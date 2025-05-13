@@ -18,4 +18,4 @@ documentation for details.
    modules
    installation
    usage
-   contributing
+   contributions
