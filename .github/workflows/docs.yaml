@@ -35,10 +35,12 @@ jobs:
         run: |
           pip install -e .
           pip install sphinx furo 
+          
       - name: Sphinx build
         run: |
           sphinx-apidoc -o docs src/sphinxy/ src/chord-dht/ src/weatherlearn/ --separate
           sphinx-build docs docs/build/html
+
       - name: Create index.html
         run: |
           cp docs/source/_templates/gh-pages-redirect.html docs/build/html/index.html
