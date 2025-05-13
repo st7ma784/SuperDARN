@@ -1,0 +1,6 @@
+[submodule "src/weatherlearn"]
+	path = src/weatherlearn
+	url = https://github.com/st7ma784/weatherlearn
+[submodule "src/chord-dht"]
+	path = src/chord-dht
+	url = https://github.com/st7ma784/chord-dht
