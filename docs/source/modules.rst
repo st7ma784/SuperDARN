@@ -5,3 +5,5 @@ sphinxy
    :maxdepth: 4
 
    sphinxy
+   weatherlearn
+   chord-dht
