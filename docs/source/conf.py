@@ -32,15 +32,15 @@ exclude_patterns = []
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = 'furo'
+html_theme = 'classic'
 html_static_path = ['_static']
-html_sidebars = {
-    "**": [
-        "sidebar/brand.html",
-        "sidebar/search.html",
-        "sidebar/scroll-start.html",
-        "sidebar/navigation.html",
-        "sidebar/versions.html",
-        "sidebar/scroll-end.html",
-    ],
-}
+# html_sidebars = {
+#     "**": [
+#         "sidebar/brand.html",
+#         "sidebar/search.html",
+#         "sidebar/scroll-start.html",
+#         "sidebar/navigation.html",
+#         "sidebar/versions.html",
+#         "sidebar/scroll-end.html",
+#     ],
+# }
