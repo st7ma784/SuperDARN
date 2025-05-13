@@ -1,0 +1,15 @@
+.gitignore
+LICENSE
+README.md
+pyproject.toml
+images/favicon.ico
+images/sphinx.png
+src/sphinxy/__init__.py
+src/sphinxy/riddle.py
+src/sphinxy/sphinx.py
+src/sphinxy.egg-info/PKG-INFO
+src/sphinxy.egg-info/SOURCES.txt
+src/sphinxy.egg-info/dependency_links.txt
+src/sphinxy.egg-info/requires.txt
+src/sphinxy.egg-info/top_level.txt
+tests/test_import.py
