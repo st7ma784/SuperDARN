@@ -18,18 +18,26 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
+        with:
+          submodules: true
+          submodules_recursive: true
+          
       - uses: actions/setup-python@v3
         with:
           python-version: "3.10"
+      
+      - name: pull and install submodules
+        run: |
+          git submodule update --init --recursive
+          git submodule foreach git pull origin main
 
       - name: Install dependencies
         run: |
           pip install -e .
-          pip install sphinx furo sphinx_multiversion
+          pip install sphinx furo 
       - name: Sphinx build
         run: |
-          sphinx-apidoc -o docs src/weatherlearn/ --separate
-          sphinx-apidoc -o docs src/chord-dht/ --separate
+          sphinx-apidoc -o docs src/sphinxy/ src/chord-dht/ src/weatherlearn/ --separate
           sphinx-build docs docs/build/html
       - name: Create index.html
         run: |
