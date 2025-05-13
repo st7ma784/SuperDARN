@@ -29,7 +29,7 @@ jobs:
       - name: pull and install submodules
         run: |
           git submodule update --init --recursive
-          git submodule foreach git pull origin main
+          # git submodule foreach git pull origin main
 
       - name: Install dependencies
         run: |
