@@ -32,7 +32,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -e .
-          pip install sphinx furo 
+          pip install sphinx furo sphinx_multiversion 
 
       - name: Sphinx build
         run: |
