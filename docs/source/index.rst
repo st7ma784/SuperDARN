@@ -14,11 +14,3 @@ documentation for details.
 .. toctree::
    :maxdepth: 4
    :caption: Contents:
-
-   :glob:
-   weatherlearn/*
-   chord-dht/*
-   weatherlearn
-   chord-dht
-   weatherlearn/index
-   chord-dht/index
