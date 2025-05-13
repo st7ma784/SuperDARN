@@ -15,3 +15,14 @@ documentation for details.
    :maxdepth: 4
    :caption: Contents:
 
+modules
+   :glob:
+
+   weatherlearn
+   chord-dht
+   weatherlearn.*
+   chord-dht.*
+   weatherlearn.*.*
+   chord-dht.*.*
+   weatherlearn.*.*.*
+   chord-dht.*.*.*
