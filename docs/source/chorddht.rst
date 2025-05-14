@@ -1,19 +1,18 @@
-src.api package
-===============
+chorddht package
+================
 
-Submodules
-----------
+Subpackages
+-----------
 
 .. toctree::
    :maxdepth: 4
 
-   src.api.controller
-   src.api.job
+   chorddht.src
 
 Module contents
 ---------------
 
-.. automodule:: src.api
+.. automodule:: chorddht
    :members:
    :show-inheritance:
    :undoc-members:

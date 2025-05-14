@@ -1,16 +1,13 @@
 weatherlearn
 ============
 
-.. toctree::
-   :maxdepth: 4
-
-   weatherlearn
+.. module:: weatherlearn
+   :synopsis: WeatherLearn - a machine learning library for weather data.
    
    
-chord-dht
+chord
 =========
 
-.. toctree::
-   :maxdepth: 4
+.. module:: chord
+   :synopsis: Chord DHT implementation.
    
-   chord-dht

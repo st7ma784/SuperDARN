@@ -44,3 +44,10 @@ html_static_path = ['_static']
 #         "sidebar/scroll-end.html",
 #     ],
 # }
+import sys, os
+sys.path.insert(0, os.path.abspath('../../src/weatherlearn/PTL'))
+sys.path.insert(0, os.path.abspath('../../src/chorddht/src/'))
+sys.path.insert(0, os.path.abspath('../../src/chorddht/src/chord'))
+sys.path.insert(0, os.path.abspath('../../src/chorddht/src/api'))
+
+

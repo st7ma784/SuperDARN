@@ -4,16 +4,60 @@ weatherlearn.PTL package
 Submodules
 ----------
 
-.. toctree::
-   :maxdepth: 4
+weatherlearn.PTL.DataModule module
+----------------------------------
 
-   weatherlearn.PTL.DataModule
-   weatherlearn.PTL.MinioToDisk
-   weatherlearn.PTL.generateFitToConv
-   weatherlearn.PTL.launch
-   weatherlearn.PTL.model
-   weatherlearn.PTL.utils
+.. automodule:: weatherlearn.PTL.DataModule
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
 
+weatherlearn.PTL.MinioToDisk module
+-----------------------------------
+
+.. automodule:: weatherlearn.PTL.MinioToDisk
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
+
+weatherlearn.PTL.generateFitToConv module
+-----------------------------------------
+
+.. automodule:: weatherlearn.PTL.generateFitToConv
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
+
+weatherlearn.PTL.launch module
+------------------------------
+
+.. automodule:: weatherlearn.PTL.launch
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
+
+weatherlearn.PTL.model module
+-----------------------------
+
+.. automodule:: weatherlearn.PTL.model
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
+
+weatherlearn.PTL.utils module
+-----------------------------
+
+.. automodule:: weatherlearn.PTL.utils
+   :members:
+   :show-inheritance:
+   :undoc-members:
+   :no-index:
+   
 Module contents
 ---------------
 
@@ -21,3 +65,4 @@ Module contents
    :members:
    :show-inheritance:
    :undoc-members:
+   :no-index:

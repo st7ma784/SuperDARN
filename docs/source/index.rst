@@ -15,6 +15,8 @@ documentation for details.
    :maxdepth: 4
    :caption: Contents:
    
+   chorddht
+   weatherlearn
    modules
    installation
    usage
