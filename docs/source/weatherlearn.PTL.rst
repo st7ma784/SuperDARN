@@ -11,7 +11,6 @@ weatherlearn.PTL.DataModule module
    :members:
    :show-inheritance:
    :undoc-members:
-   :no-index:
 
 weatherlearn.PTL.MinioToDisk module
 -----------------------------------
@@ -20,7 +19,7 @@ weatherlearn.PTL.MinioToDisk module
    :members:
    :show-inheritance:
    :undoc-members:
-   :no-index:
+
 
 weatherlearn.PTL.generateFitToConv module
 -----------------------------------------
@@ -29,7 +28,7 @@ weatherlearn.PTL.generateFitToConv module
    :members:
    :show-inheritance:
    :undoc-members:
-   :no-index:
+
 
 weatherlearn.PTL.launch module
 ------------------------------
@@ -38,7 +37,7 @@ weatherlearn.PTL.launch module
    :members:
    :show-inheritance:
    :undoc-members:
-   :no-index:
+
 
 weatherlearn.PTL.model module
 -----------------------------
@@ -47,7 +46,7 @@ weatherlearn.PTL.model module
    :members:
    :show-inheritance:
    :undoc-members:
-   :no-index:
+
 
 weatherlearn.PTL.utils module
 -----------------------------
@@ -56,8 +55,8 @@ weatherlearn.PTL.utils module
    :members:
    :show-inheritance:
    :undoc-members:
-   :no-index:
-   
+
+
 Module contents
 ---------------
 
@@ -65,4 +64,3 @@ Module contents
    :members:
    :show-inheritance:
    :undoc-members:
-   :no-index:
