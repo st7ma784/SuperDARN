@@ -36,7 +36,7 @@ jobs:
 
       - name: Sphinx build
         run: |
-          sphinx-apidoc -o docs/source src/chord-dht/ src/weatherlearn/ --separate
+          sphinx-apidoc -o docs/source src/ --separate
           sphinx-build docs/source docs/build/html
 
       - name: Create index.html
