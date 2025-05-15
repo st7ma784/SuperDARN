@@ -57,7 +57,3 @@ The SuperDARN codebase provides a robust foundation for processing radar data an
    
    chorddht
    weatherlearn
-   modules
-   installation
-   usage
-   contributions
