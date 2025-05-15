@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>chorddht.src.chord.node module &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.chord.node module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-chorddht.src.chord.node">
+<span id="chorddht-src-chord-node-module"></span><h1>chorddht.src.chord.node module<a class="headerlink" href="#module-chorddht.src.chord.node" title="Link to this heading">¶</a></h1>
+<section id="node-module">
+<h2>Node Module<a class="headerlink" href="#node-module" title="Link to this heading">¶</a></h2>
+<p>This module implements the <cite>Node</cite> class, which is responsible for managing a node in the Chord Distributed Hash Table (DHT) system.
+The Chord algorithm is implemented to enable decentralized and efficient management of key-value pairs across a distributed network of nodes.</p>
+<section id="key-features">
+<h3>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Node Initialization</strong>:
+- Initializes a node with its address, ID, and storage.
+- Configures the MinIO client for object storage integration.</p></li>
+<li><p><strong>Joining the Network</strong>:
+- Allows a node to join an existing Chord ring by connecting to a bootstrap node.
+- Handles the initialization of the finger table, predecessor, and successor.</p></li>
+<li><p><strong>Stabilization</strong>:
+- Periodically verifies and updates the successor and predecessor nodes.
+- Ensures the finger table is up-to-date for efficient routing.</p></li>
+<li><p><strong>Routing</strong>:
+- Implements methods to find the closest preceding node and the successor for a given key.
+- Supports multi-hop routing to locate the appropriate node for a key.</p></li>
+<li><p><strong>Storage Integration</strong>:
+- Integrates with the <cite>Storage</cite> class to manage key-value pairs locally.
+- Supports replication and retrieval of keys across the network.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>api.job</strong>:
+Provides job management functionality for distributed tasks.</p></li>
+<li><p><strong>chord.helpers</strong>:
+Utility functions for generating IDs, checking ranges, and printing tables.</p></li>
+<li><p><strong>chord.rpc</strong>:
+Remote procedure call (RPC) functions for inter-node communication.</p></li>
+<li><p><strong>chord.storage</strong>:
+Local storage management for key-value pairs.</p></li>
+<li><p><strong>minio</strong>:
+MinIO client for object storage integration.</p></li>
+</ul>
+</section>
+<section id="classes">
+<h3>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Node</strong>:
+Represents a node in the Chord DHT system and implements the core Chord algorithm.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.node.</span></span><span class="sig-name descname"><span class="pre">Node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class responsible for managing a Chord DHT node.</p>
+<p>The Chord algorithm is implemented in the following methods:
+1. join: Join the network by connecting to a known node. Initializes the node’s predecessor and finger table.
+2. stabilize: Called periodically to verify the current node’s successor and notify the successor about the current node.
+3. fix_fingers: Called periodically to update finger table entries.
+4. fix_successor: Called periodically to update the successor of the current node.</p>
+<p>Initializes a Chord DHT node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong> (<em>str</em>) – Host address of the node.</p></li>
+<li><p><strong>port</strong> (<em>str</em>) – Port number of the node.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.dump_me">
+<span class="sig-name descname"><span class="pre">dump_me</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node.dump_me" title="Link to this definition">¶</a></dt>
+<dd><p>Prints a dump of all relevant node information for debugging purposes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.find_successor">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">find_successor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numeric_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node.find_successor" title="Link to this definition">¶</a></dt>
+<dd><p>Finds the successor for a given numeric ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>numeric_id</strong> (<em>int</em>) – The numeric ID of the node.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing a boolean indicating if the successor was found and the successor node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.join">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bootstrap_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node.join" title="Link to this definition">¶</a></dt>
+<dd><p>Joins the Chord network by connecting to a known bootstrap node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bootstrap_node</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – Address of the bootstrap node.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.router">
+<span class="sig-name descname"><span class="pre">router</span></span><a class="headerlink" href="#chorddht.src.chord.node.Node.router" title="Link to this definition">¶</a></dt>
+<dd><p>A Data Descriptor that creates a new <code class="xref py py-class docutils literal notranslate"><span class="pre">Router</span></code> instance for each
+class instance to which it is set.</p>
+<p>The attribute name for the Service should always be <em>router</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Spam</span><span class="p">:</span>
+    <span class="n">router</span> <span class="o">=</span> <span class="n">aiomas</span><span class="o">.</span><span class="n">rpc</span><span class="o">.</span><span class="n">Service</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can optionally pass a list with the attribute names of classes with
+sub-routers.  This required to build hierarchies of routers, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Eggs</span><span class="p">:</span>
+    <span class="n">router</span> <span class="o">=</span> <span class="n">aiomas</span><span class="o">.</span><span class="n">rpc</span><span class="o">.</span><span class="n">Service</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Spam</span><span class="p">:</span>
+    <span class="n">router</span> <span class="o">=</span> <span class="n">aiomas</span><span class="o">.</span><span class="n">rpc</span><span class="o">.</span><span class="n">Service</span><span class="p">([</span><span class="s1">&#39;eggs&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eggs</span> <span class="o">=</span> <span class="n">Eggs</span><span class="p">()</span>  <span class="c1"># Instance with a sub-router</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.stabilize">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stabilize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node.stabilize" title="Link to this definition">¶</a></dt>
+<dd><p>Periodically stabilizes the network by verifying and updating the successor and predecessor nodes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">chorddht.src.chord.node module</a><ul>
+<li><a class="reference internal" href="#node-module">Node Module</a><ul>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node"><code class="docutils literal notranslate"><span class="pre">Node</span></code></a><ul>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.dump_me"><code class="docutils literal notranslate"><span class="pre">Node.dump_me()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.find_successor"><code class="docutils literal notranslate"><span class="pre">Node.find_successor()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.join"><code class="docutils literal notranslate"><span class="pre">Node.join()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.router"><code class="docutils literal notranslate"><span class="pre">Node.router</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.stabilize"><code class="docutils literal notranslate"><span class="pre">Node.stabilize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/chorddht.src.chord.node.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.chord.node module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>
