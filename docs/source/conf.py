@@ -46,8 +46,11 @@ html_static_path = ['_static']
 # }
 import sys, os
 sys.path.insert(0, os.path.abspath('../../src/weatherlearn/PTL'))
+os.system('pip install -r ../../src/weatherlearn/PTL/requirements.txt')
 sys.path.insert(0, os.path.abspath('../../src/chorddht/src/'))
+os.system('pip install -r ../../src/chorddht/requirements.txt')
 sys.path.insert(0, os.path.abspath('../../src/chorddht/src/chord'))
+
 sys.path.insert(0, os.path.abspath('../../src/chorddht/src/api'))
 
 

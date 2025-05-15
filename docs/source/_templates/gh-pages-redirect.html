@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>SuperDARN documentation &#8212; SuperDARN  documentation</title>
+    <title>SuperDARN Codebase Overview &#8212; SuperDARN  documentation</title>
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
     <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
     
@@ -30,7 +30,7 @@
           <a href="chorddht.html" title="chorddht package"
              accesskey="N">next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">SuperDARN  documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">SuperDARN documentation</a></li> 
+        <li class="nav-item nav-item-this"><a href="">SuperDARN Codebase Overview</a></li> 
       </ul>
     </div>  
 
@@ -39,21 +39,85 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <section id="superdarn-documentation">
-<h1>SuperDARN documentation<a class="headerlink" href="#superdarn-documentation" title="Link to this heading">¶</a></h1>
-<p>Add your content using <code class="docutils literal notranslate"><span class="pre">reStructuredText</span></code> syntax. See the
-<a class="reference external" href="https://www.sphinx-doc.org/en/master/usage/restructuredtext/index.html">reStructuredText</a>
-documentation for details.</p>
+  <section id="superdarn-codebase-overview">
+<h1>SuperDARN Codebase Overview<a class="headerlink" href="#superdarn-codebase-overview" title="Link to this heading">¶</a></h1>
+<p>The SuperDARN codebase provides a proof-of-concept framework for processing radar data and training machine learning models for weather forecasting. It is designed to handle large-scale datasets stored in MinIO buckets and includes tools for efficient data processing, as well as machine learning pipelines for forecasting tasks.</p>
+<section id="key-components">
+<h2>Key Components<a class="headerlink" href="#key-components" title="Link to this heading">¶</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Data Processing with MinIO</strong>:
+- The <cite>MinioToDisk</cite> module provides functionality for downloading radar data from MinIO buckets to local storage. It supports multithreaded downloads to ensure high performance and preserves the folder structure of the bucket locally.
+- The <cite>generateFitToConv</cite> module processes FITACF radar data files and associates them with corresponding CONVMAP files. This enables the creation of structured datasets for downstream tasks.</p></li>
+<li><p><strong>WeatherLearn Models</strong>:
+- The <cite>weatherlearn</cite> package includes tools for training machine learning models on radar data. It features the Pangu-Weather model, a 3D transformer-based architecture optimized for spatiotemporal weather forecasting.
+- The <cite>PTL</cite> subpackage provides PyTorch Lightning-based modules for data handling, model training, and evaluation. It includes utilities for hyperparameter optimization and integration with HPC environments using SLURM.</p></li>
+<li><p><strong>Data Handling</strong>:
+- The <cite>DataModule</cite> module defines classes for loading and preprocessing radar data. It supports both flat and grid-based data representations and includes functionality for caching datasets and saving/loading preprocessed data.
+- The <cite>DatasetFromMinioBucket</cite> class enables seamless integration with MinIO, allowing radar data to be loaded directly into PyTorch workflows.</p></li>
+<li><p><strong>Forecasting Models</strong>:
+- The <cite>model</cite> module implements the Pangu-Weather model, which uses earth-specific attention mechanisms and transformer blocks to process spatiotemporal data. It supports multi-step forecasting and includes utilities for patch embedding, window partitioning, and attention masking.</p></li>
+<li><p><strong>Utilities</strong>:
+- The <cite>utils</cite> module provides helper functions and classes for tensor operations, such as up-sampling, down-sampling, cropping, and patch recovery. These utilities are essential for preparing data for the Pangu-Weather model.</p></li>
+</ol>
+</section>
+<section id="proof-of-concept-goals">
+<h2>Proof-of-Concept Goals<a class="headerlink" href="#proof-of-concept-goals" title="Link to this heading">¶</a></h2>
+<p>The codebase demonstrates the following capabilities:</p>
+<ol class="arabic simple">
+<li><p><strong>Efficient Data Processing</strong>:
+- By leveraging MinIO for distributed object storage, the framework enables rapid access to radar data. The <cite>MinioToDisk</cite> and <cite>generateFitToConv</cite> modules streamline the process of preparing datasets for machine learning tasks.</p></li>
+<li><p><strong>Forecasting with Machine Learning</strong>:
+- The <cite>weatherlearn</cite> package provides a pipeline for training forecasting models on radar data. The Pangu-Weather model serves as a proof-of-concept for using transformer-based architectures in weather prediction.</p></li>
+<li><p><strong>Scalability and HPC Integration</strong>:
+- The framework is designed to scale across HPC environments, with support for SLURM job scheduling and distributed training. This ensures that the tools can handle large datasets and complex computations efficiently.</p></li>
+<li><p><strong>Modularity and Extensibility</strong>:
+- The modular design of the codebase allows for easy integration of new data sources, preprocessing methods, and machine learning models. This makes it adaptable to future research and development needs.</p></li>
+</ol>
+</section>
+<section id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Link to this heading">¶</a></h2>
+<p>The SuperDARN codebase provides a robust foundation for processing radar data and training machine learning models for weather forecasting. By combining efficient data handling with state-of-the-art machine learning techniques, it offers a scalable and extensible solution for tackling complex forecasting challenges.</p>
 <div class="toctree-wrapper compound">
 <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="chorddht.html">chorddht package</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="chorddht.html">chorddht package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="chorddht.html#chord-dht-overview">Chord DHT Overview</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chorddht.html#why-chord-dht">Why Chord DHT?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chorddht.html#importance-of-node-dynamics">Importance of Node Dynamics</a></li>
 <li class="toctree-l2"><a class="reference internal" href="chorddht.html#subpackages">Subpackages</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="chorddht.src.html">chorddht.src package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#subpackages">Subpackages</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="chorddht.src.api.html">chorddht.src.api package</a></li>
+<li class="toctree-l5"><a class="reference internal" href="chorddht.src.api.html#chord-dht-api">Chord DHT API</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.api.html#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.api.html#module-chorddht.src.api.controller">chorddht.src.api.controller module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.api.html#module-chorddht.src.api.job">chorddht.src.api.job module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.api.html#module-chorddht.src.api">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="chorddht.src.chord.html">chorddht.src.chord package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.chord.html#submodules">Submodules</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord.helpers">chorddht.src.chord.helpers module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord.node">chorddht.src.chord.node module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord.rpc">chorddht.src.chord.rpc module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord.storage">chorddht.src.chord.storage module</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#module-chorddht.src.main">chorddht.src.main module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#module-chorddht.src">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#module-chorddht.src">Module contents</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="chorddht.src.html#chord-dht-package">Chord-DHT Package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.html#why-distribute-workloads-between-chord-nodes">Why Distribute Workloads Between Chord Nodes?</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.html#benefits-for-superdarn-workloads">Benefits for SuperDARN Workloads</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.html#file-organization">File Organization</a></li>
+<li class="toctree-l6"><a class="reference internal" href="chorddht.src.html#how-to-spin-up-the-system-with-docker-compose">How to Spin Up the System with Docker-Compose</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -70,45 +134,240 @@ documentation for details.</p>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="weatherlearn.html">weatherlearn package</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="weatherlearn.html">weatherlearn Package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="weatherlearn.html#key-features">Key Features</a></li>
+<li class="toctree-l2"><a class="reference internal" href="weatherlearn.html#modules">Modules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="weatherlearn.html#how-to-use">How to Use</a></li>
+<li class="toctree-l2"><a class="reference internal" href="weatherlearn.html#tutorials-and-documentation">Tutorials and Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="weatherlearn.html#acknowledgements">Acknowledgements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="weatherlearn.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="weatherlearn.PTL.html">weatherlearn.PTL package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.DataModule">weatherlearn.PTL.DataModule module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.MinioToDisk">weatherlearn.PTL.MinioToDisk module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.generateFitToConv">weatherlearn.PTL.generateFitToConv module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.launch">weatherlearn.PTL.launch module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.model">weatherlearn.PTL.model module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.utils">weatherlearn.PTL.utils module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="weatherlearn.PTL.html">PTL Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#modules">Modules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#tutorials-and-documentation">Tutorials and Documentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#acknowledgements">Acknowledgements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.DataModule">weatherlearn.PTL.DataModule module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#datamodule-module">DataModule Module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#key-features">Key Features</a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.minioClient"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.minioClient</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.bucket_name"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.bucket_name</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.data_dir"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.data_dir</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.batch_size"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.batch_size</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.method"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.method</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.window_size"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.window_size</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data_per_node"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.prepare_data_per_node</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.prepare_data()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.setup"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.setup()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.test_dataloader"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.test_dataloader()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.train_dataloader"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.train_dataloader()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.val_dataloader"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.val_dataloader()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromPresaved"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataA"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.dataA</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataB"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.dataB</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromPresaved.shape"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.shape</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.DatasetFromPresaved.len"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.len</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDataset"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDataset.minioClient"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.minioClient</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDataset.minioBucket"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.minioBucket</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDataset.batch_size"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.batch_size</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDataset.method"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.method</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDataset.window_size"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.window_size</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDataset.from_disk"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.from_disk()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDataset.generator"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.generator()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDataset.process_file"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_file()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.dataset"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.dataset</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.data</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data_dir"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.data_dir</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.batch_size"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.batch_size</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.gaussian"><code class="docutils literal notranslate"><span class="pre">gaussian()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.load_dataset_from_disk"><code class="docutils literal notranslate"><span class="pre">load_dataset_from_disk()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.DataModule.save_dataset_to_disk"><code class="docutils literal notranslate"><span class="pre">save_dataset_to_disk()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.MinioToDisk">weatherlearn.PTL.MinioToDisk module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#miniotodisk-module">MinioToDisk Module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id1">Key Features</a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id2">Dependencies</a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#usage">Usage</a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#example-command">Example Command:</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.MinioToDisk.download_minio_bucket_to_folder"><code class="docutils literal notranslate"><span class="pre">download_minio_bucket_to_folder()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.generateFitToConv">weatherlearn.PTL.generateFitToConv module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#generatefittoconv-module">generateFitToConv Module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id3">Key Features</a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id4">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.generateFitToConv.find_conv_maps_from_filelists"><code class="docutils literal notranslate"><span class="pre">find_conv_maps_from_filelists()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.generateFitToConv.load_file"><code class="docutils literal notranslate"><span class="pre">load_file()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.generateFitToConv.process_fitacf_to_filelists"><code class="docutils literal notranslate"><span class="pre">process_fitacf_to_filelists()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.launch">weatherlearn.PTL.launch module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#launch-module">Launch Module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id5">Key Features</a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id6">Dependencies</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.SlurmRun"><code class="docutils literal notranslate"><span class="pre">SlurmRun()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.baseparser"><code class="docutils literal notranslate"><span class="pre">baseparser</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.baseparser.keys_of_interest"><code class="docutils literal notranslate"><span class="pre">baseparser.keys_of_interest</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.neptunetrain"><code class="docutils literal notranslate"><span class="pre">neptunetrain()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.parser"><code class="docutils literal notranslate"><span class="pre">parser</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.parser.generate_trials"><code class="docutils literal notranslate"><span class="pre">parser.generate_trials()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.parser.generate_neptune_trials"><code class="docutils literal notranslate"><span class="pre">parser.generate_neptune_trials()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.parser.generate_wandb_trials"><code class="docutils literal notranslate"><span class="pre">parser.generate_wandb_trials()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id0"><code class="docutils literal notranslate"><span class="pre">parser.generate_neptune_trials()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id7"><code class="docutils literal notranslate"><span class="pre">parser.generate_trials()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id8"><code class="docutils literal notranslate"><span class="pre">parser.generate_wandb_trials()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.train"><code class="docutils literal notranslate"><span class="pre">train()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.launch.wandbtrain"><code class="docutils literal notranslate"><span class="pre">wandbtrain()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.model">weatherlearn.PTL.model module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#id9">MinioToDisk Module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id10">Key Features</a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id11">Dependencies</a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id12">Usage</a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id13">Example Command:</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.DropPath"><code class="docutils literal notranslate"><span class="pre">DropPath</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.DropPath.extra_repr"><code class="docutils literal notranslate"><span class="pre">DropPath.extra_repr()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.DropPath.forward"><code class="docutils literal notranslate"><span class="pre">DropPath.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.DropPath.null_forward"><code class="docutils literal notranslate"><span class="pre">DropPath.null_forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.EarthAttention3D"><code class="docutils literal notranslate"><span class="pre">EarthAttention3D</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.EarthAttention3D.forward"><code class="docutils literal notranslate"><span class="pre">EarthAttention3D.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.EarthAttention3D.forward_mask"><code class="docutils literal notranslate"><span class="pre">EarthAttention3D.forward_mask()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.EarthAttention3D.forward_null"><code class="docutils literal notranslate"><span class="pre">EarthAttention3D.forward_null()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.EarthSpecificBlock"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.EarthSpecificBlock.forward"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.EarthSpecificBlock.negrollX"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock.negrollX()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.EarthSpecificBlock.null_rollX"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock.null_rollX()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.EarthSpecificBlock.posrollX"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock.posrollX()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.Pangu"><code class="docutils literal notranslate"><span class="pre">Pangu</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.Pangu.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">Pangu.configure_optimizers()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.Pangu.forward"><code class="docutils literal notranslate"><span class="pre">Pangu.forward()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.Pangu.plot_and_log_data"><code class="docutils literal notranslate"><span class="pre">Pangu.plot_and_log_data()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.Pangu.test_step"><code class="docutils literal notranslate"><span class="pre">Pangu.test_step()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.Pangu.training_step"><code class="docutils literal notranslate"><span class="pre">Pangu.training_step()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.Pangu.validation_step"><code class="docutils literal notranslate"><span class="pre">Pangu.validation_step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.model.norm_cdf"><code class="docutils literal notranslate"><span class="pre">norm_cdf()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL.utils">weatherlearn.PTL.utils module</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.Crop3D"><code class="docutils literal notranslate"><span class="pre">Crop3D</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.Crop3D.forward"><code class="docutils literal notranslate"><span class="pre">Crop3D.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.DownSample"><code class="docutils literal notranslate"><span class="pre">DownSample</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.DownSample.forward"><code class="docutils literal notranslate"><span class="pre">DownSample.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.PatchEmbed2D"><code class="docutils literal notranslate"><span class="pre">PatchEmbed2D</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.PatchEmbed2D.forward"><code class="docutils literal notranslate"><span class="pre">PatchEmbed2D.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.PatchEmbed3D"><code class="docutils literal notranslate"><span class="pre">PatchEmbed3D</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.PatchEmbed3D.forward"><code class="docutils literal notranslate"><span class="pre">PatchEmbed3D.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.PatchRecovery2D"><code class="docutils literal notranslate"><span class="pre">PatchRecovery2D</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.PatchRecovery2D.forward"><code class="docutils literal notranslate"><span class="pre">PatchRecovery2D.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.PatchRecovery3D"><code class="docutils literal notranslate"><span class="pre">PatchRecovery3D</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.PatchRecovery3D.forward"><code class="docutils literal notranslate"><span class="pre">PatchRecovery3D.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.UpSample"><code class="docutils literal notranslate"><span class="pre">UpSample</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.UpSample.forward"><code class="docutils literal notranslate"><span class="pre">UpSample.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.WindowPartition"><code class="docutils literal notranslate"><span class="pre">WindowPartition</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.WindowPartition.forward"><code class="docutils literal notranslate"><span class="pre">WindowPartition.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.WindowReverse"><code class="docutils literal notranslate"><span class="pre">WindowReverse</span></code></a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.WindowReverse.forward"><code class="docutils literal notranslate"><span class="pre">WindowReverse.forward()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.crop2d"><code class="docutils literal notranslate"><span class="pre">crop2d()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.crop3d"><code class="docutils literal notranslate"><span class="pre">crop3d()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.get_earth_position_index"><code class="docutils literal notranslate"><span class="pre">get_earth_position_index()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.get_pad2d"><code class="docutils literal notranslate"><span class="pre">get_pad2d()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.get_pad3d"><code class="docutils literal notranslate"><span class="pre">get_pad3d()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.get_shift_window_mask"><code class="docutils literal notranslate"><span class="pre">get_shift_window_mask()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.window_partition"><code class="docutils literal notranslate"><span class="pre">window_partition()</span></code></a></li>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#weatherlearn.PTL.utils.window_reverse"><code class="docutils literal notranslate"><span class="pre">window_reverse()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.PTL.html#module-weatherlearn.PTL">Module contents</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.PTL.html#id14">PTL Package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.PTL.html#id15">Modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="weatherlearn.storageServer.html">weatherlearn.storageServer package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.storageServer.html#module-weatherlearn.storageServer">Module contents</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.storageServer.html#modules-for-how-to-interact-with-the-storage-server">Modules for how to interact with the storage server</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.storageServer.html#module-weatherlearn.storageServer">Module contents</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="weatherlearn.storageServer.html#storageserver-package">storageServer Package</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="weatherlearn.storageServer.html#modules">Modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="weatherlearn.html#module-contents">Module contents</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="weatherlearn.html#id1">weatherlearn Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#key-features">Key Features</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#modules">Modules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#how-to-use">How to Use</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#tutorials-and-documentation">Tutorials and Documentation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#acknowledgements">Acknowledgements</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#id2">Key Features</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#id3">Modules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#id4">How to Use</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#id5">Tutorials and Documentation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="weatherlearn.html#id6">Acknowledgements</a></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html">weatherlearn</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modules.html#module-chord">chord</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html">SuperDARN installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="usage.html">SuperDARN usage</a></li>
-<li class="toctree-l1"><a class="reference internal" href="contributions.html">SuperDARN contributions</a></li>
 </ul>
 </div>
+</section>
 </section>
 
 
@@ -118,6 +377,18 @@ documentation for details.</p>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="Main">
         <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="#">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">SuperDARN Codebase Overview</a><ul>
+<li><a class="reference internal" href="#key-components">Key Components</a></li>
+<li><a class="reference internal" href="#proof-of-concept-goals">Proof-of-Concept Goals</a></li>
+<li><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
   <div>
     <h4>Next topic</h4>
     <p class="topless"><a href="chorddht.html"
@@ -157,7 +428,7 @@ documentation for details.</p>
           <a href="chorddht.html" title="chorddht package"
              >next</a> |</li>
         <li class="nav-item nav-item-0"><a href="#">SuperDARN  documentation</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">SuperDARN documentation</a></li> 
+        <li class="nav-item nav-item-this"><a href="">SuperDARN Codebase Overview</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">
