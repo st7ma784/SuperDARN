@@ -36,11 +36,11 @@ html_theme = 'classic'
 html_static_path = ['_static']
 # html_sidebars = {
 #     "**": [
-#         "sidebar/brand.html",
-#         "sidebar/search.html",
+#         # "sidebar/brand.html",
+#         # "sidebar/search.html",
 #         "sidebar/scroll-start.html",
 #         "sidebar/navigation.html",
-#         "sidebar/versions.html",
+#         # "sidebar/versions.html",
 #         "sidebar/scroll-end.html",
 #     ],
 # }
