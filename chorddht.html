@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>chorddht package &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="chorddht.src package" href="chorddht.src.html" />
+    <link rel="prev" title="SuperDARN Future Work" href="future.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="chorddht.src.html" title="chorddht.src package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="future.html" title="SuperDARN Future Work"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="chorddht-package">
+<h1>chorddht package<a class="headerlink" href="#chorddht-package" title="Link to this heading">¶</a></h1>
+</section>
+<section id="chord-dht-overview">
+<h1>Chord DHT Overview<a class="headerlink" href="#chord-dht-overview" title="Link to this heading">¶</a></h1>
+<p>The Chord Distributed Hash Table (DHT) is a decentralized system designed to efficiently manage key-value pairs across a network of nodes. It organizes nodes in a circular ring structure, where each node is responsible for a specific range of keys. This design ensures that workloads can be distributed evenly across the network, making it an excellent fit for scalable and fault-tolerant systems.</p>
+<section id="why-chord-dht">
+<h2>Why Chord DHT?<a class="headerlink" href="#why-chord-dht" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>Efficient Workload Distribution</strong>:
+Chord’s ring structure allows tasks to be distributed based on consistent hashing, ensuring balanced resource utilization across nodes.</p></li>
+<li><p><strong>Fault Tolerance</strong>:
+Chord dynamically adjusts to nodes joining or leaving the network, redistributing keys and maintaining redundancy to minimize the impact of node failures.</p></li>
+<li><p><strong>Scalability</strong>:
+The logarithmic complexity of Chord’s lookup operations ensures that the system remains efficient even as the number of nodes grows.</p></li>
+</ul>
+</section>
+<section id="importance-of-node-dynamics">
+<h2>Importance of Node Dynamics<a class="headerlink" href="#importance-of-node-dynamics" title="Link to this heading">¶</a></h2>
+<p>In distributed systems, nodes may join or leave the network unpredictably. Chord’s ability to handle these changes gracefully ensures that the system remains operational and consistent. By periodically stabilizing the ring and updating finger tables, Chord maintains efficient routing and key accessibility, even in dynamic environments.</p>
+<p>For more details, refer to the <a class="reference external" href="https://en.wikipedia.org/wiki/Chord_(peer-to-peer)">Chord DHT Wiki</a>.</p>
+</section>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="chorddht.src.html">chorddht.src package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="chorddht.src.html#subpackages">Subpackages</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="chorddht.src.api.html">chorddht.src.api package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="chorddht.src.api.html#chord-dht-api">Chord DHT API</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.api.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.api.html#module-chorddht.src.api.controller">chorddht.src.api.controller module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.api.html#module-chorddht.src.api.job">chorddht.src.api.job module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.api.html#module-chorddht.src.api">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="chorddht.src.chord.html">chorddht.src.chord package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.chord.html#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord.helpers">chorddht.src.chord.helpers module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord.node">chorddht.src.chord.node module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord.rpc">chorddht.src.chord.rpc module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord.storage">chorddht.src.chord.storage module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.chord.html#module-chorddht.src.chord">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="chorddht.src.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chorddht.src.html#module-chorddht.src.main">chorddht.src.main module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="chorddht.src.html#module-chorddht.src">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="chorddht.src.html#chord-dht-package">Chord-DHT Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#why-distribute-workloads-between-chord-nodes">Why Distribute Workloads Between Chord Nodes?</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#benefits-for-superdarn-workloads">Benefits for SuperDARN Workloads</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#file-organization">File Organization</a></li>
+<li class="toctree-l4"><a class="reference internal" href="chorddht.src.html#how-to-spin-up-the-system-with-docker-compose">How to Spin Up the System with Docker-Compose</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-chorddht">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-chorddht" title="Link to this heading">¶</a></h2>
+<section id="chord-dht-package">
+<h3>Chord-DHT Package<a class="headerlink" href="#chord-dht-package" title="Link to this heading">¶</a></h3>
+<p>This package implements a Chord Distributed Hash Table (DHT) for decentralized job management and execution.
+It is designed to distribute workloads across a network of nodes, ensuring scalability, fault tolerance,
+and efficient resource utilization.</p>
+<section id="why-distribute-workloads-between-chord-nodes">
+<h4>Why Distribute Workloads Between Chord Nodes?<a class="headerlink" href="#why-distribute-workloads-between-chord-nodes" title="Link to this heading">¶</a></h4>
+<p>The Chord DHT algorithm enables decentralized distribution of workloads by organizing nodes in a ring structure.
+Each node is responsible for a specific range of keys, allowing tasks to be distributed efficiently across the network.
+This approach is particularly beneficial for workloads like SuperDARN, which excel on single CPU cores but require
+scalable and fault-tolerant systems for large-scale data processing.</p>
+</section>
+<section id="why-use-this-system">
+<h4>Why Use This System?<a class="headerlink" href="#why-use-this-system" title="Link to this heading">¶</a></h4>
+<p>For the purpose of the SuperDARN project, we need to distribute workloads between Chord nodes to ensure that tasks are executed efficiently and reliably.
+It also aligns with the goal of eventually performing machine learning on the data, which requires a distributed system to handle large datasets and complex computations.</p>
+<p>This codebase assumes a MinIO server to store the data, which is a distributed object storage system compatible with Amazon S3. MinIO excels at random access to data,
+such as might be needed for machine learning tasks, and is designed to work well with distributed systems. This allows for efficient data retrieval and processing,
+making it an ideal choice for the SuperDARN project.</p>
+<p>However, as seen in the PTL part of the project, caching is still a useful speed-up for the system.</p>
+<p>For future users who may have LUNA or other systems, the code is designed to be modular and extensible but may not be as efficient as can be implemented
+in a more tightly integrated storage backend.</p>
+<p>To future RSEs: This can probably be improved by using a more efficient storage backend, such as LUNA or other systems, but was sufficient for the current use case.</p>
+</section>
+<section id="benefits-for-superdarn-workloads">
+<h4>Benefits for SuperDARN Workloads<a class="headerlink" href="#benefits-for-superdarn-workloads" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>Scalability</strong>: By distributing tasks across multiple nodes, the system can handle larger datasets and more complex computations.</p></li>
+<li><p><strong>Fault Tolerance</strong>: The Chord DHT ensures redundancy and recovery mechanisms, minimizing the impact of node failures.</p></li>
+<li><p><strong>Efficient Resource Utilization</strong>: Tasks are assigned to nodes based on their hash values, ensuring balanced workload distribution.</p></li>
+</ul>
+</section>
+<section id="how-to-spin-up-the-system-with-docker-compose">
+<h4>How to Spin Up the System with Docker-Compose<a class="headerlink" href="#how-to-spin-up-the-system-with-docker-compose" title="Link to this heading">¶</a></h4>
+<p>To quickly set up the Chord-DHT system, you can use the provided <cite>docker-compose.yml</cite> file. Follow these steps:</p>
+<ol class="arabic">
+<li><p><strong>Install Docker and Docker-Compose</strong>:
+Ensure that Docker and Docker-Compose are installed on your system. You can find installation instructions <a class="reference external" href="https://docs.docker.com/get-docker/">here</a>.</p></li>
+<li><p><strong>Clone the Repository</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p>git clone <a class="reference external" href="https://github.com/st7ma784/chord-dht.git">https://github.com/st7ma784/chord-dht.git</a>
+cd chord-dht</p>
+</div></blockquote>
+</li>
+<li><p><strong>Build the Docker Images</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p>docker-compose build</p>
+</div></blockquote>
+</li>
+<li><p><strong>Start the Chord-DHT Network</strong>:
+.. code-block:: bash</p>
+<blockquote>
+<div><p>docker-compose up</p>
+</div></blockquote>
+</li>
+<li><p><strong>Access the Web Interface</strong>:
+Open your web browser and navigate to <cite>http://localhost:5000</cite> to access the Chord-DHT web interface.</p></li>
+<li><p><strong>Submit Jobs</strong>:
+Use the web interface to submit jobs to the Chord-DHT network. The controller will handle job distribution and execution across the nodes.</p></li>
+<li><p><strong>Monitor Jobs</strong>:
+You can monitor the status of your jobs through the web interface. The system will provide updates on job progress and completion.</p></li>
+</ol>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">chorddht package</a></li>
+<li><a class="reference internal" href="#chord-dht-overview">Chord DHT Overview</a><ul>
+<li><a class="reference internal" href="#why-chord-dht">Why Chord DHT?</a></li>
+<li><a class="reference internal" href="#importance-of-node-dynamics">Importance of Node Dynamics</a></li>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#module-chorddht">Module contents</a><ul>
+<li><a class="reference internal" href="#chord-dht-package">Chord-DHT Package</a><ul>
+<li><a class="reference internal" href="#why-distribute-workloads-between-chord-nodes">Why Distribute Workloads Between Chord Nodes?</a></li>
+<li><a class="reference internal" href="#why-use-this-system">Why Use This System?</a></li>
+<li><a class="reference internal" href="#benefits-for-superdarn-workloads">Benefits for SuperDARN Workloads</a></li>
+<li><a class="reference internal" href="#how-to-spin-up-the-system-with-docker-compose">How to Spin Up the System with Docker-Compose</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="future.html"
+                          title="previous chapter">SuperDARN Future Work</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="chorddht.src.html"
+                          title="next chapter">chorddht.src package</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/chorddht.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="chorddht.src.html" title="chorddht.src package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="future.html" title="SuperDARN Future Work"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

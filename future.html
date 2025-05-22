@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>SuperDARN Future Work &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="chorddht package" href="chorddht.html" />
+    <link rel="prev" title="SuperDARN Codebase Overview" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="chorddht.html" title="chorddht package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SuperDARN Codebase Overview"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">SuperDARN Future Work</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="superdarn-future-work">
+<h1>SuperDARN Future Work<a class="headerlink" href="#superdarn-future-work" title="Link to this heading">¶</a></h1>
+<p>The planned future work for the SuperDARN codebase focuses on enhancing the existing framework and expanding its capabilities. The following areas are identified for further development using CUDA and parrallelization:</p>
+<ol class="arabic simple">
+<li><p><strong>Optimizing Data Processing</strong>:
+- Implementing more efficient data processing algorithms to reduce the time taken for downloading and preprocessing radar data.
+- Exploring advanced caching mechanisms to minimize redundant data transfers and improve access times.
+- Improving Data structures away from linked lists, to enable parrallelization</p></li>
+<li><p><strong>Enhancing Machine Learning Models</strong>:
+- Investigating new architectures and techniques for improving the performance of the Pangu-Weather model.
+- Experimenting with different hyperparameter optimization strategies to fine-tune model performance.
+- Integrating additional machine learning frameworks and libraries to provide users with more options for model training and evaluation.</p></li>
+</ol>
+<section id="current-software-stack">
+<h2>Current Software stack<a class="headerlink" href="#current-software-stack" title="Link to this heading">¶</a></h2>
+<p>The current stack relies on Minio for object storage, which is hosted in a docker container. This setup allows for efficient data management and retrieval, making it easy to integrate with existing workflows and tools.
+This choice was made for a few reasons:
+1. Hardware stack available, and ability to land on any machine (local or remote)
+2. Compatability with ML flows
+3. Fast retrieval of data
+4. Redundancy and fault tolerance - perfect for bunches of disks, or caching to/from LUNA store.</p>
+<blockquote>
+<div><p>This means that if central storage is available, it can be used to store the data, and then the local machine can be used to process the data.
+It also means that if no server is available, the local machine can be used to host minio via docker so the same interface can be used.</p>
+</div></blockquote>
+</section>
+<section id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Link to this heading">¶</a></h2>
+<p>For the future work, the available resources are:</p>
+<ul class="simple">
+<li><p>2 years x 2.0 FTE (PDRA/RSE)</p></li>
+<li><dl class="simple">
+<dt>Hardware stack:</dt><dd><ul>
+<li><dl class="simple">
+<dt>Workstation(s)</dt><dd><ul>
+<li><p>Local GPU</p></li>
+<li><p>Local Storage</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>HPC</dt><dd><ul>
+<li><p>GPU nodes</p></li>
+<li><p>Storage (MinIO)</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>Software stack:</dt><dd><ul>
+<li><p>Existing RST for testing</p></li>
+<li><p>Existing codebase for reference</p></li>
+<li><p>Existing data for testing</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="minimum-viable-requirements">
+<h2>Minimum Viable Requirements<a class="headerlink" href="#minimum-viable-requirements" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><dl class="simple">
+<dt>The minimum viable requirements for the future work include:</dt><dd><ul>
+<li><p>A working code base for testing and validation.</p></li>
+<li><p>A GPU (per person) for development and testing.</p></li>
+<li><p>The existing store of files</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>Under this, a significant amount of time will be spent developing plans and tooling for building tests, comparing outputs across all stored data.</p>
+</section>
+<section id="general-requirements">
+<h2>General Requirements<a class="headerlink" href="#general-requirements" title="Link to this heading">¶</a></h2>
+<dl class="simple">
+<dt>If more storage is available, the following general requirements can be considered:</dt><dd><ul class="simple">
+<li><p>A more extensive set of radar data for testing and validation.</p></li>
+<li><p>Additional hardware resources for parallel processing and distributed training.</p></li>
+<li><p>Faster access to Testing, means more code changes, and therefore more dev time, thus reducing project risk</p></li>
+</ul>
+</dd>
+<dt>If a larger GPU is available, the following general requirements can be considered:</dt><dd><ul class="simple">
+<li><p>A larger GPU for training larger models and handling more complex datasets.</p></li>
+<li><p>Significantly reduces code change time, and therefore reduces project risk</p></li>
+<li><p>Multiple GPUs enables tools like local LLMs to be used to generate code, and therefore reduces project risk</p></li>
+</ul>
+</dd>
+<dt>If a storage Server is available, the following general requirements can be considered:</dt><dd><ul class="simple">
+<li><p>A storage server for hosting MinIO buckets and providing distributed access to radar data.</p></li>
+<li><p>Data sharing between multiple users and teams can enable collaboration and knowledge sharing, and shared tooling</p></li>
+<li><p>The project can better pivot towards future Machine learning applications.</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">SuperDARN Future Work</a><ul>
+<li><a class="reference internal" href="#current-software-stack">Current Software stack</a></li>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#minimum-viable-requirements">Minimum Viable Requirements</a></li>
+<li><a class="reference internal" href="#general-requirements">General Requirements</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">SuperDARN Codebase Overview</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="chorddht.html"
+                          title="next chapter">chorddht package</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/future.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="chorddht.html" title="chorddht package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SuperDARN Codebase Overview"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">SuperDARN Future Work</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>
