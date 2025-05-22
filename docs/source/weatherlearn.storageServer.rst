@@ -11,7 +11,8 @@ It works exceedingly well with random access data, and offers redundancy and fau
 Feel free to modify the docker compose file to suit your needs.
 
 Modules for how to interact with the storage server
-------------------------------------------------
+-------------------------------------------------------
+
 - **DataModule**:
   Handles data loading and preprocessing, including downloading and uploading data to MinIO.
 
