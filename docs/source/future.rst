@@ -19,6 +19,21 @@ The planned future work for the SuperDARN codebase focuses on enhancing the exis
    - Integrating additional machine learning frameworks and libraries to provide users with more options for model training and evaluation.
 
 
+Current Software stack
+------------------------------------------------
+
+The current stack relies on Minio for object storage, which is hosted in a docker container. This setup allows for efficient data management and retrieval, making it easy to integrate with existing workflows and tools. 
+This choice was made for a few reasons: 
+1. Hardware stack available, and ability to land on any machine (local or remote)
+2. Compatability with ML flows
+3. Fast retrieval of data
+4. Redundancy and fault tolerance - perfect for bunches of disks, or caching to/from LUNA store. 
+ 
+ This means that if central storage is available, it can be used to store the data, and then the local machine can be used to process the data.
+ It also means that if no server is available, the local machine can be used to host minio via docker so the same interface can be used.
+ 
+
+
 Requirements
 -----------------
 
