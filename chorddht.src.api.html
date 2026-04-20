@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>chorddht.src.api package &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="chorddht.src.chord package" href="chorddht.src.chord.html" />
+    <link rel="prev" title="chorddht.src package" href="chorddht.src.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="chorddht.src.chord.html" title="chorddht.src.chord package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chorddht.src.html" title="chorddht.src package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="chorddht.html" >chorddht package</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="chorddht.src.html" accesskey="U">chorddht.src package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.api package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="chorddht-src-api-package">
+<h1>chorddht.src.api package<a class="headerlink" href="#chorddht-src-api-package" title="Link to this heading">¶</a></h1>
+</section>
+<section id="chord-dht-api">
+<h1>Chord DHT API<a class="headerlink" href="#chord-dht-api" title="Link to this heading">¶</a></h1>
+<p>The Chord DHT API provides a set of classes and functions to interact with the Chord Distributed Hash Table (DHT). It allows users to perform operations such as joining the network, storing and retrieving data, and managing node dynamics.
+In this folder, it is specifically modified for the SuperDARN project, to allow for the storage of radar data in a distributed manner. The API is designed to be user-friendly and efficient, making it easy to integrate with existing applications.</p>
+<p>This is accessible from every node, allowing for seamless communication and data sharing across the network.</p>
+<p>Hopefully, this means several researchers who have this on their work station, might be able to pool compute, without worries if one machine leaves.</p>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-chorddht.src.api.controller">
+<span id="chorddht-src-api-controller-module"></span><h2>chorddht.src.api.controller module<a class="headerlink" href="#module-chorddht.src.api.controller" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.api.controller.</span></span><span class="sig-name descname"><span class="pre">ApiController</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">chord_node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Represents the API controller, which acts as the entry point for HTTP requests.</p>
+<p>Provides endpoints for managing jobs, interacting with MinIO, and querying the Chord DHT network.</p>
+<p>Initializes the API controller with a reference to the Chord node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>chord_node</strong> – The Chord node instance this controller interacts with.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.add_job">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">add_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.add_job" title="Link to this definition">¶</a></dt>
+<dd><p>Adds a single job to the Chord DHT.</p>
+<p>The job is distributed to the appropriate node in the ring based on its hash.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – The HTTP request object containing the job data.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the job ID and keys.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>web.json_response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.getStatus">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getStatus</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.getStatus" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the status of the MinIO server and the Chord DHT node.</p>
+<p>This is used to check if the system is online and operational.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – The HTTP request object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the system status.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>web.json_response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.get_all_jobs">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_all_jobs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.get_all_jobs" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the status of all jobs stored on the current node.</p>
+<p>This includes jobs that the node is responsible for in the Chord ring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – The HTTP request object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the list of jobs.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>web.json_response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.get_buckets">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_buckets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.get_buckets" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the list of buckets from MinIO.</p>
+<p>This is used to populate dropdowns in the web interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – The HTTP request object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the list of buckets.
+web.Response: An error response if the operation fails.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>web.json_response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.get_job_status">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_job_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.get_job_status" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the status of a specific job by its hash.</p>
+<p>The job is looked up in the Chord DHT, and its status is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – The HTTP request object containing the job hash.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the job data or an error message.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>web.json_response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.get_nodes">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_nodes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.get_nodes" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves information about all nodes in the Chord ring.</p>
+<p>This includes node IDs, numeric IDs, and the keys they are responsible for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary containing information about all nodes in the Chord ring.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.get_routes">
+<span class="sig-name descname"><span class="pre">get_routes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.get_routes" title="Link to this definition">¶</a></dt>
+<dd><p>Defines the HTTP routes for the API.</p>
+<p>These routes map to the methods defined in this controller.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A list of web routes.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.getfinger">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">getfinger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.getfinger" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the finger table entries for the current Chord node.</p>
+<p>The finger table is used for efficient routing in the Chord ring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – The HTTP request object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A JSON response containing the finger table entries.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>web.json_response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.index">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.index" title="Link to this definition">¶</a></dt>
+<dd><p>Serves the index.html file for the API’s main page.</p>
+<p>This is the default route for the web interface.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – The HTTP request object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The index.html file.
+web.Response: An error response if the file cannot be served.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>web.FileResponse</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.test_DHT">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_DHT</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.test_DHT" title="Link to this definition">¶</a></dt>
+<dd><p>Tests the Chord DHT by submitting a simple job.</p>
+<p>The job is distributed across the Chord ring, and the response indicates the nodes involved.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – The HTTP request object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A response indicating the result of the test.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>web.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.controller.ApiController.test_minio">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">test_minio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.controller.ApiController.test_minio" title="Link to this definition">¶</a></dt>
+<dd><p>Tests the connection to the MinIO object storage.</p>
+<p>If the “test” bucket does not exist, it creates the bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>request</strong> – The HTTP request object.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A response indicating the result of the test.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>web.Response</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-chorddht.src.api.job">
+<span id="chorddht-src-api-job-module"></span><h2>chorddht.src.api.job module<a class="headerlink" href="#module-chorddht.src.api.job" title="Link to this heading">¶</a></h2>
+<section id="job-module">
+<h3>Job Module<a class="headerlink" href="#job-module" title="Link to this heading">¶</a></h3>
+<p>This module defines the <cite>Job</cite> class and supporting classes (<cite>Tasks</cite> and <cite>NameConverters</cite>) for managing distributed
+jobs in the Chord Distributed Hash Table (DHT) system. It provides functionality for defining tasks, generating
+commands, converting filenames, and executing jobs that interact with MinIO object storage.</p>
+<section id="key-features">
+<h4>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>Task Management</strong>:</dt><dd><ul>
+<li><dl class="simple">
+<dt>The <cite>Tasks</cite> class defines shell commands for various tasks, such as:</dt><dd><ul>
+<li><p><cite>getFitacfCommand</cite>: Generates a command for the <cite>make_fit</cite> task.</p></li>
+<li><p><cite>getDespeckCommand</cite>: Generates a command for despeckling radar data.</p></li>
+<li><p><cite>getCombineCommand</cite>: Combines multiple files into one.</p></li>
+<li><p><cite>getMakeGridCommand</cite>: Creates grid files from radar data.</p></li>
+<li><p><cite>getMapGrdCommand</cite>: Maps grid files to produce final outputs.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Filename Conversion</strong>:</dt><dd><ul>
+<li><p>The <cite>NameConverters</cite> class provides methods for converting filenames for different tasks, ensuring consistency across operations.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Job Execution</strong>:</dt><dd><ul>
+<li><dl class="simple">
+<dt>The <cite>Job</cite> class represents a distributed job in the Chord DHT system and handles:</dt><dd><ul>
+<li><p>Selecting files from MinIO based on the task.</p></li>
+<li><p>Downloading files to local storage.</p></li>
+<li><p>Running the specified task command.</p></li>
+<li><p>Uploading results back to MinIO.</p></li>
+<li><p>Serializing and deserializing job data for storage and communication.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="dependencies">
+<h4>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>MinIO</strong>:
+Used for interacting with MinIO object storage for file retrieval and upload.</p></li>
+<li><p><strong>Subprocess</strong>:
+Executes shell commands for processing radar data.</p></li>
+<li><p><strong>Asyncio</strong>:
+Supports asynchronous job execution.</p></li>
+<li><p><strong>Logging</strong>:
+Provides logging for debugging and error tracking.</p></li>
+<li><p><strong>TQDM</strong>:
+Displays progress bars for long-running operations.</p></li>
+<li><p><strong>Matplotlib and OpenCV</strong>:
+Used for visualizing and processing radar data.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Job">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.api.job.</span></span><span class="sig-name descname"><span class="pre">Job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">job_id</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Job" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents a job in the Chord DHT system.</p>
+<p>Each job is responsible for:
+- Selecting files from MinIO based on the task.
+- Downloading the files to local storage.
+- Running the specified command.
+- Uploading the results back to MinIO.</p>
+<p>Initializes a job with its ID and data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>job_id</strong> (<em>str</em>) – Unique identifier for the job.</p></li>
+<li><p><strong>data</strong> (<em>dict</em>) – Job data (e.g., task, source bucket, etc.).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Job.deserialize">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">deserialize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Job.deserialize" title="Link to this definition">¶</a></dt>
+<dd><p>Deserializes a job from a JSON string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>string</strong> (<em>str</em>) – JSON string representing the job.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Deserialized job instance.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="chorddht.src.api.job.html#chorddht.src.api.job.Job" title="chorddht.src.api.job.Job">Job</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Job.run">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Job.run" title="Link to this definition">¶</a></dt>
+<dd><p>Executes the job logic:
+1. Select files from MinIO based on the task.
+2. Download the files to local storage.
+3. Run the specified command.
+4. Upload the results back to MinIO.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> – The Chord node instance.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The result of the job execution.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Job.serialize">
+<span class="sig-name descname"><span class="pre">serialize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Job.serialize" title="Link to this definition">¶</a></dt>
+<dd><p>Serializes the job to a JSON string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>JSON string representing the job.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="chorddht.src.api.job.NameConverters">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.api.job.</span></span><span class="sig-name descname"><span class="pre">NameConverters</span></span><a class="headerlink" href="#chorddht.src.api.job.NameConverters" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Provides methods to convert filenames for different tasks.</p>
+<p>Ensures that filenames are transformed appropriately for each task.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.NameConverters.combineGridName">
+<span class="sig-name descname"><span class="pre">combineGridName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.NameConverters.combineGridName" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a filename to a combined grid format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inputFileName</strong> (<em>str</em>) – Input filename.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Converted filename.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.NameConverters.convertDespeckName">
+<span class="sig-name descname"><span class="pre">convertDespeckName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.NameConverters.convertDespeckName" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a fitacf3 filename to a despeckled fitacf3 filename.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inputFileName</strong> (<em>str</em>) – Input filename.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Converted filename.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.NameConverters.convertFitacfName">
+<span class="sig-name descname"><span class="pre">convertFitacfName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.NameConverters.convertFitacfName" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a rawacf filename to a fitacf3 filename.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inputFileName</strong> (<em>str</em>) – Input filename.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Converted filename.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.NameConverters.converttoDailyName">
+<span class="sig-name descname"><span class="pre">converttoDailyName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.NameConverters.converttoDailyName" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a filename to a daily format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inputFileName</strong> (<em>str</em>) – Input filename.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Converted filename.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.NameConverters.makeGridName">
+<span class="sig-name descname"><span class="pre">makeGridName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.NameConverters.makeGridName" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a fitacf3 filename to a grid filename.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inputFileName</strong> (<em>str</em>) – Input filename.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Converted filename.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.NameConverters.mapGrdName">
+<span class="sig-name descname"><span class="pre">mapGrdName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.NameConverters.mapGrdName" title="Link to this definition">¶</a></dt>
+<dd><p>Converts a grid filename to a map filename.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inputFileName</strong> (<em>str</em>) – Input filename.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Converted filename.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.NameConverters.runName">
+<span class="sig-name descname"><span class="pre">runName</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.NameConverters.runName" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the input filename without modification.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>inputFileName</strong> (<em>str</em>) – Input filename.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Unmodified filename.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.api.job.</span></span><span class="sig-name descname"><span class="pre">Tasks</span></span><a class="headerlink" href="#chorddht.src.api.job.Tasks" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Defines shell commands for various tasks.</p>
+<p>Each method generates a command string for a specific task.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.combine">
+<span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.combine" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for combining files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.combine_grid">
+<span class="sig-name descname"><span class="pre">combine_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.combine_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for combining grid files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.despeck">
+<span class="sig-name descname"><span class="pre">despeck</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.despeck" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for the <cite>fit_speck_removal</cite> task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.fitacf">
+<span class="sig-name descname"><span class="pre">fitacf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.fitacf" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for the <cite>make_fit</cite> task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.getCombineCommand">
+<span class="sig-name descname"><span class="pre">getCombineCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.getCombineCommand" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for combining files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.getCombineGridCommand">
+<span class="sig-name descname"><span class="pre">getCombineGridCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.getCombineGridCommand" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for combining grid files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.getDespeckCommand">
+<span class="sig-name descname"><span class="pre">getDespeckCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.getDespeckCommand" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for the <cite>fit_speck_removal</cite> task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.getFitacfCommand">
+<span class="sig-name descname"><span class="pre">getFitacfCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.getFitacfCommand" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for the <cite>make_fit</cite> task.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.getMakeGridCommand">
+<span class="sig-name descname"><span class="pre">getMakeGridCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.getMakeGridCommand" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for creating a grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.getMapGrdCommand">
+<span class="sig-name descname"><span class="pre">getMapGrdCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.getMapGrdCommand" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for mapping grid files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.make_grid">
+<span class="sig-name descname"><span class="pre">make_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.make_grid" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for creating a grid.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.map_grd">
+<span class="sig-name descname"><span class="pre">map_grd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.map_grd" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a command string for mapping grid files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.runCommand">
+<span class="sig-name descname"><span class="pre">runCommand</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.runCommand" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a generic command string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.api.job.Tasks.test">
+<span class="sig-name descname"><span class="pre">test</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">destfile</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.api.job.Tasks.test" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a generic command string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files</strong> (<em>list</em>) – List of input files.</p></li>
+<li><p><strong>destfile</strong> (<em>str</em>) – Destination file path.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Command string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-chorddht.src.api">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-chorddht.src.api" title="Link to this heading">¶</a></h2>
+<p>API Package</p>
+<p>This package contains modules and classes for implementing and interacting with
+a Chord Distributed Hash Table (DHT) network.</p>
+<p>The package is split into two main components:</p>
+<ol class="arabic simple">
+<li><p><strong>Controller</strong>:
+- Handles the web interface for the Chord DHT network.
+- When a web request is received, the controller launches a job that is distributed across the compute nodes in the Chord ring.
+- The controller acts as a workload manager, ensuring that tasks are distributed efficiently and executed on the appropriate nodes.
+- This design is analogous to workload managers on HPC systems, where parallel submissions are used to distribute tasks across multiple compute nodes.</p></li>
+<li><p><strong>Job</strong>:
+- Handles job submission and management, enabling tasks to be executed remotely across the Chord DHT network.
+- The <cite>job.py</cite> file contains the <cite>Job</cite> class, which defines the logic for submitting and managing jobs.
+- Each job instance can trigger additional tasks across all nodes in the network, ensuring scalability and efficient resource utilization.</p></li>
+</ol>
+<p>### Job Logic in the Controller</p>
+<p>The controller is responsible for receiving web requests and translating them into jobs that can be executed across the Chord DHT network. When a request is received:
+1. A job is created and submitted to the Chord ring.
+2. The job is run, and if necessary, submits more jobs.
+3. The job is distributed to the appropriate node(s) based on the hash of the job’s key.
+4. The workload is executed on the assigned nodes, leveraging the distributed nature of the Chord DHT.</p>
+<p>This approach ensures that workloads are balanced across the network and that resources are utilized efficiently. On HPC systems, this can be thought of as analogous to parallel job submissions, where tasks are distributed across multiple compute nodes for execution.</p>
+<p>### Summary</p>
+<p>The API package provides the tools necessary to interact with the Chord DHT network, enabling efficient workload distribution and execution. The combination of the controller and job logic ensures that tasks are managed effectively, making this system a powerful workload manager for distributed computing environments.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">chorddht.src.api package</a></li>
+<li><a class="reference internal" href="#chord-dht-api">Chord DHT API</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-chorddht.src.api.controller">chorddht.src.api.controller module</a><ul>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController"><code class="docutils literal notranslate"><span class="pre">ApiController</span></code></a><ul>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.add_job"><code class="docutils literal notranslate"><span class="pre">ApiController.add_job()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.getStatus"><code class="docutils literal notranslate"><span class="pre">ApiController.getStatus()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.get_all_jobs"><code class="docutils literal notranslate"><span class="pre">ApiController.get_all_jobs()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.get_buckets"><code class="docutils literal notranslate"><span class="pre">ApiController.get_buckets()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.get_job_status"><code class="docutils literal notranslate"><span class="pre">ApiController.get_job_status()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.get_nodes"><code class="docutils literal notranslate"><span class="pre">ApiController.get_nodes()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.get_routes"><code class="docutils literal notranslate"><span class="pre">ApiController.get_routes()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.getfinger"><code class="docutils literal notranslate"><span class="pre">ApiController.getfinger()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.index"><code class="docutils literal notranslate"><span class="pre">ApiController.index()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.test_DHT"><code class="docutils literal notranslate"><span class="pre">ApiController.test_DHT()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.controller.ApiController.test_minio"><code class="docutils literal notranslate"><span class="pre">ApiController.test_minio()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-chorddht.src.api.job">chorddht.src.api.job module</a><ul>
+<li><a class="reference internal" href="#job-module">Job Module</a><ul>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Job"><code class="docutils literal notranslate"><span class="pre">Job</span></code></a><ul>
+<li><a class="reference internal" href="#chorddht.src.api.job.Job.deserialize"><code class="docutils literal notranslate"><span class="pre">Job.deserialize()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Job.run"><code class="docutils literal notranslate"><span class="pre">Job.run()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Job.serialize"><code class="docutils literal notranslate"><span class="pre">Job.serialize()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chorddht.src.api.job.NameConverters"><code class="docutils literal notranslate"><span class="pre">NameConverters</span></code></a><ul>
+<li><a class="reference internal" href="#chorddht.src.api.job.NameConverters.combineGridName"><code class="docutils literal notranslate"><span class="pre">NameConverters.combineGridName()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.NameConverters.convertDespeckName"><code class="docutils literal notranslate"><span class="pre">NameConverters.convertDespeckName()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.NameConverters.convertFitacfName"><code class="docutils literal notranslate"><span class="pre">NameConverters.convertFitacfName()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.NameConverters.converttoDailyName"><code class="docutils literal notranslate"><span class="pre">NameConverters.converttoDailyName()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.NameConverters.makeGridName"><code class="docutils literal notranslate"><span class="pre">NameConverters.makeGridName()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.NameConverters.mapGrdName"><code class="docutils literal notranslate"><span class="pre">NameConverters.mapGrdName()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.NameConverters.runName"><code class="docutils literal notranslate"><span class="pre">NameConverters.runName()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks"><code class="docutils literal notranslate"><span class="pre">Tasks</span></code></a><ul>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.combine"><code class="docutils literal notranslate"><span class="pre">Tasks.combine()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.combine_grid"><code class="docutils literal notranslate"><span class="pre">Tasks.combine_grid()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.despeck"><code class="docutils literal notranslate"><span class="pre">Tasks.despeck()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.fitacf"><code class="docutils literal notranslate"><span class="pre">Tasks.fitacf()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.getCombineCommand"><code class="docutils literal notranslate"><span class="pre">Tasks.getCombineCommand()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.getCombineGridCommand"><code class="docutils literal notranslate"><span class="pre">Tasks.getCombineGridCommand()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.getDespeckCommand"><code class="docutils literal notranslate"><span class="pre">Tasks.getDespeckCommand()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.getFitacfCommand"><code class="docutils literal notranslate"><span class="pre">Tasks.getFitacfCommand()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.getMakeGridCommand"><code class="docutils literal notranslate"><span class="pre">Tasks.getMakeGridCommand()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.getMapGrdCommand"><code class="docutils literal notranslate"><span class="pre">Tasks.getMapGrdCommand()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.make_grid"><code class="docutils literal notranslate"><span class="pre">Tasks.make_grid()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.map_grd"><code class="docutils literal notranslate"><span class="pre">Tasks.map_grd()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.runCommand"><code class="docutils literal notranslate"><span class="pre">Tasks.runCommand()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.api.job.Tasks.test"><code class="docutils literal notranslate"><span class="pre">Tasks.test()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-chorddht.src.api">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="chorddht.src.html"
+                          title="previous chapter">chorddht.src package</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="chorddht.src.chord.html"
+                          title="next chapter">chorddht.src.chord package</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/chorddht.src.api.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="chorddht.src.chord.html" title="chorddht.src.chord package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chorddht.src.html" title="chorddht.src package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="chorddht.html" >chorddht package</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="chorddht.src.html" >chorddht.src package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.api package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

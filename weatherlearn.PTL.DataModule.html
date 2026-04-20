@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>weatherlearn.PTL.DataModule module &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">weatherlearn.PTL.DataModule module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-weatherlearn.PTL.DataModule">
+<span id="weatherlearn-ptl-datamodule-module"></span><h1>weatherlearn.PTL.DataModule module<a class="headerlink" href="#module-weatherlearn.PTL.DataModule" title="Link to this heading">¶</a></h1>
+<section id="datamodule-module">
+<h2>DataModule Module<a class="headerlink" href="#datamodule-module" title="Link to this heading">¶</a></h2>
+<p>This module defines data handling classes and functions for processing SuperDARN radar data. It provides tools
+for loading, preprocessing, and managing datasets from MinIO buckets or disk storage. The module supports both
+flat and grid-based data representations and includes functionality for caching datasets and saving/loading
+preprocessed data.</p>
+<section id="key-features">
+<h3>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Dataset Management</strong>:
+- <cite>SuperDARNDatasetFolder</cite>: Handles datasets stored on disk.
+- <cite>SuperDARNDataset</cite>: Handles datasets stored in MinIO buckets.
+- <cite>DatasetFromMinioBucket</cite>: A PyTorch Lightning DataModule for managing data loading and preprocessing.
+- <cite>DatasetFromPresaved</cite>: Handles preprocessed datasets saved on disk.</p></li>
+<li><p><strong>Preprocessing and Caching</strong>:
+- Supports preprocessing of radar data into flat or grid-based representations.
+- Provides functionality for saving datasets to disk and loading them for reuse.</p></li>
+<li><p><strong>Utility Functions</strong>:
+- <cite>gaussian</cite>: Computes a 2D Gaussian function.
+- <cite>save_dataset_to_disk</cite>: Saves a dataset to disk in minibatches.
+- <cite>load_dataset_from_disk</cite>: Loads a dataset from disk.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>PyTorch Lightning</strong>:
+Provides the <cite>LightningDataModule</cite> for managing data loading and preprocessing.</p></li>
+<li><p><strong>MinIO</strong>:
+Used for interacting with MinIO buckets to load radar data.</p></li>
+<li><p><strong>pydarnio</strong>:
+A library for reading and processing SuperDARN radar data.</p></li>
+<li><p><strong>NumPy</strong>:
+Used for numerical operations and data manipulation.</p></li>
+<li><p><strong>Torch</strong>:
+Provides utilities for creating datasets and DataLoaders.</p></li>
+<li><p><strong>TQDM</strong>:
+Used for progress tracking during data processing.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">DatasetFromMinioBucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minioClient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WindowsMinutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LightningDataModule</span></code></p>
+<p>A PyTorch Lightning DataModule for managing data loading and preprocessing.</p>
+<p>This class provides functionality to load, preprocess, and manage SuperDARN radar data from MinIO buckets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minioClient</strong> (<em>dict</em>) – Dictionary containing MinIO connection details.</p></li>
+<li><p><strong>bucket_name</strong> (<em>str</em>) – Name of the MinIO bucket.</p></li>
+<li><p><strong>data_dir</strong> (<em>str</em>) – Directory to store cached data.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for data loading.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Data representation method (‘flat’ or ‘grid’).</p></li>
+<li><p><strong>windowMinutes</strong> (<em>int</em>) – Size of the time window for data processing.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.minioClient">
+<span class="sig-name descname"><span class="pre">minioClient</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.minioClient" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary containing MinIO connection details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.bucket_name">
+<span class="sig-name descname"><span class="pre">bucket_name</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.bucket_name" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the MinIO bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.data_dir">
+<span class="sig-name descname"><span class="pre">data_dir</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.data_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Directory to store cached data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.batch_size">
+<span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.batch_size" title="Link to this definition">¶</a></dt>
+<dd><p>Batch size for data loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.method">
+<span class="sig-name descname"><span class="pre">method</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.method" title="Link to this definition">¶</a></dt>
+<dd><p>Data representation method (‘flat’ or ‘grid’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.window_size">
+<span class="sig-name descname"><span class="pre">window_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.window_size" title="Link to this definition">¶</a></dt>
+<dd><p>Size of the time window for data processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data_per_node">
+<span class="sig-name descname"><span class="pre">prepare_data_per_node</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data_per_node" title="Link to this definition">¶</a></dt>
+<dd><p>If True, each LOCAL_RANK=0 will call prepare data.
+Otherwise only NODE_RANK=0, LOCAL_RANK=0 will prepare data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices">
+<span class="sig-name descname"><span class="pre">allow_zero_length_dataloader_with_multiple_devices</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices" title="Link to this definition">¶</a></dt>
+<dd><p>If True, dataloader with zero length within local rank is allowed.
+Default value is False.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data">
+<span class="sig-name descname"><span class="pre">prepare_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data" title="Link to this definition">¶</a></dt>
+<dd><p>Prepares the data for training by downloading or preprocessing it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.setup" title="Link to this definition">¶</a></dt>
+<dd><p>Sets up the dataset for training, validation, and testing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>stage</strong> (<em>str</em><em>, </em><em>optional</em>) – The stage of the setup process. Defaults to None.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.test_dataloader">
+<span class="sig-name descname"><span class="pre">test_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.test_dataloader" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the test DataLoader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The test DataLoader.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.train_dataloader">
+<span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.train_dataloader" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the training DataLoader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The training DataLoader.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.val_dataloader">
+<span class="sig-name descname"><span class="pre">val_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.val_dataloader" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the validation DataLoader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The validation DataLoader.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">DatasetFromPresaved</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+<p>Handles preprocessed datasets saved on disk.</p>
+<p>This class provides functionality to load and process preprocessed SuperDARN radar data saved on disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataA</strong> (<em>list</em>) – List of file paths for dataA.</p></li>
+<li><p><strong>dataB</strong> (<em>list</em>) – List of file paths for dataB.</p></li>
+<li><p><strong>shape</strong> (<em>list</em>) – Shape of the dataset.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.dataA">
+<span class="sig-name descname"><span class="pre">dataA</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataA" title="Link to this definition">¶</a></dt>
+<dd><p>List of file paths for dataA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.dataB">
+<span class="sig-name descname"><span class="pre">dataB</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataB" title="Link to this definition">¶</a></dt>
+<dd><p>List of file paths for dataB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.shape" title="Link to this definition">¶</a></dt>
+<dd><p>Shape of the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.len">
+<span class="sig-name descname"><span class="pre">len</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.len" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Initializes the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataA</strong> (<em>list</em>) – List of file paths for dataA.</p></li>
+<li><p><strong>dataB</strong> (<em>list</em>) – List of file paths for dataB.</p></li>
+<li><p><strong>shape</strong> (<em>list</em>) – Shape of the dataset.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.compute_stats_from_indices">
+<span class="sig-name descname"><span class="pre">compute_stats_from_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.compute_stats_from_indices" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.set_normalization_stats">
+<span class="sig-name descname"><span class="pre">set_normalization_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stats</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.set_normalization_stats" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">SuperDARNDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">miniodict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minioBucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code></p>
+<p>Handles datasets stored in MinIO buckets.</p>
+<p>This class provides functionality to load and process SuperDARN radar data stored in MinIO buckets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>miniodict</strong> (<em>dict</em>) – Dictionary containing MinIO connection details.</p></li>
+<li><p><strong>minioBucket</strong> (<em>str</em>) – Name of the MinIO bucket.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for data loading.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Data representation method (‘flat’ or ‘grid’).</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – Size of the time window for data processing.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.minioClient">
+<span class="sig-name descname"><span class="pre">minioClient</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.minioClient" title="Link to this definition">¶</a></dt>
+<dd><p>MinIO client object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minio</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.minioBucket">
+<span class="sig-name descname"><span class="pre">minioBucket</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.minioBucket" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the MinIO bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.batch_size">
+<span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.batch_size" title="Link to this definition">¶</a></dt>
+<dd><p>Batch size for data loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.method">
+<span class="sig-name descname"><span class="pre">method</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.method" title="Link to this definition">¶</a></dt>
+<dd><p>Data representation method (‘flat’ or ‘grid’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.window_size">
+<span class="sig-name descname"><span class="pre">window_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.window_size" title="Link to this definition">¶</a></dt>
+<dd><p>Size of the time window for data processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Initializes the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>miniodict</strong> (<em>dict</em>) – Dictionary containing MinIO connection details.</p></li>
+<li><p><strong>minioBucket</strong> (<em>str</em>) – Name of the MinIO bucket.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for data loading.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Data representation method (‘flat’ or ‘grid’).</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – Size of the time window for data processing.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.from_disk">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.from_disk" title="Link to this definition">¶</a></dt>
+<dd><p>Loads the dataset from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<em>str</em>) – Directory containing the data files.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for data loading.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Data representation method (‘flat’ or ‘grid’).</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – Size of the time window for data processing.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of the dataset.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset" title="weatherlearn.PTL.DataModule.SuperDARNDataset">SuperDARNDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.generator">
+<span class="sig-name descname"><span class="pre">generator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.generator" title="Link to this definition">¶</a></dt>
+<dd><p>Returns an iterator over the objects in the MinIO bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Yields<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Any</em> – The next object in the bucket.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_flat">
+<span class="sig-name descname"><span class="pre">process_conv_to_flat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_flat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_grid">
+<span class="sig-name descname"><span class="pre">process_conv_to_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_grid" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_data_conv">
+<span class="sig-name descname"><span class="pre">process_data_conv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_data_conv" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_file">
+<span class="sig-name descname"><span class="pre">process_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_file" title="Link to this definition">¶</a></dt>
+<dd><p>Processes a file and converts it into a usable format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data1</strong> (<em>file-like object</em>) – The file to process.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Processed data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_flat">
+<span class="sig-name descname"><span class="pre">process_fitacf_to_flat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_flat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_grid">
+<span class="sig-name descname"><span class="pre">process_fitacf_to_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_grid" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">SuperDARNDatasetFolder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+<p>Handles datasets stored on disk.</p>
+<p>This class provides functionality to load and process SuperDARN radar data stored on disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.dataset">
+<span class="sig-name descname"><span class="pre">dataset</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.dataset" title="Link to this definition">¶</a></dt>
+<dd><p>Dataset object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset" title="weatherlearn.PTL.DataModule.SuperDARNDataset">SuperDARNDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data" title="Link to this definition">¶</a></dt>
+<dd><p>List of data files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data_dir">
+<span class="sig-name descname"><span class="pre">data_dir</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Directory containing the data files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.batch_size">
+<span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.batch_size" title="Link to this definition">¶</a></dt>
+<dd><p>Batch size for data loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Initializes the dataset folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.gaussian">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.gaussian" title="Link to this definition">¶</a></dt>
+<dd><p>Computes a 2D Gaussian function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – X-coordinate.</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Y-coordinate.</p></li>
+<li><p><strong>x0</strong> (<em>float</em>) – X-coordinate of the Gaussian center.</p></li>
+<li><p><strong>y0</strong> (<em>float</em>) – Y-coordinate of the Gaussian center.</p></li>
+<li><p><strong>sigma_x</strong> (<em>float</em>) – Standard deviation in the X direction.</p></li>
+<li><p><strong>sigma_y</strong> (<em>float</em>) – Standard deviation in the Y direction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value of the Gaussian function at (x, y).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.load_dataset_from_disk">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">load_dataset_from_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.load_dataset_from_disk" title="Link to this definition">¶</a></dt>
+<dd><p>Loads a dataset from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to the dataset directory.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing dataA, dataB, and the dataset shape.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.save_dataset_to_disk">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">save_dataset_to_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DataLoader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.save_dataset_to_disk" title="Link to this definition">¶</a></dt>
+<dd><p>Saves a dataset to disk in minibatches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DataLoader</strong> (<em>torch.utils.data.DataLoader</em>) – DataLoader object containing the dataset.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to save the dataset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">weatherlearn.PTL.DataModule module</a><ul>
+<li><a class="reference internal" href="#datamodule-module">DataModule Module</a><ul>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.minioClient"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.minioClient</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.bucket_name"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.bucket_name</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.data_dir"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.data_dir</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.batch_size"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.batch_size</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.method"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.method</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.window_size"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.window_size</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data_per_node"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.prepare_data_per_node</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.prepare_data()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.setup"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.setup()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.test_dataloader"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.test_dataloader()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.train_dataloader"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.train_dataloader()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.val_dataloader"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.val_dataloader()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataA"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.dataA</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataB"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.dataB</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.shape"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.shape</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.len"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.len</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.compute_stats_from_indices"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.compute_stats_from_indices()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.set_normalization_stats"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.set_normalization_stats()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.minioClient"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.minioClient</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.minioBucket"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.minioBucket</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.batch_size"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.batch_size</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.method"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.method</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.window_size"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.window_size</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.from_disk"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.from_disk()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.generator"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.generator()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_flat"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_conv_to_flat()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_grid"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_conv_to_grid()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_data_conv"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_data_conv()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_file"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_file()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_flat"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_fitacf_to_flat()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_grid"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_fitacf_to_grid()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.dataset"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.dataset</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.data</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data_dir"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.data_dir</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.batch_size"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.batch_size</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.gaussian"><code class="docutils literal notranslate"><span class="pre">gaussian()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.load_dataset_from_disk"><code class="docutils literal notranslate"><span class="pre">load_dataset_from_disk()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.save_dataset_to_disk"><code class="docutils literal notranslate"><span class="pre">save_dataset_to_disk()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/weatherlearn.PTL.DataModule.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">weatherlearn.PTL.DataModule module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

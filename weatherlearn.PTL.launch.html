@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>weatherlearn.PTL.launch module &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">weatherlearn.PTL.launch module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-weatherlearn.PTL.launch">
+<span id="weatherlearn-ptl-launch-module"></span><h1>weatherlearn.PTL.launch module<a class="headerlink" href="#module-weatherlearn.PTL.launch" title="Link to this heading">¶</a></h1>
+<section id="launch-module">
+<h2>Launch Module<a class="headerlink" href="#launch-module" title="Link to this heading">¶</a></h2>
+<p>This module provides functionality for training machine learning models using PyTorch Lightning. It includes
+methods for training with different logging tools (e.g., Weights &amp; Biases, Neptune), generating SLURM scripts
+for HPC environments, and managing hyperparameter optimization trials.</p>
+<section id="key-features">
+<h3>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Training</strong>:
+- <cite>train</cite>: Trains a model using PyTorch Lightning.
+- <cite>wandbtrain</cite>: Wrapper for training with Weights &amp; Biases logging.
+- <cite>neptunetrain</cite>: Wrapper for training with Neptune logging.</p></li>
+<li><p><strong>SLURM Integration</strong>:
+- <cite>SlurmRun</cite>: Generates a SLURM script for running experiments on HPC systems.</p></li>
+<li><p><strong>Hyperparameter Optimization</strong>:
+- <cite>__get_hopt_params</cite>: Converts hyperparameter optimization trials into script parameters.
+- <cite>__should_escape</cite>: Determines if a value should be escaped in the command line.</p></li>
+<li><p><strong>Custom Parsers</strong>:
+- <cite>baseparser</cite>: A custom argument parser for hyperparameter optimization.
+- <cite>parser</cite>: Extends <cite>baseparser</cite> to handle Neptune and Weights &amp; Biases trials.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>PyTorch Lightning</strong>:
+Provides the framework for model training and logging.</p></li>
+<li><p><strong>Weights &amp; Biases (wandb)</strong>:
+Used for experiment tracking and logging.</p></li>
+<li><p><strong>Neptune</strong>:
+Provides logging and experiment tracking for machine learning workflows.</p></li>
+<li><p><strong>SLURM</strong>:
+Used for job scheduling and resource management on HPC systems.</p></li>
+<li><p><strong>Test Tube</strong>:
+Provides the <cite>HyperOptArgumentParser</cite> for hyperparameter optimization.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.SlurmRun">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">SlurmRun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trialconfig</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.SlurmRun" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a SLURM script for running experiments on HPC systems.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trialconfig</strong> (<em>dict</em>) – Configuration dictionary for the trial.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SLURM script as a string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.baseparser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">baseparser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'random_search'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.baseparser" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HyperOptArgumentParser</span></code></p>
+<p>A custom argument parser for hyperparameter optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Positional arguments.</p></li>
+<li><p><strong>strategy</strong> (<em>str</em>) – Optimization strategy (e.g., ‘random_search’).</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.baseparser.keys_of_interest">
+<span class="sig-name descname"><span class="pre">keys_of_interest</span></span><a class="headerlink" href="#weatherlearn.PTL.launch.baseparser.keys_of_interest" title="Link to this definition">¶</a></dt>
+<dd><p>List of keys to track during optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strategy</strong> – ‘grid_search’, ‘random_search’</p></li>
+<li><p><strong>enabled</strong></p></li>
+<li><p><strong>experiment</strong></p></li>
+<li><p><strong>kwargs</strong></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.neptunetrain">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">neptunetrain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accelerator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.neptunetrain" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper for training with Neptune logging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>dict</em>) – Configuration dictionary containing model and training parameters.</p></li>
+<li><p><strong>dir</strong> (<em>str</em>) – Directory to save model checkpoints.</p></li>
+<li><p><strong>devices</strong> (<em>int</em><em> or </em><em>str</em>) – Number of devices to use for training.</p></li>
+<li><p><strong>accelerator</strong> (<em>str</em>) – Accelerator type (e.g., ‘gpu’, ‘cpu’).</p></li>
+<li><p><strong>Dataset</strong> (<em>Dataset</em>) – Dataset object for training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'random_search'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.parser" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#weatherlearn.PTL.launch.baseparser" title="weatherlearn.PTL.launch.baseparser"><code class="xref py py-class docutils literal notranslate"><span class="pre">baseparser</span></code></a></p>
+<p>Extends baseparser to handle Neptune and Weights &amp; Biases trials.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Positional arguments.</p></li>
+<li><p><strong>strategy</strong> (<em>str</em>) – Optimization strategy (e.g., ‘random_search’).</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.parser.generate_trials">
+<span class="sig-name descname"><span class="pre">generate_trials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.parser.generate_trials" title="Link to this definition">¶</a></dt>
+<dd><p>Generates hyperparameter optimization trials.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.parser.generate_neptune_trials">
+<span class="sig-name descname"><span class="pre">generate_neptune_trials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.parser.generate_neptune_trials" title="Link to this definition">¶</a></dt>
+<dd><p>Generates trials using Neptune API.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.parser.generate_wandb_trials">
+<span class="sig-name descname"><span class="pre">generate_wandb_trials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.parser.generate_wandb_trials" title="Link to this definition">¶</a></dt>
+<dd><p>Generates trials using Weights &amp; Biases API.</p>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strategy</strong> – ‘grid_search’, ‘random_search’</p></li>
+<li><p><strong>enabled</strong></p></li>
+<li><p><strong>experiment</strong></p></li>
+<li><p><strong>kwargs</strong></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">generate_neptune_trials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">generate_trials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id1" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">generate_wandb_trials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id2" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.train">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'batch_size':</span> <span class="pre">16,</span> <span class="pre">'codeversion':</span> <span class="pre">'-1'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accelerator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logtool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EvalOnLaunch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.train" title="Link to this definition">¶</a></dt>
+<dd><p>Trains a model using PyTorch Lightning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>dict</em>) – Configuration dictionary containing model and training parameters.</p></li>
+<li><p><strong>dir</strong> (<em>str</em>) – Directory to save model checkpoints.</p></li>
+<li><p><strong>devices</strong> (<em>int</em><em> or </em><em>str</em>) – Number of devices to use for training.</p></li>
+<li><p><strong>accelerator</strong> (<em>str</em>) – Accelerator type (e.g., ‘gpu’, ‘cpu’).</p></li>
+<li><p><strong>Dataset</strong> (<em>Dataset</em>) – Dataset object for training.</p></li>
+<li><p><strong>logtool</strong> (<em>Logger</em>) – Logger for tracking training metrics.</p></li>
+<li><p><strong>EvalOnLaunch</strong> (<em>bool</em>) – Whether to evaluate the model immediately after training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.wandbtrain">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">wandbtrain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accelerator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.wandbtrain" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper for training with Weights &amp; Biases logging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>dict</em>) – Configuration dictionary containing model and training parameters.</p></li>
+<li><p><strong>dir</strong> (<em>str</em>) – Directory to save model checkpoints.</p></li>
+<li><p><strong>devices</strong> (<em>int</em><em> or </em><em>str</em>) – Number of devices to use for training.</p></li>
+<li><p><strong>accelerator</strong> (<em>str</em>) – Accelerator type (e.g., ‘gpu’, ‘cpu’).</p></li>
+<li><p><strong>Dataset</strong> (<em>Dataset</em>) – Dataset object for training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">weatherlearn.PTL.launch module</a><ul>
+<li><a class="reference internal" href="#launch-module">Launch Module</a><ul>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.SlurmRun"><code class="docutils literal notranslate"><span class="pre">SlurmRun()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.baseparser"><code class="docutils literal notranslate"><span class="pre">baseparser</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.baseparser.keys_of_interest"><code class="docutils literal notranslate"><span class="pre">baseparser.keys_of_interest</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.neptunetrain"><code class="docutils literal notranslate"><span class="pre">neptunetrain()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.parser"><code class="docutils literal notranslate"><span class="pre">parser</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.parser.generate_trials"><code class="docutils literal notranslate"><span class="pre">parser.generate_trials()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.parser.generate_neptune_trials"><code class="docutils literal notranslate"><span class="pre">parser.generate_neptune_trials()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.parser.generate_wandb_trials"><code class="docutils literal notranslate"><span class="pre">parser.generate_wandb_trials()</span></code></a></li>
+<li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">parser.generate_neptune_trials()</span></code></a></li>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">parser.generate_trials()</span></code></a></li>
+<li><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">parser.generate_wandb_trials()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.train"><code class="docutils literal notranslate"><span class="pre">train()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.wandbtrain"><code class="docutils literal notranslate"><span class="pre">wandbtrain()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/weatherlearn.PTL.launch.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">weatherlearn.PTL.launch module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

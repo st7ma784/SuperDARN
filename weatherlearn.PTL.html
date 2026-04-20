@@ -1,0 +1,2371 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>PTL Package &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="weatherlearn.storageServer package" href="weatherlearn.storageServer.html" />
+    <link rel="prev" title="weatherlearn Package" href="weatherlearn.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="weatherlearn.storageServer.html" title="weatherlearn.storageServer package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="weatherlearn.html" title="weatherlearn Package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="weatherlearn.html" accesskey="U">weatherlearn Package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PTL Package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="ptl-package">
+<h1>PTL Package<a class="headerlink" href="#ptl-package" title="Link to this heading">¶</a></h1>
+<p>This package contains modules and utilities for training machine learning models using PyTorch Lightning.
+It includes data handling, model definitions, and training scripts.</p>
+<section id="modules">
+<h2>Modules<a class="headerlink" href="#modules" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><strong>DataModule</strong>:
+Handles data loading and preprocessing.</p></li>
+<li><p><strong>generateFitToConv</strong>:
+Processes FITACF files and generates CONVMAP files.</p></li>
+<li><p><strong>launch</strong>:
+Provides training scripts and SLURM integration for HPC environments.</p></li>
+<li><p><strong>model</strong>:
+Defines machine learning models, including the Pangu model.</p></li>
+<li><p><strong>utils</strong>:
+Contains utility functions and classes for tensor operations and model components.</p></li>
+</ul>
+</section>
+<section id="tutorials-and-documentation">
+<h2>Tutorials and Documentation<a class="headerlink" href="#tutorials-and-documentation" title="Link to this heading">¶</a></h2>
+</section>
+<section id="acknowledgements">
+<h2>Acknowledgements<a class="headerlink" href="#acknowledgements" title="Link to this heading">¶</a></h2>
+<p>This package builds upon the Pangu-Weather model and integrates modern tools like PyTorch Lightning, MinIO, and Weights &amp; Biases for efficient and scalable machine learning workflows.</p>
+</section>
+<section id="module-weatherlearn.PTL.DataModule">
+<span id="weatherlearn-ptl-datamodule-module"></span><h2>weatherlearn.PTL.DataModule module<a class="headerlink" href="#module-weatherlearn.PTL.DataModule" title="Link to this heading">¶</a></h2>
+<section id="datamodule-module">
+<h3>DataModule Module<a class="headerlink" href="#datamodule-module" title="Link to this heading">¶</a></h3>
+<p>This module defines data handling classes and functions for processing SuperDARN radar data. It provides tools
+for loading, preprocessing, and managing datasets from MinIO buckets or disk storage. The module supports both
+flat and grid-based data representations and includes functionality for caching datasets and saving/loading
+preprocessed data.</p>
+<section id="key-features">
+<h4>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>Dataset Management</strong>:
+- <cite>SuperDARNDatasetFolder</cite>: Handles datasets stored on disk.
+- <cite>SuperDARNDataset</cite>: Handles datasets stored in MinIO buckets.
+- <cite>DatasetFromMinioBucket</cite>: A PyTorch Lightning DataModule for managing data loading and preprocessing.
+- <cite>DatasetFromPresaved</cite>: Handles preprocessed datasets saved on disk.</p></li>
+<li><p><strong>Preprocessing and Caching</strong>:
+- Supports preprocessing of radar data into flat or grid-based representations.
+- Provides functionality for saving datasets to disk and loading them for reuse.</p></li>
+<li><p><strong>Utility Functions</strong>:
+- <cite>gaussian</cite>: Computes a 2D Gaussian function.
+- <cite>save_dataset_to_disk</cite>: Saves a dataset to disk in minibatches.
+- <cite>load_dataset_from_disk</cite>: Loads a dataset from disk.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h4>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>PyTorch Lightning</strong>:
+Provides the <cite>LightningDataModule</cite> for managing data loading and preprocessing.</p></li>
+<li><p><strong>MinIO</strong>:
+Used for interacting with MinIO buckets to load radar data.</p></li>
+<li><p><strong>pydarnio</strong>:
+A library for reading and processing SuperDARN radar data.</p></li>
+<li><p><strong>NumPy</strong>:
+Used for numerical operations and data manipulation.</p></li>
+<li><p><strong>Torch</strong>:
+Provides utilities for creating datasets and DataLoaders.</p></li>
+<li><p><strong>TQDM</strong>:
+Used for progress tracking during data processing.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">DatasetFromMinioBucket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minioClient</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'grid'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">WindowsMinutes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LightningDataModule</span></code></p>
+<p>A PyTorch Lightning DataModule for managing data loading and preprocessing.</p>
+<p>This class provides functionality to load, preprocess, and manage SuperDARN radar data from MinIO buckets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minioClient</strong> (<em>dict</em>) – Dictionary containing MinIO connection details.</p></li>
+<li><p><strong>bucket_name</strong> (<em>str</em>) – Name of the MinIO bucket.</p></li>
+<li><p><strong>data_dir</strong> (<em>str</em>) – Directory to store cached data.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for data loading.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Data representation method (‘flat’ or ‘grid’).</p></li>
+<li><p><strong>windowMinutes</strong> (<em>int</em>) – Size of the time window for data processing.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.minioClient">
+<span class="sig-name descname"><span class="pre">minioClient</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.minioClient" title="Link to this definition">¶</a></dt>
+<dd><p>Dictionary containing MinIO connection details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.bucket_name">
+<span class="sig-name descname"><span class="pre">bucket_name</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.bucket_name" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the MinIO bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.data_dir">
+<span class="sig-name descname"><span class="pre">data_dir</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.data_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Directory to store cached data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.batch_size">
+<span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.batch_size" title="Link to this definition">¶</a></dt>
+<dd><p>Batch size for data loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.method">
+<span class="sig-name descname"><span class="pre">method</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.method" title="Link to this definition">¶</a></dt>
+<dd><p>Data representation method (‘flat’ or ‘grid’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.window_size">
+<span class="sig-name descname"><span class="pre">window_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.window_size" title="Link to this definition">¶</a></dt>
+<dd><p>Size of the time window for data processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data_per_node">
+<span class="sig-name descname"><span class="pre">prepare_data_per_node</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data_per_node" title="Link to this definition">¶</a></dt>
+<dd><p>If True, each LOCAL_RANK=0 will call prepare data.
+Otherwise only NODE_RANK=0, LOCAL_RANK=0 will prepare data.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices">
+<span class="sig-name descname"><span class="pre">allow_zero_length_dataloader_with_multiple_devices</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices" title="Link to this definition">¶</a></dt>
+<dd><p>If True, dataloader with zero length within local rank is allowed.
+Default value is False.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data">
+<span class="sig-name descname"><span class="pre">prepare_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data" title="Link to this definition">¶</a></dt>
+<dd><p>Prepares the data for training by downloading or preprocessing it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.setup">
+<span class="sig-name descname"><span class="pre">setup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.setup" title="Link to this definition">¶</a></dt>
+<dd><p>Sets up the dataset for training, validation, and testing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>stage</strong> (<em>str</em><em>, </em><em>optional</em>) – The stage of the setup process. Defaults to None.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.test_dataloader">
+<span class="sig-name descname"><span class="pre">test_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.test_dataloader" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the test DataLoader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The test DataLoader.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.train_dataloader">
+<span class="sig-name descname"><span class="pre">train_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.train_dataloader" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the training DataLoader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The training DataLoader.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromMinioBucket.val_dataloader">
+<span class="sig-name descname"><span class="pre">val_dataloader</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.val_dataloader" title="Link to this definition">¶</a></dt>
+<dd><p>Returns the validation DataLoader.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The validation DataLoader.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>DataLoader</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">DatasetFromPresaved</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataB</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shape</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+<p>Handles preprocessed datasets saved on disk.</p>
+<p>This class provides functionality to load and process preprocessed SuperDARN radar data saved on disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataA</strong> (<em>list</em>) – List of file paths for dataA.</p></li>
+<li><p><strong>dataB</strong> (<em>list</em>) – List of file paths for dataB.</p></li>
+<li><p><strong>shape</strong> (<em>list</em>) – Shape of the dataset.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.dataA">
+<span class="sig-name descname"><span class="pre">dataA</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataA" title="Link to this definition">¶</a></dt>
+<dd><p>List of file paths for dataA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.dataB">
+<span class="sig-name descname"><span class="pre">dataB</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataB" title="Link to this definition">¶</a></dt>
+<dd><p>List of file paths for dataB.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.shape">
+<span class="sig-name descname"><span class="pre">shape</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.shape" title="Link to this definition">¶</a></dt>
+<dd><p>Shape of the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.len">
+<span class="sig-name descname"><span class="pre">len</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.len" title="Link to this definition">¶</a></dt>
+<dd><p>Length of the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Initializes the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataA</strong> (<em>list</em>) – List of file paths for dataA.</p></li>
+<li><p><strong>dataB</strong> (<em>list</em>) – List of file paths for dataB.</p></li>
+<li><p><strong>shape</strong> (<em>list</em>) – Shape of the dataset.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.compute_stats_from_indices">
+<span class="sig-name descname"><span class="pre">compute_stats_from_indices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">indices</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.compute_stats_from_indices" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.DatasetFromPresaved.set_normalization_stats">
+<span class="sig-name descname"><span class="pre">set_normalization_stats</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stats</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.set_normalization_stats" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">SuperDARNDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">miniodict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minioBucket</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">IterableDataset</span></code></p>
+<p>Handles datasets stored in MinIO buckets.</p>
+<p>This class provides functionality to load and process SuperDARN radar data stored in MinIO buckets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>miniodict</strong> (<em>dict</em>) – Dictionary containing MinIO connection details.</p></li>
+<li><p><strong>minioBucket</strong> (<em>str</em>) – Name of the MinIO bucket.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for data loading.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Data representation method (‘flat’ or ‘grid’).</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – Size of the time window for data processing.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.minioClient">
+<span class="sig-name descname"><span class="pre">minioClient</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.minioClient" title="Link to this definition">¶</a></dt>
+<dd><p>MinIO client object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Minio</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.minioBucket">
+<span class="sig-name descname"><span class="pre">minioBucket</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.minioBucket" title="Link to this definition">¶</a></dt>
+<dd><p>Name of the MinIO bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.batch_size">
+<span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.batch_size" title="Link to this definition">¶</a></dt>
+<dd><p>Batch size for data loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.method">
+<span class="sig-name descname"><span class="pre">method</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.method" title="Link to this definition">¶</a></dt>
+<dd><p>Data representation method (‘flat’ or ‘grid’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.window_size">
+<span class="sig-name descname"><span class="pre">window_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.window_size" title="Link to this definition">¶</a></dt>
+<dd><p>Size of the time window for data processing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Initializes the dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>miniodict</strong> (<em>dict</em>) – Dictionary containing MinIO connection details.</p></li>
+<li><p><strong>minioBucket</strong> (<em>str</em>) – Name of the MinIO bucket.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for data loading.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Data representation method (‘flat’ or ‘grid’).</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – Size of the time window for data processing.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.from_disk">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flat'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.from_disk" title="Link to this definition">¶</a></dt>
+<dd><p>Loads the dataset from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_dir</strong> (<em>str</em>) – Directory containing the data files.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) – Batch size for data loading.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – Data representation method (‘flat’ or ‘grid’).</p></li>
+<li><p><strong>window_size</strong> (<em>int</em>) – Size of the time window for data processing.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>An instance of the dataset.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="weatherlearn.PTL.DataModule.html#weatherlearn.PTL.DataModule.SuperDARNDataset" title="weatherlearn.PTL.DataModule.SuperDARNDataset">SuperDARNDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.generator">
+<span class="sig-name descname"><span class="pre">generator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.generator" title="Link to this definition">¶</a></dt>
+<dd><p>Returns an iterator over the objects in the MinIO bucket.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Yields<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Any</em> – The next object in the bucket.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_flat">
+<span class="sig-name descname"><span class="pre">process_conv_to_flat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_flat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_grid">
+<span class="sig-name descname"><span class="pre">process_conv_to_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_grid" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_data_conv">
+<span class="sig-name descname"><span class="pre">process_data_conv</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_data_conv" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_file">
+<span class="sig-name descname"><span class="pre">process_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_file" title="Link to this definition">¶</a></dt>
+<dd><p>Processes a file and converts it into a usable format.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>data1</strong> (<em>file-like object</em>) – The file to process.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Processed data.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_flat">
+<span class="sig-name descname"><span class="pre">process_fitacf_to_flat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_flat" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_grid">
+<span class="sig-name descname"><span class="pre">process_fitacf_to_grid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">records</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_grid" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">SuperDARNDatasetFolder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+<p>Handles datasets stored on disk.</p>
+<p>This class provides functionality to load and process SuperDARN radar data stored on disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.dataset">
+<span class="sig-name descname"><span class="pre">dataset</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.dataset" title="Link to this definition">¶</a></dt>
+<dd><p>Dataset object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="weatherlearn.PTL.DataModule.html#weatherlearn.PTL.DataModule.SuperDARNDataset" title="weatherlearn.PTL.DataModule.SuperDARNDataset">SuperDARNDataset</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data">
+<span class="sig-name descname"><span class="pre">data</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data" title="Link to this definition">¶</a></dt>
+<dd><p>List of data files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data_dir">
+<span class="sig-name descname"><span class="pre">data_dir</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data_dir" title="Link to this definition">¶</a></dt>
+<dd><p>Directory containing the data files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.batch_size">
+<span class="sig-name descname"><span class="pre">batch_size</span></span><a class="headerlink" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.batch_size" title="Link to this definition">¶</a></dt>
+<dd><p>Batch size for data loading.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<p>Initializes the dataset folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Positional arguments.</p></li>
+<li><p><strong>**kwargs</strong> – Keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.gaussian">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">gaussian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_y</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.gaussian" title="Link to this definition">¶</a></dt>
+<dd><p>Computes a 2D Gaussian function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>float</em>) – X-coordinate.</p></li>
+<li><p><strong>y</strong> (<em>float</em>) – Y-coordinate.</p></li>
+<li><p><strong>x0</strong> (<em>float</em>) – X-coordinate of the Gaussian center.</p></li>
+<li><p><strong>y0</strong> (<em>float</em>) – Y-coordinate of the Gaussian center.</p></li>
+<li><p><strong>sigma_x</strong> (<em>float</em>) – Standard deviation in the X direction.</p></li>
+<li><p><strong>sigma_y</strong> (<em>float</em>) – Standard deviation in the Y direction.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value of the Gaussian function at (x, y).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.load_dataset_from_disk">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">load_dataset_from_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.load_dataset_from_disk" title="Link to this definition">¶</a></dt>
+<dd><p>Loads a dataset from disk.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to the dataset directory.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing dataA, dataB, and the dataset shape.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.DataModule.save_dataset_to_disk">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.DataModule.</span></span><span class="sig-name descname"><span class="pre">save_dataset_to_disk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">DataLoader</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.DataModule.save_dataset_to_disk" title="Link to this definition">¶</a></dt>
+<dd><p>Saves a dataset to disk in minibatches.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>DataLoader</strong> (<em>torch.utils.data.DataLoader</em>) – DataLoader object containing the dataset.</p></li>
+<li><p><strong>path</strong> (<em>str</em>) – Path to save the dataset.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-weatherlearn.PTL.MinioToDisk">
+<span id="weatherlearn-ptl-miniotodisk-module"></span><h2>weatherlearn.PTL.MinioToDisk module<a class="headerlink" href="#module-weatherlearn.PTL.MinioToDisk" title="Link to this heading">¶</a></h2>
+<section id="miniotodisk-module">
+<h3>MinioToDisk Module<a class="headerlink" href="#miniotodisk-module" title="Link to this heading">¶</a></h3>
+<p>This module provides functionality for downloading all objects from a MinIO bucket to a local folder. It supports
+multithreaded downloads for improved performance and ensures that the folder structure of the bucket is preserved
+locally.</p>
+<section id="id1">
+<h4>Key Features<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>MinIO Integration</strong>:
+- Uses the <cite>Minio</cite> client to interact with MinIO buckets.
+- Supports authentication using access and secret keys.</p></li>
+<li><p><strong>Multithreaded Downloads</strong>:
+- Utilizes <cite>ThreadPoolExecutor</cite> for concurrent downloads of objects from the bucket.
+- Displays progress using the <cite>tqdm</cite> progress bar.</p></li>
+<li><p><strong>Folder Structure Preservation</strong>:
+- Ensures that the folder structure of the bucket is replicated in the local target folder.</p></li>
+<li><p><strong>Error Handling</strong>:
+- Handles errors during object downloads and logs issues for debugging.</p></li>
+</ul>
+</section>
+<section id="id2">
+<h4>Dependencies<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>minio</strong>:
+Provides the MinIO client for interacting with MinIO buckets.</p></li>
+<li><p><strong>os</strong>:
+Used for file system operations, such as creating directories and saving files.</p></li>
+<li><p><strong>concurrent.futures</strong>:
+Enables multithreaded downloads using <cite>ThreadPoolExecutor</cite>.</p></li>
+<li><p><strong>tqdm</strong>:
+Displays a progress bar for tracking download progress.</p></li>
+</ul>
+</section>
+<section id="usage">
+<h4>Usage<a class="headerlink" href="#usage" title="Link to this heading">¶</a></h4>
+<p>To download all objects from a MinIO bucket to a local folder, use the <cite>download_minio_bucket_to_folder</cite> function.
+You can also run the script directly with command-line arguments to specify the MinIO configuration, bucket name,
+and target folder.</p>
+</section>
+<section id="example-command">
+<h4>Example Command:<a class="headerlink" href="#example-command" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>MinioToDisk.py<span class="w"> </span>--host<span class="w"> </span>localhost<span class="w"> </span>--port<span class="w"> </span><span class="m">9000</span><span class="w"> </span>--access_key<span class="w"> </span>minioadmin<span class="w"> </span>--secret_key<span class="w"> </span>minioadmin<span class="w">                          </span>--bucket<span class="w"> </span>mybucket<span class="w"> </span>--target_folder<span class="w"> </span>/path/to/local/folder
+</pre></div>
+</div>
+</section>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.MinioToDisk.download_minio_bucket_to_folder">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.MinioToDisk.</span></span><span class="sig-name descname"><span class="pre">download_minio_bucket_to_folder</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">minio_config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bucket_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.MinioToDisk.download_minio_bucket_to_folder" title="Link to this definition">¶</a></dt>
+<dd><p>Downloads all objects from a Minio bucket to a local folder.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>minio_config</strong> (<em>dict</em>) – Configuration for Minio client with keys:
+- host: Minio server host
+- port: Minio server port
+- access_key: Access key for Minio
+- secret_key: Secret key for Minio</p></li>
+<li><p><strong>bucket_name</strong> (<em>str</em>) – Name of the bucket to download.</p></li>
+<li><p><strong>target_folder</strong> (<em>str</em>) – Path to the local folder where files will be saved.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-weatherlearn.PTL.generateFitToConv">
+<span id="weatherlearn-ptl-generatefittoconv-module"></span><h2>weatherlearn.PTL.generateFitToConv module<a class="headerlink" href="#module-weatherlearn.PTL.generateFitToConv" title="Link to this heading">¶</a></h2>
+<section id="generatefittoconv-module">
+<h3>generateFitToConv Module<a class="headerlink" href="#generatefittoconv-module" title="Link to this heading">¶</a></h3>
+<p>This module provides functions for processing SuperDARN radar data, specifically FITACF files, and finding
+corresponding CONVMAP files. It includes tools for loading radar data, creating file sets based on time ranges
+and radar coverage, and associating FITACF file sets with their corresponding CONVMAP files.</p>
+<section id="id3">
+<h4>Key Features<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>File Loading</strong>:</dt><dd><ul>
+<li><p><cite>load_file</cite>: Loads a FITACF file and extracts radar records.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>FITACF File Processing</strong>:</dt><dd><ul>
+<li><p><cite>process_fitacf_to_filelists</cite>: Processes FITACF files in a folder to create file sets based on time ranges and radar coverage.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>CONVMAP File Association</strong>:</dt><dd><ul>
+<li><p><cite>find_conv_maps_from_filelists</cite>: Finds corresponding CONVMAP files for a list of FITACF file sets.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="id4">
+<h4>Dependencies<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>pydarnio</strong>:
+Used for reading and processing SuperDARN radar data.</p></li>
+<li><p><strong>pandas</strong>:
+Provides data manipulation and filtering capabilities for organizing radar data.</p></li>
+<li><p><strong>datetime</strong>:
+Used for handling time ranges and timestamps.</p></li>
+<li><p><strong>os</strong>:
+Used for file system operations, such as listing files in a directory.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.generateFitToConv.find_conv_maps_from_filelists">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.generateFitToConv.</span></span><span class="sig-name descname"><span class="pre">find_conv_maps_from_filelists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_sets</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.generateFitToConv.find_conv_maps_from_filelists" title="Link to this definition">¶</a></dt>
+<dd><p>Finds corresponding CONVMAP files for a list of FITACF file sets.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>folder</strong> (<em>str</em>) – Path to the folder containing CONVMAP files.</p></li>
+<li><p><strong>file_sets</strong> (<em>list</em>) – A list of file sets containing time ranges and associated radar files.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><dl class="simple">
+<dt>A tuple containing:</dt><dd><ul class="simple">
+<li><p>files_to_process (list): A list of file sets with associated CONVMAP files.</p></li>
+<li><p>file_sets (list): The original file sets with updated CONVMAP file information.</p></li>
+</ul>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.generateFitToConv.load_file">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.generateFitToConv.</span></span><span class="sig-name descname"><span class="pre">load_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.generateFitToConv.load_file" title="Link to this definition">¶</a></dt>
+<dd><p>Loads a file and extracts radar records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Path to the file to load.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of radar records extracted from the file.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.generateFitToConv.process_fitacf_to_filelists">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.generateFitToConv.</span></span><span class="sig-name descname"><span class="pre">process_fitacf_to_filelists</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">folder</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.generateFitToConv.process_fitacf_to_filelists" title="Link to this definition">¶</a></dt>
+<dd><p>Processes FITACF files in a folder to create a list of file sets based on time ranges and radar coverage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>folder</strong> (<em>str</em>) – Path to the folder containing FITACF files.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of file sets, each containing time ranges and associated radar files.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-weatherlearn.PTL.launch">
+<span id="weatherlearn-ptl-launch-module"></span><h2>weatherlearn.PTL.launch module<a class="headerlink" href="#module-weatherlearn.PTL.launch" title="Link to this heading">¶</a></h2>
+<section id="launch-module">
+<h3>Launch Module<a class="headerlink" href="#launch-module" title="Link to this heading">¶</a></h3>
+<p>This module provides functionality for training machine learning models using PyTorch Lightning. It includes
+methods for training with different logging tools (e.g., Weights &amp; Biases, Neptune), generating SLURM scripts
+for HPC environments, and managing hyperparameter optimization trials.</p>
+<section id="id5">
+<h4>Key Features<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>Training</strong>:
+- <cite>train</cite>: Trains a model using PyTorch Lightning.
+- <cite>wandbtrain</cite>: Wrapper for training with Weights &amp; Biases logging.
+- <cite>neptunetrain</cite>: Wrapper for training with Neptune logging.</p></li>
+<li><p><strong>SLURM Integration</strong>:
+- <cite>SlurmRun</cite>: Generates a SLURM script for running experiments on HPC systems.</p></li>
+<li><p><strong>Hyperparameter Optimization</strong>:
+- <cite>__get_hopt_params</cite>: Converts hyperparameter optimization trials into script parameters.
+- <cite>__should_escape</cite>: Determines if a value should be escaped in the command line.</p></li>
+<li><p><strong>Custom Parsers</strong>:
+- <cite>baseparser</cite>: A custom argument parser for hyperparameter optimization.
+- <cite>parser</cite>: Extends <cite>baseparser</cite> to handle Neptune and Weights &amp; Biases trials.</p></li>
+</ul>
+</section>
+<section id="id6">
+<h4>Dependencies<a class="headerlink" href="#id6" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>PyTorch Lightning</strong>:
+Provides the framework for model training and logging.</p></li>
+<li><p><strong>Weights &amp; Biases (wandb)</strong>:
+Used for experiment tracking and logging.</p></li>
+<li><p><strong>Neptune</strong>:
+Provides logging and experiment tracking for machine learning workflows.</p></li>
+<li><p><strong>SLURM</strong>:
+Used for job scheduling and resource management on HPC systems.</p></li>
+<li><p><strong>Test Tube</strong>:
+Provides the <cite>HyperOptArgumentParser</cite> for hyperparameter optimization.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.SlurmRun">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">SlurmRun</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trialconfig</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.SlurmRun" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a SLURM script for running experiments on HPC systems.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>trialconfig</strong> (<em>dict</em>) – Configuration dictionary for the trial.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>SLURM script as a string.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.baseparser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">baseparser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'random_search'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.baseparser" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">HyperOptArgumentParser</span></code></p>
+<p>A custom argument parser for hyperparameter optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Positional arguments.</p></li>
+<li><p><strong>strategy</strong> (<em>str</em>) – Optimization strategy (e.g., ‘random_search’).</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.baseparser.keys_of_interest">
+<span class="sig-name descname"><span class="pre">keys_of_interest</span></span><a class="headerlink" href="#weatherlearn.PTL.launch.baseparser.keys_of_interest" title="Link to this definition">¶</a></dt>
+<dd><p>List of keys to track during optimization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strategy</strong> – ‘grid_search’, ‘random_search’</p></li>
+<li><p><strong>enabled</strong></p></li>
+<li><p><strong>experiment</strong></p></li>
+<li><p><strong>kwargs</strong></p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.neptunetrain">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">neptunetrain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accelerator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.neptunetrain" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper for training with Neptune logging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>dict</em>) – Configuration dictionary containing model and training parameters.</p></li>
+<li><p><strong>dir</strong> (<em>str</em>) – Directory to save model checkpoints.</p></li>
+<li><p><strong>devices</strong> (<em>int</em><em> or </em><em>str</em>) – Number of devices to use for training.</p></li>
+<li><p><strong>accelerator</strong> (<em>str</em>) – Accelerator type (e.g., ‘gpu’, ‘cpu’).</p></li>
+<li><p><strong>Dataset</strong> (<em>Dataset</em>) – Dataset object for training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.parser">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strategy</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'random_search'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.parser" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="weatherlearn.PTL.launch.html#weatherlearn.PTL.launch.baseparser" title="weatherlearn.PTL.launch.baseparser"><code class="xref py py-class docutils literal notranslate"><span class="pre">baseparser</span></code></a></p>
+<p>Extends baseparser to handle Neptune and Weights &amp; Biases trials.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Positional arguments.</p></li>
+<li><p><strong>strategy</strong> (<em>str</em>) – Optimization strategy (e.g., ‘random_search’).</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.parser.generate_trials">
+<span class="sig-name descname"><span class="pre">generate_trials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.parser.generate_trials" title="Link to this definition">¶</a></dt>
+<dd><p>Generates hyperparameter optimization trials.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.parser.generate_neptune_trials">
+<span class="sig-name descname"><span class="pre">generate_neptune_trials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.parser.generate_neptune_trials" title="Link to this definition">¶</a></dt>
+<dd><p>Generates trials using Neptune API.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.parser.generate_wandb_trials">
+<span class="sig-name descname"><span class="pre">generate_wandb_trials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.parser.generate_wandb_trials" title="Link to this definition">¶</a></dt>
+<dd><p>Generates trials using Weights &amp; Biases API.</p>
+</dd></dl>
+
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>strategy</strong> – ‘grid_search’, ‘random_search’</p></li>
+<li><p><strong>enabled</strong></p></li>
+<li><p><strong>experiment</strong></p></li>
+<li><p><strong>kwargs</strong></p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">generate_neptune_trials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id0" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">generate_trials</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#id7" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">generate_wandb_trials</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">entity</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#id8" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.train">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">{'batch_size':</span> <span class="pre">16,</span> <span class="pre">'codeversion':</span> <span class="pre">'-1'}</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accelerator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logtool</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">EvalOnLaunch</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.train" title="Link to this definition">¶</a></dt>
+<dd><p>Trains a model using PyTorch Lightning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>dict</em>) – Configuration dictionary containing model and training parameters.</p></li>
+<li><p><strong>dir</strong> (<em>str</em>) – Directory to save model checkpoints.</p></li>
+<li><p><strong>devices</strong> (<em>int</em><em> or </em><em>str</em>) – Number of devices to use for training.</p></li>
+<li><p><strong>accelerator</strong> (<em>str</em>) – Accelerator type (e.g., ‘gpu’, ‘cpu’).</p></li>
+<li><p><strong>Dataset</strong> (<em>Dataset</em>) – Dataset object for training.</p></li>
+<li><p><strong>logtool</strong> (<em>Logger</em>) – Logger for tracking training metrics.</p></li>
+<li><p><strong>EvalOnLaunch</strong> (<em>bool</em>) – Whether to evaluate the model immediately after training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.launch.wandbtrain">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.launch.</span></span><span class="sig-name descname"><span class="pre">wandbtrain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">devices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">accelerator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Dataset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.launch.wandbtrain" title="Link to this definition">¶</a></dt>
+<dd><p>Wrapper for training with Weights &amp; Biases logging.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>config</strong> (<em>dict</em>) – Configuration dictionary containing model and training parameters.</p></li>
+<li><p><strong>dir</strong> (<em>str</em>) – Directory to save model checkpoints.</p></li>
+<li><p><strong>devices</strong> (<em>int</em><em> or </em><em>str</em>) – Number of devices to use for training.</p></li>
+<li><p><strong>accelerator</strong> (<em>str</em>) – Accelerator type (e.g., ‘gpu’, ‘cpu’).</p></li>
+<li><p><strong>Dataset</strong> (<em>Dataset</em>) – Dataset object for training.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-weatherlearn.PTL.model">
+<span id="weatherlearn-ptl-model-module"></span><h2>weatherlearn.PTL.model module<a class="headerlink" href="#module-weatherlearn.PTL.model" title="Link to this heading">¶</a></h2>
+<section id="id9">
+<h3>MinioToDisk Module<a class="headerlink" href="#id9" title="Link to this heading">¶</a></h3>
+<p>This module provides functionality for downloading all objects from a MinIO bucket to a local folder. It supports
+multithreaded downloads for improved performance and ensures that the folder structure of the bucket is preserved
+locally.</p>
+<section id="id10">
+<h4>Key Features<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>MinIO Integration</strong>:
+- Uses the <cite>Minio</cite> client to interact with MinIO buckets.
+- Supports authentication using access and secret keys.</p></li>
+<li><p><strong>Multithreaded Downloads</strong>:
+- Utilizes <cite>ThreadPoolExecutor</cite> for concurrent downloads of objects from the bucket.
+- Displays progress using the <cite>tqdm</cite> progress bar.</p></li>
+<li><p><strong>Folder Structure Preservation</strong>:
+- Ensures that the folder structure of the bucket is replicated in the local target folder.</p></li>
+<li><p><strong>Error Handling</strong>:
+- Handles errors during object downloads and logs issues for debugging.</p></li>
+</ul>
+</section>
+<section id="id11">
+<h4>Dependencies<a class="headerlink" href="#id11" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>minio</strong>:
+Provides the MinIO client for interacting with MinIO buckets.</p></li>
+<li><p><strong>os</strong>:
+Used for file system operations, such as creating directories and saving files.</p></li>
+<li><p><strong>concurrent.futures</strong>:
+Enables multithreaded downloads using <cite>ThreadPoolExecutor</cite>.</p></li>
+<li><p><strong>tqdm</strong>:
+Displays a progress bar for tracking download progress.</p></li>
+</ul>
+</section>
+<section id="id12">
+<h4>Usage<a class="headerlink" href="#id12" title="Link to this heading">¶</a></h4>
+<p>To download all objects from a MinIO bucket to a local folder, use the <cite>download_minio_bucket_to_folder</cite> function.
+You can also run the script directly with command-line arguments to specify the MinIO configuration, bucket name,
+and target folder.</p>
+</section>
+<section id="id13">
+<h4>Example Command:<a class="headerlink" href="#id13" title="Link to this heading">¶</a></h4>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>MinioToDisk.py<span class="w"> </span>--host<span class="w"> </span>localhost<span class="w"> </span>--port<span class="w"> </span><span class="m">9000</span><span class="w"> </span>--access_key<span class="w"> </span>minioadmin<span class="w"> </span>--secret_key<span class="w"> </span>minioadmin<span class="w">                          </span>--bucket<span class="w"> </span>mybucket<span class="w"> </span>--target_folder<span class="w"> </span>/path/to/local/folder
+</pre></div>
+</div>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.DropPath">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.model.</span></span><span class="sig-name descname"><span class="pre">DropPath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">drop_prob</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scale_by_keep</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.DropPath" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Drop paths (Stochastic Depth) per sample.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>drop_prob</strong> (<em>float</em>) – Probability of dropping a path. Default: 0.0.</p></li>
+<li><p><strong>scale_by_keep</strong> (<em>bool</em>) – Whether to scale by keep probability. Default: True.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.DropPath.extra_repr">
+<span class="sig-name descname"><span class="pre">extra_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.DropPath.extra_repr" title="Link to this definition">¶</a></dt>
+<dd><p>Returns a string representation of the DropPath module.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>String representation.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.DropPath.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.DropPath.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass with drop path applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor with drop path applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.DropPath.null_forward">
+<span class="sig-name descname"><span class="pre">null_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.DropPath.null_forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass without applying drop path.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.EarthAttention3D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.model.</span></span><span class="sig-name descname"><span class="pre">EarthAttention3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qkv_bias</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qk_scale</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">proj_drop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.EarthAttention3D" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>3D window attention with earth position bias.</p>
+<p>Supports both shifted and non-shifted windows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> (<em>int</em>) – Number of input channels.</p></li>
+<li><p><strong>input_resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Input resolution [pressure levels, latitude, longitude].</p></li>
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size [pressure levels, latitude, longitude].</p></li>
+<li><p><strong>num_heads</strong> (<em>int</em>) – Number of attention heads.</p></li>
+<li><p><strong>qkv_bias</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, adds a learnable bias to query, key, and value. Default: True.</p></li>
+<li><p><strong>qk_scale</strong> (<em>float</em><em>, </em><em>optional</em>) – Override default qk scale of head_dim ** -0.5 if set. Default: None.</p></li>
+<li><p><strong>attn_drop</strong> (<em>float</em><em>, </em><em>optional</em>) – Dropout ratio of attention weights. Default: 0.0.</p></li>
+<li><p><strong>proj_drop</strong> (<em>float</em><em>, </em><em>optional</em>) – Dropout ratio of output. Default: 0.0.</p></li>
+<li><p><strong>attn_mask</strong> (<em>torch.Tensor</em><em>, </em><em>optional</em>) – Attention mask. Default: None.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.EarthAttention3D.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.EarthAttention3D.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for 3D attention with earth position bias.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.Tensor</em>) – Input features with shape (B * num_lon, num_pl*num_lat, N, C).</p></li>
+<li><p><strong>mask</strong> (<em>torch.Tensor</em><em>, </em><em>optional</em>) – Attention mask. Default: None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor after applying attention.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.EarthAttention3D.forward_mask">
+<span class="sig-name descname"><span class="pre">forward_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nW_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.EarthAttention3D.forward_mask" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass with attention mask applied.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p></li>
+<li><p><strong>B</strong> (<em>int</em>) – Batch size.</p></li>
+<li><p><strong>nW</strong> (<em>int</em>) – Number of windows.</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – Window size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor with mask applied.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.EarthAttention3D.forward_null">
+<span class="sig-name descname"><span class="pre">forward_null</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nW_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">N</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.EarthAttention3D.forward_null" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass without applying attention mask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p></li>
+<li><p><strong>B</strong> (<em>int</em>) – Batch size.</p></li>
+<li><p><strong>nW</strong> (<em>int</em>) – Number of windows.</p></li>
+<li><p><strong>N</strong> (<em>int</em>) – Window size.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.EarthSpecificBlock">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.model.</span></span><span class="sig-name descname"><span class="pre">EarthSpecificBlock</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_size=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlp_ratio=4.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qkv_bias=True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">qk_scale=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attn_drop=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_path=0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_layer=&lt;class</span> <span class="pre">'torch.nn.modules.activation.GELU'&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_layer=&lt;class</span> <span class="pre">'torch.nn.modules.normalization.LayerNorm'&gt;</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.EarthSpecificBlock" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>3D Transformer Block with earth-specific attention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dim</strong> (<em>int</em>) – Number of input channels.</p></li>
+<li><p><strong>input_resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Input resolution.</p></li>
+<li><p><strong>num_heads</strong> (<em>int</em>) – Number of attention heads.</p></li>
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size [pressure levels, latitude, longitude].</p></li>
+<li><p><strong>shift_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Shift size for SW-MSA [pressure levels, latitude, longitude].</p></li>
+<li><p><strong>mlp_ratio</strong> (<em>float</em>) – Ratio of MLP hidden dim to embedding dim.</p></li>
+<li><p><strong>qkv_bias</strong> (<em>bool</em><em>, </em><em>optional</em>) – If True, adds a learnable bias to query, key, and value. Default: True.</p></li>
+<li><p><strong>qk_scale</strong> (<em>float</em><em>, </em><em>optional</em>) – Override default qk scale of head_dim ** -0.5 if set. Default: None.</p></li>
+<li><p><strong>drop</strong> (<em>float</em><em>, </em><em>optional</em>) – Dropout rate. Default: 0.0.</p></li>
+<li><p><strong>attn_drop</strong> (<em>float</em><em>, </em><em>optional</em>) – Attention dropout rate. Default: 0.0.</p></li>
+<li><p><strong>drop_path</strong> (<em>float</em><em>, </em><em>optional</em>) – Stochastic depth rate. Default: 0.0.</p></li>
+<li><p><strong>act_layer</strong> (<em>nn.Module</em><em>, </em><em>optional</em>) – Activation layer. Default: nn.GELU.</p></li>
+<li><p><strong>norm_layer</strong> (<em>nn.Module</em><em>, </em><em>optional</em>) – Normalization layer. Default: nn.LayerNorm.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.EarthSpecificBlock.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.EarthSpecificBlock.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for the transformer block.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor after applying the transformer block.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.EarthSpecificBlock.negrollX">
+<span class="sig-name descname"><span class="pre">negrollX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.EarthSpecificBlock.negrollX" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.EarthSpecificBlock.null_rollX">
+<span class="sig-name descname"><span class="pre">null_rollX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.EarthSpecificBlock.null_rollX" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.EarthSpecificBlock.posrollX">
+<span class="sig-name descname"><span class="pre">posrollX</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.EarthSpecificBlock.posrollX" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.FiLMLayer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.model.</span></span><span class="sig-name descname"><span class="pre">FiLMLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solar_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">feature_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.FiLMLayer" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Feature-wise Linear Modulation conditioned on a solar-wind scalar vector.</p>
+<dl class="simple">
+<dt>Projects <cite>solar_dim</cite> scalars → (γ, β) of size <cite>feature_dim</cite> and applies</dt><dd><p>out = (1 + γ * mask) * x + β * mask</p>
+</dd>
+</dl>
+<p>so mask=0 is an exact identity (model is unchanged when data is absent).</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.FiLMLayer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">solar_vec</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#weatherlearn.PTL.model.FiLMLayer.forward" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – (B, N, C) token sequence</p></li>
+<li><p><strong>solar_vec</strong> – (B, solar_dim) conditioning scalars</p></li>
+<li><p><strong>mask</strong> – (B, 1) float — 1 if data available, 0 if missing</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.model.</span></span><span class="sig-name descname"><span class="pre">Pangu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embed_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_heads</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(8,</span> <span class="pre">16,</span> <span class="pre">16,</span> <span class="pre">8)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(2,</span> <span class="pre">8,</span> <span class="pre">16)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learning_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0001</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">LightningModule</span></code></p>
+<p>Pangu: A PyTorch implementation of the Pangu-Weather model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>embed_dim</strong> (<em>int</em>) – Patch embedding dimension. Default: 128.</p></li>
+<li><p><strong>num_heads</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Number of attention heads in different layers.</p></li>
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) – Learning rate for the optimizer. Default: 1e-4.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.configure_optimizers">
+<span class="sig-name descname"><span class="pre">configure_optimizers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.configure_optimizers" title="Link to this definition">¶</a></dt>
+<dd><p>Configures the optimizer for training.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Configured optimizer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>torch.optim.Optimizer</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for the Pangu model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Output tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_after_backward">
+<span class="sig-name descname"><span class="pre">on_after_backward</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_after_backward" title="Link to this definition">¶</a></dt>
+<dd><p>Called after <code class="docutils literal notranslate"><span class="pre">loss.backward()</span></code> and before optimizers are stepped.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If using native AMP, the gradients will not be unscaled at this point.
+Use the <code class="docutils literal notranslate"><span class="pre">on_before_optimizer_step</span></code> if you need the unscaled gradients.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_test_end">
+<span class="sig-name descname"><span class="pre">on_test_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_test_end" title="Link to this definition">¶</a></dt>
+<dd><p>Called at the end of testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_test_start">
+<span class="sig-name descname"><span class="pre">on_test_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_test_start" title="Link to this definition">¶</a></dt>
+<dd><p>Called at the beginning of testing.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_train_batch_end">
+<span class="sig-name descname"><span class="pre">on_train_batch_end</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_train_batch_end" title="Link to this definition">¶</a></dt>
+<dd><p>Called in the training loop after the batch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>outputs</strong> – The outputs of training_step(x)</p></li>
+<li><p><strong>batch</strong> – The batched data as it is returned by the training DataLoader.</p></li>
+<li><p><strong>batch_idx</strong> – the index of the batch</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The value <code class="docutils literal notranslate"><span class="pre">outputs[&quot;loss&quot;]</span></code> here will be the normalized value w.r.t <code class="docutils literal notranslate"><span class="pre">accumulate_grad_batches</span></code> of the
+loss returned from <code class="docutils literal notranslate"><span class="pre">training_step</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_train_batch_start">
+<span class="sig-name descname"><span class="pre">on_train_batch_start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_train_batch_start" title="Link to this definition">¶</a></dt>
+<dd><p>Called in the training loop before anything happens for that batch.</p>
+<p>If you return -1 here, you will skip training for the rest of the current epoch.
+Learning rate scheduler will still be stepped at the end of epoch.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> – The batched data as it is returned by the training DataLoader.</p></li>
+<li><p><strong>batch_idx</strong> – the index of the batch</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_train_start">
+<span class="sig-name descname"><span class="pre">on_train_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_train_start" title="Link to this definition">¶</a></dt>
+<dd><p>Called at the beginning of training after sanity check.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_validation_end">
+<span class="sig-name descname"><span class="pre">on_validation_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_validation_end" title="Link to this definition">¶</a></dt>
+<dd><p>Called at the end of validation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_validation_epoch_end">
+<span class="sig-name descname"><span class="pre">on_validation_epoch_end</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_validation_epoch_end" title="Link to this definition">¶</a></dt>
+<dd><p>Called in the validation loop at the very end of the epoch.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_validation_epoch_start">
+<span class="sig-name descname"><span class="pre">on_validation_epoch_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_validation_epoch_start" title="Link to this definition">¶</a></dt>
+<dd><p>Called in the validation loop at the very beginning of the epoch.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.on_validation_start">
+<span class="sig-name descname"><span class="pre">on_validation_start</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.on_validation_start" title="Link to this definition">¶</a></dt>
+<dd><p>Called at the beginning of validation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.plot_and_log_data">
+<span class="sig-name descname"><span class="pre">plot_and_log_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_hat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.plot_and_log_data" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.test_step">
+<span class="sig-name descname"><span class="pre">test_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.test_step" title="Link to this definition">¶</a></dt>
+<dd><p>Test step for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> (<em>tuple</em>) – Input batch containing features and labels.</p></li>
+<li><p><strong>batch_idx</strong> (<em>int</em>) – Index of the batch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Test loss.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.training_step">
+<span class="sig-name descname"><span class="pre">training_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.training_step" title="Link to this definition">¶</a></dt>
+<dd><p>Training step for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> (<em>tuple</em>) – Input batch containing features and labels.</p></li>
+<li><p><strong>batch_idx</strong> (<em>int</em>) – Index of the batch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Training loss.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.Pangu.validation_step">
+<span class="sig-name descname"><span class="pre">validation_step</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">batch</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_idx</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.Pangu.validation_step" title="Link to this definition">¶</a></dt>
+<dd><p>Validation step for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>batch</strong> (<em>tuple</em>) – Input batch containing features and labels.</p></li>
+<li><p><strong>batch_idx</strong> (<em>int</em>) – Index of the batch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Validation loss.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.model.norm_cdf">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.model.</span></span><span class="sig-name descname"><span class="pre">norm_cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.model.norm_cdf" title="Link to this definition">¶</a></dt>
+<dd><p>Computes the standard normal cumulative distribution function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>float</em>) – Input value.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cumulative probability for the input value.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-weatherlearn.PTL.utils">
+<span id="weatherlearn-ptl-utils-module"></span><h2>weatherlearn.PTL.utils module<a class="headerlink" href="#module-weatherlearn.PTL.utils" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.Crop3D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">Crop3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">padding</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.Crop3D" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Crops a 3D tensor based on specified padding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>padding</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Padding values (left, right, top, bottom, front, back).</p>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.Crop3D.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.Crop3D.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for cropping a 3D tensor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cropped tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.DownSample">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">DownSample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_resolution</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.DownSample" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Down-sampling operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_dim</strong> (<em>int</em>) – Number of input channels.</p></li>
+<li><p><strong>input_resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – [pressure levels, latitude, longitude].</p></li>
+<li><p><strong>output_resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – [pressure levels, latitude, longitude].</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.DownSample.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.DownSample.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for down-sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor of shape (B, N, C).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Down-sampled tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.PatchEmbed2D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">PatchEmbed2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_chans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.PatchEmbed2D" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Converts a 2D image into patch embeddings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Image size (Lat, Lon).</p></li>
+<li><p><strong>patch_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Patch size (Lat, Lon).</p></li>
+<li><p><strong>in_chans</strong> (<em>int</em>) – Number of input channels.</p></li>
+<li><p><strong>embed_dim</strong> (<em>int</em>) – Number of output channels.</p></li>
+<li><p><strong>norm_layer</strong> (<em>nn.Module</em><em>, </em><em>optional</em>) – Normalization layer. Default: None.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.PatchEmbed2D.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.PatchEmbed2D.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for patch embedding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Patch-embedded tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.PatchEmbed3D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">PatchEmbed3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_chans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">embed_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">norm_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.PatchEmbed3D" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Converts a 3D image into patch embeddings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Image size (Pl, Lat, Lon).</p></li>
+<li><p><strong>patch_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Patch size (Pl, Lat, Lon).</p></li>
+<li><p><strong>in_chans</strong> (<em>int</em>) – Number of input channels.</p></li>
+<li><p><strong>embed_dim</strong> (<em>int</em>) – Number of output channels.</p></li>
+<li><p><strong>norm_layer</strong> (<em>nn.Module</em><em>, </em><em>optional</em>) – Normalization layer. Default: None.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.PatchEmbed3D.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.PatchEmbed3D.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for patch embedding.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Patch-embedded tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.PatchRecovery2D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">PatchRecovery2D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_chans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_chans</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.PatchRecovery2D" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Recovers a 2D image from patch embeddings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Image size (Lat, Lon).</p></li>
+<li><p><strong>patch_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Patch size (Lat, Lon).</p></li>
+<li><p><strong>in_chans</strong> (<em>int</em>) – Number of input channels.</p></li>
+<li><p><strong>out_chans</strong> (<em>int</em>) – Number of output channels.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.PatchRecovery2D.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.PatchRecovery2D.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for patch recovery.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Recovered image tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.PatchRecovery3D">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">PatchRecovery3D</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">img_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">patch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">in_chans</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_chans</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.PatchRecovery3D" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Recovers a 3D image from patch embeddings.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Image size (Pl, Lat, Lon).</p></li>
+<li><p><strong>patch_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Patch size (Pl, Lat, Lon).</p></li>
+<li><p><strong>in_chans</strong> (<em>int</em>) – Number of input channels.</p></li>
+<li><p><strong>out_chans</strong> (<em>int</em>) – Number of output channels.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.PatchRecovery3D.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.PatchRecovery3D.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for patch recovery.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Recovered image tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.Permute">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">Permute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">dims</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.Permute" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Module wrapper around tensor.permute for use in nn.Sequential.</p>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.Permute.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.Permute.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Define the computation performed at every call.</p>
+<p>Should be overridden by all subclasses.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Although the recipe for forward pass needs to be defined within
+this function, one should call the <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code> instance afterwards
+instead of this since the former takes care of running the
+registered hooks while the latter silently ignores them.</p>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.UpSample">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">UpSample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_resolution</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.UpSample" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Up-sampling operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>in_dim</strong> (<em>int</em>) – Number of input channels.</p></li>
+<li><p><strong>out_dim</strong> (<em>int</em>) – Number of output channels.</p></li>
+<li><p><strong>input_resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – [pressure levels, latitude, longitude].</p></li>
+<li><p><strong>output_resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – [pressure levels, latitude, longitude].</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.UpSample.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.UpSample.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for up-sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor of shape (B, N, C).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Up-sampled tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.WindowPartition">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">WindowPartition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.WindowPartition" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Torch module for partitioning a tensor into windows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_shape</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Shape of the input tensor (B, Pl, Lat, Lon, C).</p></li>
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size (Pl, Lat, Lon).</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.WindowPartition.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.WindowPartition.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for window partitioning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Partitioned windows.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.WindowReverse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">WindowReverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.WindowReverse" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Torch module for reversing window partitioning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size (Pl, Lat, Lon).</p></li>
+<li><p><strong>Pl</strong> (<em>int</em>) – Pressure levels.</p></li>
+<li><p><strong>Lat</strong> (<em>int</em>) – Latitude.</p></li>
+<li><p><strong>Lon</strong> (<em>int</em>) – Longitude.</p></li>
+<li><p><strong>dim</strong> (<em>int</em>) – Number of channels.</p></li>
+</ul>
+</dd>
+</dl>
+<p>Initialize internal Module state, shared by both nn.Module and ScriptModule.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.WindowReverse.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">windows</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.WindowReverse.forward" title="Link to this definition">¶</a></dt>
+<dd><p>Forward pass for reversing window partitioning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>windows</strong> (<em>torch.Tensor</em>) – Partitioned windows.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reconstructed tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.crop2d">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">crop2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.crop2d" title="Link to this definition">¶</a></dt>
+<dd><p>Crops a 2D tensor to the specified resolution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor of shape (B, C, Lat, Lon).</p></li>
+<li><p><strong>resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Target resolution (Lat, Lon).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cropped tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.crop3d">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">crop3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resolution</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.crop3d" title="Link to this definition">¶</a></dt>
+<dd><p>Crops a 3D tensor to the specified resolution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor of shape (B, C, Pl, Lat, Lon).</p></li>
+<li><p><strong>resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Target resolution (Pl, Lat, Lon).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Cropped tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.get_earth_position_index">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">get_earth_position_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.get_earth_position_index" title="Link to this definition">¶</a></dt>
+<dd><p>Constructs the position index for earth-specific attention.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size (Pl, Lat, Lon).</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Position index tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.get_pad2d">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">get_pad2d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.get_pad2d" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates padding for a 2D tensor to align with the window size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Input resolution (Lat, Lon).</p></li>
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size (Lat, Lon).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Padding values (left, right, top, bottom).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.get_pad3d">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">get_pad3d</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.get_pad3d" title="Link to this definition">¶</a></dt>
+<dd><p>Calculates padding for a 3D tensor to align with the window size.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Input resolution (Pl, Lat, Lon).</p></li>
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size (Pl, Lat, Lon).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Padding values (left, right, top, bottom, front, back).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple[int]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.get_shift_window_mask">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">get_shift_window_mask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_resolution</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">shift_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.get_shift_window_mask" title="Link to this definition">¶</a></dt>
+<dd><p>Generates a shift window mask for SW-MSA.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_resolution</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Input resolution (Pl, Lat, Lon).</p></li>
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size (Pl, Lat, Lon).</p></li>
+<li><p><strong>shift_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Shift size (Pl, Lat, Lon).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Attention mask.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.window_partition">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">window_partition</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.window_partition" title="Link to this definition">¶</a></dt>
+<dd><p>Partitions a tensor into windows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<em>torch.Tensor</em>) – Input tensor of shape (B, Pl, Lat, Lon, C).</p></li>
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size (Pl, Lat, Lon).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Partitioned windows.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="weatherlearn.PTL.utils.window_reverse">
+<span class="sig-prename descclassname"><span class="pre">weatherlearn.PTL.utils.</span></span><span class="sig-name descname"><span class="pre">window_reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">windows</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">window_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Pl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lat</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Lon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dim</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#weatherlearn.PTL.utils.window_reverse" title="Link to this definition">¶</a></dt>
+<dd><p>Reverses the window partitioning operation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>windows</strong> (<em>torch.Tensor</em>) – Partitioned windows.</p></li>
+<li><p><strong>window_size</strong> (<em>tuple</em><em>[</em><em>int</em><em>]</em>) – Window size (Pl, Lat, Lon).</p></li>
+<li><p><strong>Pl</strong> (<em>int</em>) – Pressure levels.</p></li>
+<li><p><strong>Lat</strong> (<em>int</em>) – Latitude.</p></li>
+<li><p><strong>Lon</strong> (<em>int</em>) – Longitude.</p></li>
+<li><p><strong>dim</strong> (<em>int</em>) – Number of channels.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Reconstructed tensor.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-weatherlearn.PTL">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-weatherlearn.PTL" title="Link to this heading">¶</a></h2>
+<section id="id14">
+<h3>PTL Package<a class="headerlink" href="#id14" title="Link to this heading">¶</a></h3>
+<p>This package contains modules and utilities for training machine learning models using PyTorch Lightning.
+It includes data handling, model definitions, and training scripts.</p>
+<section id="id15">
+<h4>Modules<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>DataModule</strong>:
+Handles data loading and preprocessing.</p></li>
+<li><p><strong>generateFitToConv</strong>:
+Processes FITACF files and generates CONVMAP files.</p></li>
+<li><p><strong>launch</strong>:
+Provides training scripts and SLURM integration for HPC environments.</p></li>
+<li><p><strong>model</strong>:
+Defines machine learning models, including the Pangu model.</p></li>
+<li><p><strong>utils</strong>:
+Contains utility functions and classes for tensor operations and model components.</p></li>
+</ul>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">PTL Package</a><ul>
+<li><a class="reference internal" href="#modules">Modules</a></li>
+<li><a class="reference internal" href="#tutorials-and-documentation">Tutorials and Documentation</a></li>
+<li><a class="reference internal" href="#acknowledgements">Acknowledgements</a></li>
+<li><a class="reference internal" href="#module-weatherlearn.PTL.DataModule">weatherlearn.PTL.DataModule module</a><ul>
+<li><a class="reference internal" href="#datamodule-module">DataModule Module</a><ul>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.minioClient"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.minioClient</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.bucket_name"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.bucket_name</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.data_dir"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.data_dir</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.batch_size"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.batch_size</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.method"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.method</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.window_size"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.window_size</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data_per_node"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.prepare_data_per_node</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.allow_zero_length_dataloader_with_multiple_devices</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.prepare_data"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.prepare_data()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.setup"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.setup()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.test_dataloader"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.test_dataloader()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.train_dataloader"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.train_dataloader()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromMinioBucket.val_dataloader"><code class="docutils literal notranslate"><span class="pre">DatasetFromMinioBucket.val_dataloader()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataA"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.dataA</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.dataB"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.dataB</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.shape"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.shape</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.len"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.len</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.compute_stats_from_indices"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.compute_stats_from_indices()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.DatasetFromPresaved.set_normalization_stats"><code class="docutils literal notranslate"><span class="pre">DatasetFromPresaved.set_normalization_stats()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.minioClient"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.minioClient</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.minioBucket"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.minioBucket</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.batch_size"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.batch_size</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.method"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.method</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.window_size"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.window_size</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.from_disk"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.from_disk()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.generator"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.generator()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_flat"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_conv_to_flat()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_conv_to_grid"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_conv_to_grid()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_data_conv"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_data_conv()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_file"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_file()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_flat"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_fitacf_to_flat()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDataset.process_fitacf_to_grid"><code class="docutils literal notranslate"><span class="pre">SuperDARNDataset.process_fitacf_to_grid()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.dataset"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.dataset</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.data</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.data_dir"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.data_dir</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.SuperDARNDatasetFolder.batch_size"><code class="docutils literal notranslate"><span class="pre">SuperDARNDatasetFolder.batch_size</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.gaussian"><code class="docutils literal notranslate"><span class="pre">gaussian()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.load_dataset_from_disk"><code class="docutils literal notranslate"><span class="pre">load_dataset_from_disk()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.DataModule.save_dataset_to_disk"><code class="docutils literal notranslate"><span class="pre">save_dataset_to_disk()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-weatherlearn.PTL.MinioToDisk">weatherlearn.PTL.MinioToDisk module</a><ul>
+<li><a class="reference internal" href="#miniotodisk-module">MinioToDisk Module</a><ul>
+<li><a class="reference internal" href="#id1">Key Features</a></li>
+<li><a class="reference internal" href="#id2">Dependencies</a></li>
+<li><a class="reference internal" href="#usage">Usage</a></li>
+<li><a class="reference internal" href="#example-command">Example Command:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.MinioToDisk.download_minio_bucket_to_folder"><code class="docutils literal notranslate"><span class="pre">download_minio_bucket_to_folder()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-weatherlearn.PTL.generateFitToConv">weatherlearn.PTL.generateFitToConv module</a><ul>
+<li><a class="reference internal" href="#generatefittoconv-module">generateFitToConv Module</a><ul>
+<li><a class="reference internal" href="#id3">Key Features</a></li>
+<li><a class="reference internal" href="#id4">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.generateFitToConv.find_conv_maps_from_filelists"><code class="docutils literal notranslate"><span class="pre">find_conv_maps_from_filelists()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.generateFitToConv.load_file"><code class="docutils literal notranslate"><span class="pre">load_file()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.generateFitToConv.process_fitacf_to_filelists"><code class="docutils literal notranslate"><span class="pre">process_fitacf_to_filelists()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-weatherlearn.PTL.launch">weatherlearn.PTL.launch module</a><ul>
+<li><a class="reference internal" href="#launch-module">Launch Module</a><ul>
+<li><a class="reference internal" href="#id5">Key Features</a></li>
+<li><a class="reference internal" href="#id6">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.SlurmRun"><code class="docutils literal notranslate"><span class="pre">SlurmRun()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.baseparser"><code class="docutils literal notranslate"><span class="pre">baseparser</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.baseparser.keys_of_interest"><code class="docutils literal notranslate"><span class="pre">baseparser.keys_of_interest</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.neptunetrain"><code class="docutils literal notranslate"><span class="pre">neptunetrain()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.parser"><code class="docutils literal notranslate"><span class="pre">parser</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.parser.generate_trials"><code class="docutils literal notranslate"><span class="pre">parser.generate_trials()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.parser.generate_neptune_trials"><code class="docutils literal notranslate"><span class="pre">parser.generate_neptune_trials()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.parser.generate_wandb_trials"><code class="docutils literal notranslate"><span class="pre">parser.generate_wandb_trials()</span></code></a></li>
+<li><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">parser.generate_neptune_trials()</span></code></a></li>
+<li><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">parser.generate_trials()</span></code></a></li>
+<li><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">parser.generate_wandb_trials()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.train"><code class="docutils literal notranslate"><span class="pre">train()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.launch.wandbtrain"><code class="docutils literal notranslate"><span class="pre">wandbtrain()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-weatherlearn.PTL.model">weatherlearn.PTL.model module</a><ul>
+<li><a class="reference internal" href="#id9">MinioToDisk Module</a><ul>
+<li><a class="reference internal" href="#id10">Key Features</a></li>
+<li><a class="reference internal" href="#id11">Dependencies</a></li>
+<li><a class="reference internal" href="#id12">Usage</a></li>
+<li><a class="reference internal" href="#id13">Example Command:</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.DropPath"><code class="docutils literal notranslate"><span class="pre">DropPath</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.DropPath.extra_repr"><code class="docutils literal notranslate"><span class="pre">DropPath.extra_repr()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.DropPath.forward"><code class="docutils literal notranslate"><span class="pre">DropPath.forward()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.DropPath.null_forward"><code class="docutils literal notranslate"><span class="pre">DropPath.null_forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.EarthAttention3D"><code class="docutils literal notranslate"><span class="pre">EarthAttention3D</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.EarthAttention3D.forward"><code class="docutils literal notranslate"><span class="pre">EarthAttention3D.forward()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.EarthAttention3D.forward_mask"><code class="docutils literal notranslate"><span class="pre">EarthAttention3D.forward_mask()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.EarthAttention3D.forward_null"><code class="docutils literal notranslate"><span class="pre">EarthAttention3D.forward_null()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.EarthSpecificBlock"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.EarthSpecificBlock.forward"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock.forward()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.EarthSpecificBlock.negrollX"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock.negrollX()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.EarthSpecificBlock.null_rollX"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock.null_rollX()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.EarthSpecificBlock.posrollX"><code class="docutils literal notranslate"><span class="pre">EarthSpecificBlock.posrollX()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.FiLMLayer"><code class="docutils literal notranslate"><span class="pre">FiLMLayer</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.FiLMLayer.forward"><code class="docutils literal notranslate"><span class="pre">FiLMLayer.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu"><code class="docutils literal notranslate"><span class="pre">Pangu</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.configure_optimizers"><code class="docutils literal notranslate"><span class="pre">Pangu.configure_optimizers()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.forward"><code class="docutils literal notranslate"><span class="pre">Pangu.forward()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_after_backward"><code class="docutils literal notranslate"><span class="pre">Pangu.on_after_backward()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_test_end"><code class="docutils literal notranslate"><span class="pre">Pangu.on_test_end()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_test_start"><code class="docutils literal notranslate"><span class="pre">Pangu.on_test_start()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_train_batch_end"><code class="docutils literal notranslate"><span class="pre">Pangu.on_train_batch_end()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_train_batch_start"><code class="docutils literal notranslate"><span class="pre">Pangu.on_train_batch_start()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_train_start"><code class="docutils literal notranslate"><span class="pre">Pangu.on_train_start()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_validation_end"><code class="docutils literal notranslate"><span class="pre">Pangu.on_validation_end()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_validation_epoch_end"><code class="docutils literal notranslate"><span class="pre">Pangu.on_validation_epoch_end()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_validation_epoch_start"><code class="docutils literal notranslate"><span class="pre">Pangu.on_validation_epoch_start()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.on_validation_start"><code class="docutils literal notranslate"><span class="pre">Pangu.on_validation_start()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.plot_and_log_data"><code class="docutils literal notranslate"><span class="pre">Pangu.plot_and_log_data()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.test_step"><code class="docutils literal notranslate"><span class="pre">Pangu.test_step()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.training_step"><code class="docutils literal notranslate"><span class="pre">Pangu.training_step()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.Pangu.validation_step"><code class="docutils literal notranslate"><span class="pre">Pangu.validation_step()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.model.norm_cdf"><code class="docutils literal notranslate"><span class="pre">norm_cdf()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-weatherlearn.PTL.utils">weatherlearn.PTL.utils module</a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.Crop3D"><code class="docutils literal notranslate"><span class="pre">Crop3D</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.Crop3D.forward"><code class="docutils literal notranslate"><span class="pre">Crop3D.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.DownSample"><code class="docutils literal notranslate"><span class="pre">DownSample</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.DownSample.forward"><code class="docutils literal notranslate"><span class="pre">DownSample.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.PatchEmbed2D"><code class="docutils literal notranslate"><span class="pre">PatchEmbed2D</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.PatchEmbed2D.forward"><code class="docutils literal notranslate"><span class="pre">PatchEmbed2D.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.PatchEmbed3D"><code class="docutils literal notranslate"><span class="pre">PatchEmbed3D</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.PatchEmbed3D.forward"><code class="docutils literal notranslate"><span class="pre">PatchEmbed3D.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.PatchRecovery2D"><code class="docutils literal notranslate"><span class="pre">PatchRecovery2D</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.PatchRecovery2D.forward"><code class="docutils literal notranslate"><span class="pre">PatchRecovery2D.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.PatchRecovery3D"><code class="docutils literal notranslate"><span class="pre">PatchRecovery3D</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.PatchRecovery3D.forward"><code class="docutils literal notranslate"><span class="pre">PatchRecovery3D.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.Permute"><code class="docutils literal notranslate"><span class="pre">Permute</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.Permute.forward"><code class="docutils literal notranslate"><span class="pre">Permute.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.UpSample"><code class="docutils literal notranslate"><span class="pre">UpSample</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.UpSample.forward"><code class="docutils literal notranslate"><span class="pre">UpSample.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.WindowPartition"><code class="docutils literal notranslate"><span class="pre">WindowPartition</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.WindowPartition.forward"><code class="docutils literal notranslate"><span class="pre">WindowPartition.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.WindowReverse"><code class="docutils literal notranslate"><span class="pre">WindowReverse</span></code></a><ul>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.WindowReverse.forward"><code class="docutils literal notranslate"><span class="pre">WindowReverse.forward()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.crop2d"><code class="docutils literal notranslate"><span class="pre">crop2d()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.crop3d"><code class="docutils literal notranslate"><span class="pre">crop3d()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.get_earth_position_index"><code class="docutils literal notranslate"><span class="pre">get_earth_position_index()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.get_pad2d"><code class="docutils literal notranslate"><span class="pre">get_pad2d()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.get_pad3d"><code class="docutils literal notranslate"><span class="pre">get_pad3d()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.get_shift_window_mask"><code class="docutils literal notranslate"><span class="pre">get_shift_window_mask()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.window_partition"><code class="docutils literal notranslate"><span class="pre">window_partition()</span></code></a></li>
+<li><a class="reference internal" href="#weatherlearn.PTL.utils.window_reverse"><code class="docutils literal notranslate"><span class="pre">window_reverse()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-weatherlearn.PTL">Module contents</a><ul>
+<li><a class="reference internal" href="#id14">PTL Package</a><ul>
+<li><a class="reference internal" href="#id15">Modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="weatherlearn.html"
+                          title="previous chapter">weatherlearn Package</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="weatherlearn.storageServer.html"
+                          title="next chapter">weatherlearn.storageServer package</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/weatherlearn.PTL.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="weatherlearn.storageServer.html" title="weatherlearn.storageServer package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="weatherlearn.html" title="weatherlearn Package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="weatherlearn.html" >weatherlearn Package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">PTL Package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>
