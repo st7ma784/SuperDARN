@@ -54,7 +54,8 @@ The SuperDARN codebase provides a robust foundation for processing radar data an
 .. toctree::
    :maxdepth: 6
    :caption: Contents:
-   
+
+   baseline_results
    future
    chorddht
    weatherlearn
