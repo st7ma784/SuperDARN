@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>chorddht.src.chord package &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="weatherlearn Package" href="weatherlearn.html" />
+    <link rel="prev" title="chorddht.src.api package" href="chorddht.src.api.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="weatherlearn.html" title="weatherlearn Package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="chorddht.src.api.html" title="chorddht.src.api package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="chorddht.html" >chorddht package</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="chorddht.src.html" accesskey="U">chorddht.src package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.chord package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="chorddht-src-chord-package">
+<h1>chorddht.src.chord package<a class="headerlink" href="#chorddht-src-chord-package" title="Link to this heading">¶</a></h1>
+<p>This folder handles the core functionality of the Chord DHT implementation. It includes the main classes and functions that enable the creation, management, and operation of the distributed hash table.</p>
+<p>The Chord DHT is designed to efficiently store and retrieve data across a network of nodes, ensuring fault tolerance and scalability. The implementation includes features such as node stabilization, finger table management, and key-value storage.
+This module is essential for the overall functionality of the Chord DHT, providing the necessary tools to interact with the distributed system.
+It is designed to be modular and extensible, allowing for easy integration with other components of the SuperDARN project.</p>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-chorddht.src.chord.helpers">
+<span id="chorddht-src-chord-helpers-module"></span><h2>chorddht.src.chord.helpers module<a class="headerlink" href="#module-chorddht.src.chord.helpers" title="Link to this heading">¶</a></h2>
+<section id="helpers-module">
+<h3>Helpers Module<a class="headerlink" href="#helpers-module" title="Link to this heading">¶</a></h3>
+<p>This module provides utility functions for the Chord Distributed Hash Table (DHT) system. These functions
+support operations such as generating unique IDs, creating finger table entries, checking ranges in a circular
+ring, and printing data in a tabular format.</p>
+<section id="functions">
+<h4>Functions<a class="headerlink" href="#functions" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>generate_id</strong>:
+Generates a unique ID for a key or node on the ring.</p></li>
+<li><p><strong>gen_finger</strong>:
+Generates an entry in the finger table for a given node.</p></li>
+<li><p><strong>between</strong>:
+Checks if an ID lies between two boundaries in a circular ring.</p></li>
+<li><p><strong>print_table</strong>:
+Pretty prints a list of dictionaries as a table.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.helpers.between">
+<span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.helpers.</span></span><span class="sig-name descname"><span class="pre">between</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive_left</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inclusive_right</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_sz</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">256</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#chorddht.src.chord.helpers.between" title="Link to this definition">¶</a></dt>
+<dd><p>Check if <cite>_id</cite> lies between <cite>left</cite> and <cite>right</cite> in a circular ring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>_id</strong> (<em>int</em>) – The ID to check.</p></li>
+<li><p><strong>left</strong> (<em>int</em>) – The left boundary.</p></li>
+<li><p><strong>right</strong> (<em>int</em>) – The right boundary.</p></li>
+<li><p><strong>inclusive_left</strong> (<em>bool</em>) – Whether to include the left boundary.</p></li>
+<li><p><strong>inclusive_right</strong> (<em>bool</em>) – Whether to include the right boundary.</p></li>
+<li><p><strong>ring_sz</strong> (<em>int</em>) – The size of the ring.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if <cite>_id</cite> lies between <cite>left</cite> and <cite>right</cite>, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.helpers.gen_finger">
+<span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.helpers.</span></span><span class="sig-name descname"><span class="pre">gen_finger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_sz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keysize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#chorddht.src.chord.helpers.gen_finger" title="Link to this definition">¶</a></dt>
+<dd><p>Generate an entry in the finger table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>addr</strong> (<em>str</em>) – Address of the node.</p></li>
+<li><p><strong>ring_sz</strong> (<em>int</em>) – Size of the ring.</p></li>
+<li><p><strong>keysize</strong> (<em>int</em>) – The number of characters to extract from the hash.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary containing the address, ID, and numeric ID.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.helpers.generate_id">
+<span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.helpers.</span></span><span class="sig-name descname"><span class="pre">generate_id</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keysize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#chorddht.src.chord.helpers.generate_id" title="Link to this definition">¶</a></dt>
+<dd><p>Generate an ID for a key or node on the ring.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>Union</em><em>[</em><em>bytes</em><em>, </em><em>str</em><em>]</em>) – Key or node IP to hash.</p></li>
+<li><p><strong>keysize</strong> (<em>int</em>) – The number of characters to extract from the hash.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The first <cite>keysize</cite> characters from the key hash.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.helpers.print_table">
+<span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.helpers.</span></span><span class="sig-name descname"><span class="pre">print_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">col_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.helpers.print_table" title="Link to this definition">¶</a></dt>
+<dd><p>Pretty print a list of dictionaries as a table.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict_arr</strong> (<em>list</em>) – A list of dictionaries to print.</p></li>
+<li><p><strong>col_list</strong> (<em>list</em><em>, </em><em>optional</em>) – A list of column names to include. Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-chorddht.src.chord.node">
+<span id="chorddht-src-chord-node-module"></span><h2>chorddht.src.chord.node module<a class="headerlink" href="#module-chorddht.src.chord.node" title="Link to this heading">¶</a></h2>
+<section id="node-module">
+<h3>Node Module<a class="headerlink" href="#node-module" title="Link to this heading">¶</a></h3>
+<p>This module implements the <cite>Node</cite> class, which is responsible for managing a node in the Chord Distributed Hash Table (DHT) system.
+The Chord algorithm is implemented to enable decentralized and efficient management of key-value pairs across a distributed network of nodes.</p>
+<section id="key-features">
+<h4>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>Node Initialization</strong>:
+- Initializes a node with its address, ID, and storage.
+- Configures the MinIO client for object storage integration.</p></li>
+<li><p><strong>Joining the Network</strong>:
+- Allows a node to join an existing Chord ring by connecting to a bootstrap node.
+- Handles the initialization of the finger table, predecessor, and successor.</p></li>
+<li><p><strong>Stabilization</strong>:
+- Periodically verifies and updates the successor and predecessor nodes.
+- Ensures the finger table is up-to-date for efficient routing.</p></li>
+<li><p><strong>Routing</strong>:
+- Implements methods to find the closest preceding node and the successor for a given key.
+- Supports multi-hop routing to locate the appropriate node for a key.</p></li>
+<li><p><strong>Storage Integration</strong>:
+- Integrates with the <cite>Storage</cite> class to manage key-value pairs locally.
+- Supports replication and retrieval of keys across the network.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h4>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>api.job</strong>:
+Provides job management functionality for distributed tasks.</p></li>
+<li><p><strong>chord.helpers</strong>:
+Utility functions for generating IDs, checking ranges, and printing tables.</p></li>
+<li><p><strong>chord.rpc</strong>:
+Remote procedure call (RPC) functions for inter-node communication.</p></li>
+<li><p><strong>chord.storage</strong>:
+Local storage management for key-value pairs.</p></li>
+<li><p><strong>minio</strong>:
+MinIO client for object storage integration.</p></li>
+</ul>
+</section>
+<section id="classes">
+<h4>Classes<a class="headerlink" href="#classes" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>Node</strong>:
+Represents a node in the Chord DHT system and implements the core Chord algorithm.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.node.</span></span><span class="sig-name descname"><span class="pre">Node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Class responsible for managing a Chord DHT node.</p>
+<p>The Chord algorithm is implemented in the following methods:
+1. join: Join the network by connecting to a known node. Initializes the node’s predecessor and finger table.
+2. stabilize: Called periodically to verify the current node’s successor and notify the successor about the current node.
+3. fix_fingers: Called periodically to update finger table entries.
+4. fix_successor: Called periodically to update the successor of the current node.</p>
+<p>Initializes a Chord DHT node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>host</strong> (<em>str</em>) – Host address of the node.</p></li>
+<li><p><strong>port</strong> (<em>str</em>) – Port number of the node.</p></li>
+<li><p><strong>**kwargs</strong> – Additional keyword arguments.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.dump_me">
+<span class="sig-name descname"><span class="pre">dump_me</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node.dump_me" title="Link to this definition">¶</a></dt>
+<dd><p>Prints a dump of all relevant node information for debugging purposes.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.find_successor">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">find_successor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">numeric_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node.find_successor" title="Link to this definition">¶</a></dt>
+<dd><p>Finds the successor for a given numeric ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>numeric_id</strong> (<em>int</em>) – The numeric ID of the node.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing a boolean indicating if the successor was found and the successor node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.join">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">join</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">bootstrap_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node.join" title="Link to this definition">¶</a></dt>
+<dd><p>Joins the Chord network by connecting to a known bootstrap node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>bootstrap_node</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em>) – Address of the bootstrap node.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.router">
+<span class="sig-name descname"><span class="pre">router</span></span><a class="headerlink" href="#chorddht.src.chord.node.Node.router" title="Link to this definition">¶</a></dt>
+<dd><p>A Data Descriptor that creates a new <code class="xref py py-class docutils literal notranslate"><span class="pre">Router</span></code> instance for each
+class instance to which it is set.</p>
+<p>The attribute name for the Service should always be <em>router</em>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Spam</span><span class="p">:</span>
+    <span class="n">router</span> <span class="o">=</span> <span class="n">aiomas</span><span class="o">.</span><span class="n">rpc</span><span class="o">.</span><span class="n">Service</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>You can optionally pass a list with the attribute names of classes with
+sub-routers.  This required to build hierarchies of routers, e.g.:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Eggs</span><span class="p">:</span>
+    <span class="n">router</span> <span class="o">=</span> <span class="n">aiomas</span><span class="o">.</span><span class="n">rpc</span><span class="o">.</span><span class="n">Service</span><span class="p">()</span>
+
+
+<span class="k">class</span><span class="w"> </span><span class="nc">Spam</span><span class="p">:</span>
+    <span class="n">router</span> <span class="o">=</span> <span class="n">aiomas</span><span class="o">.</span><span class="n">rpc</span><span class="o">.</span><span class="n">Service</span><span class="p">([</span><span class="s1">&#39;eggs&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eggs</span> <span class="o">=</span> <span class="n">Eggs</span><span class="p">()</span>  <span class="c1"># Instance with a sub-router</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.node.Node.stabilize">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">stabilize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.node.Node.stabilize" title="Link to this definition">¶</a></dt>
+<dd><p>Periodically stabilizes the network by verifying and updating the successor and predecessor nodes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-chorddht.src.chord.rpc">
+<span id="chorddht-src-chord-rpc-module"></span><h2>chorddht.src.chord.rpc module<a class="headerlink" href="#module-chorddht.src.chord.rpc" title="Link to this heading">¶</a></h2>
+<section id="rpc-module">
+<h3>RPC Module<a class="headerlink" href="#rpc-module" title="Link to this heading">¶</a></h3>
+<p>This module contains the Remote Procedure Call (RPC) functions used for communication between nodes in the
+Chord Distributed Hash Table (DHT) system. These functions enable inter-node communication for tasks such as
+finding successors, retrieving and storing keys, managing node relationships, and handling distributed jobs.</p>
+<section id="id1">
+<h4>Key Features<a class="headerlink" href="#id1" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>Successor and Predecessor Management</strong>:
+- <cite>rpc_ask_for_succ</cite>: Finds the successor for a given numeric ID.
+- <cite>rpc_ask_for_pred_and_succlist</cite>: Retrieves the predecessor and successor list of a node.</p></li>
+<li><p><strong>Node Communication</strong>:
+- <cite>rpc_ping</cite>: Pings a node to check its availability.
+- <cite>rpc_notify</cite>: Notifies a node that the calling node is now its predecessor.</p></li>
+<li><p><strong>Key-Value Operations</strong>:
+- <cite>rpc_get_key</cite>: Retrieves a value associated with a key from the DHT.
+- <cite>rpc_save_key</cite>: Stores a key-value pair in the DHT.
+- <cite>rpc_put_key</cite>: Replicates and stores a key-value pair in the DHT.
+- <cite>rpc_get_all_keys</cite>: Retrieves all key-value pairs stored on a specific node.</p></li>
+<li><p><strong>Job Management</strong>:
+- <cite>rpc_find_job</cite>: Finds and retrieves job data from the DHT.</p></li>
+</ul>
+</section>
+<section id="id2">
+<h4>Dependencies<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>aiomas</strong>:
+Provides the RPC framework for asynchronous communication between nodes.</p></li>
+<li><p><strong>chord.helpers</strong>:
+Utility functions for generating finger table entries.</p></li>
+<li><p><strong>logging</strong>:
+Used for logging errors and debugging information.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_ask_for_pred_and_succlist">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_ask_for_pred_and_succlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_ask_for_pred_and_succlist" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the predecessor and successor list of the current node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>addr</strong> (<em>str</em>) – Address of the target node.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The predecessor node.
+List: The list of successors.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_ask_for_succ">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_ask_for_succ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">next_node:</span> <span class="pre">dict,</span> <span class="pre">numeric_id:</span> <span class="pre">int)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'bool'&gt;,</span> <span class="pre">typing.Optional[dict]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_ask_for_succ" title="Link to this definition">¶</a></dt>
+<dd><p>Finds the successor for a given numeric ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>numeric_id</strong> (<em>int</em>) – The numeric ID of the node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether or not a successor exists.
+Optional[dict]: The successor node if it exists.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_find_job">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_find_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_find_job" title="Link to this definition">¶</a></dt>
+<dd><p>Checks the current node for the value or delegates to appropriate successors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>job_id</strong> (<em>str</em>) – The job ID to find.</p></li>
+<li><p><strong>ttl</strong> (<em>int</em>) – Time to live for the message.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The job data if found, None otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_get_all_keys">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_get_all_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_get_all_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Gets all key-value pairs of the node with the given node ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>node_id</strong> (<em>int</em>) – The ID of the node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the keys and values stored on the node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_get_key">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_get_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_replica</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_get_key" title="Link to this definition">¶</a></dt>
+<dd><p>Checks the current node for the value or delegates to appropriate successors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – The key to find.</p></li>
+<li><p><strong>ttl</strong> (<em>int</em>) – Time to live for the message.</p></li>
+<li><p><strong>is_replica</strong> (<em>bool</em>) – Whether or not the current node is a replica.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value if found, None otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_notify">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_notify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">succ_addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">my_addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_sz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keysize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_notify" title="Link to this definition">¶</a></dt>
+<dd><p>Notifies a node that the calling node is now its predecessor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>succ_addr</strong> (<em>str</em>) – The address of the successor node.</p></li>
+<li><p><strong>my_addr</strong> (<em>str</em>) – Address of the calling node.</p></li>
+<li><p><strong>ring_sz</strong> (<em>int</em>) – The size of the ring.</p></li>
+<li><p><strong>keysize</strong> (<em>int</em>) – The number of characters to extract from the hash.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_ping">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_ping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_ping" title="Link to this definition">¶</a></dt>
+<dd><p>Pings a node with a given address.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>addr</strong> (<em>str</em>) – The address of the target node to ping.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the node responds with “pong”, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_put_key">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_put_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_put_key" title="Link to this definition">¶</a></dt>
+<dd><p>Generates multiple DHT keys for each value for replication and stores them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – The key under which the value shall be stored.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value/data being stored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The response from the node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_save_key">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_save_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_save_key" title="Link to this definition">¶</a></dt>
+<dd><p>Stores a key-value pair in the actual storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – The key under which the value shall be stored.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value/data being stored.</p></li>
+<li><p><strong>ttl</strong> (<em>int</em>) – Time to live for the message.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The response from the node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-chorddht.src.chord.storage">
+<span id="chorddht-src-chord-storage-module"></span><h2>chorddht.src.chord.storage module<a class="headerlink" href="#module-chorddht.src.chord.storage" title="Link to this heading">¶</a></h2>
+<section id="storage-class">
+<h3>Storage Class<a class="headerlink" href="#storage-class" title="Link to this heading">¶</a></h3>
+<p>The <cite>Storage</cite> class provides functionality for securely storing and retrieving key-value pairs in a distributed
+Chord DHT system. It ensures data authenticity and integrity using HMAC-based hashing and supports operations
+such as adding, deleting, and retrieving keys and values.</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**make_digest**:</span></span></dt>
+<dd><p>Generates an HMAC digest for a given message using the node’s secret key.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**get_key**:</span></span></dt>
+<dd><p>Retrieves the value associated with a given key, ensuring its integrity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**put_key**:</span></span></dt>
+<dd><p>Stores a value under a given key with an optional time-to-live (TTL).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**_del_key**:</span></span></dt>
+<dd><p>Deletes a specific key from storage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**del_keys**:</span></span></dt>
+<dd><p>Deletes multiple keys from storage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**get_my_data**:</span></span></dt>
+<dd><p>Retrieves all keys and values stored in the current storage instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**iterjobs**:</span></span></dt>
+<dd><p>Asynchronously iterates over and pops all jobs from storage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**get_keys**:</span></span></dt>
+<dd><p>Retrieves all keys and values within a specified range.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**put_keys**:</span></span></dt>
+<dd><p>Stores multiple key-value pairs in storage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**_store**</span></span></dt>
+<dd><p>A <cite>diskcache.Cache</cite> instance used for local storage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**node**</span></span></dt>
+<dd><p>The node instance associated with this storage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**node_id**</span></span></dt>
+<dd><p>The unique identifier of the node.</p>
+</dd></dl>
+
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.storage.</span></span><span class="sig-name descname"><span class="pre">Storage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Provides secure storage functionality for a Chord DHT node.</p>
+<p>This class handles key-value storage with HMAC-based integrity checks, ensuring that data is authentic and
+has not been tampered with. It also supports operations for managing keys and values within the distributed
+system.</p>
+<p>Initializes the Storage instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> – The node instance associated with this storage.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.del_keys">
+<span class="sig-name descname"><span class="pre">del_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.del_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Deletes multiple keys from storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>keys</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – A list of keys to delete.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.get_key">
+<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.get_key" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the value associated with a given key, ensuring its integrity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – The key to retrieve.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value stored under the key, or None if the key does not exist or the integrity check fails.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.get_keys">
+<span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.get_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves all keys and values within a specified range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> (<em>int</em>) – The start interval (exclusive).</p></li>
+<li><p><strong>right</strong> (<em>int</em>) – The end interval (exclusive).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing two lists - keys and their corresponding values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.get_my_data">
+<span class="sig-name descname"><span class="pre">get_my_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.get_my_data" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves all keys and values stored in the current storage instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing two lists - keys and their corresponding values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.iterjobs">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iterjobs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.iterjobs" title="Link to this definition">¶</a></dt>
+<dd><p>Asynchronously iterates over and pops all jobs from storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Yields<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>tuple</em> – A tuple containing the key and serialized job data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.make_digest">
+<span class="sig-name descname"><span class="pre">make_digest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.make_digest" title="Link to this definition">¶</a></dt>
+<dd><p>Generates an HMAC digest for a given message using the node’s secret key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>bytes</em>) – The message to hash.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The HMAC digest of the message.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.put_key">
+<span class="sig-name descname"><span class="pre">put_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3600</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.put_key" title="Link to this definition">¶</a></dt>
+<dd><p>Stores a value under a given key with an optional time-to-live (TTL).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – The key under which the value will be stored.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value to store.</p></li>
+<li><p><strong>ttl</strong> (<em>int</em>) – The time-to-live for the key-value pair in seconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the operation was successful, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.put_keys">
+<span class="sig-name descname"><span class="pre">put_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.put_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Stores multiple key-value pairs in storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keys</strong> (<em>list</em>) – A list of keys.</p></li>
+<li><p><strong>values</strong> (<em>list</em>) – A list of values corresponding to the keys.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-chorddht.src.chord">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-chorddht.src.chord" title="Link to this heading">¶</a></h2>
+<section id="chord-package">
+<h3>Chord Package<a class="headerlink" href="#chord-package" title="Link to this heading">¶</a></h3>
+<p>This package contains modules and classes for implementing and interacting with
+a Chord Distributed Hash Table (DHT) network.</p>
+<section id="key-changes">
+<h4>Key Changes<a class="headerlink" href="#key-changes" title="Link to this heading">¶</a></h4>
+<ol class="arabic simple">
+<li><p><strong>File Organization</strong>:
+- Added a section explaining how the files are split between the <cite>API</cite> folder and the <cite>Controller</cite>.
+- Clarified the roles of the <cite>API</cite> folder (core logic) and the <cite>Controller</cite> (web interface for nodes).</p></li>
+<li><p><strong>Maintained Existing Content</strong>:
+- Retained the explanation of the Chord DHT benefits and the Docker-Compose setup instructions.</p></li>
+<li><p><strong>Improved Clarity</strong>:
+- Highlighted the role of the <cite>Controller</cite> in enabling SuperDARN requests and external interactions.</p></li>
+</ol>
+</section>
+<section id="modules">
+<h4>Modules<a class="headerlink" href="#modules" title="Link to this heading">¶</a></h4>
+<ul class="simple">
+<li><p><strong>storage</strong>:
+Provides storage-related functionality.</p></li>
+<li><p><strong>rpc</strong>:
+Contains remote procedure call (RPC) functions for node communication, including:
+- <cite>rpc_get_key</cite>
+- <cite>rpc_find_job</cite>
+- <cite>rpc_notify</cite>
+- <cite>rpc_ask_for_pred_and_succlist</cite>
+- <cite>rpc_ask_for_succ</cite>
+- <cite>rpc_save_key</cite>
+- <cite>rpc_put_key</cite>
+- <cite>rpc_get_all_keys</cite>
+- <cite>rpc_ping</cite></p></li>
+<li><p><strong>helpers</strong>:
+Utility functions for the Chord DHT, including:
+- <cite>generate_id</cite>
+- <cite>between</cite>
+- <cite>print_table</cite></p></li>
+<li><p><strong>node</strong>:
+Implements the <cite>Node</cite> class, which represents a node in the Chord DHT.</p></li>
+</ul>
+</section>
+</section>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">chorddht.src.chord package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-chorddht.src.chord.helpers">chorddht.src.chord.helpers module</a><ul>
+<li><a class="reference internal" href="#helpers-module">Helpers Module</a><ul>
+<li><a class="reference internal" href="#functions">Functions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chorddht.src.chord.helpers.between"><code class="docutils literal notranslate"><span class="pre">between()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.helpers.gen_finger"><code class="docutils literal notranslate"><span class="pre">gen_finger()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.helpers.generate_id"><code class="docutils literal notranslate"><span class="pre">generate_id()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.helpers.print_table"><code class="docutils literal notranslate"><span class="pre">print_table()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-chorddht.src.chord.node">chorddht.src.chord.node module</a><ul>
+<li><a class="reference internal" href="#node-module">Node Module</a><ul>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+<li><a class="reference internal" href="#classes">Classes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node"><code class="docutils literal notranslate"><span class="pre">Node</span></code></a><ul>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.dump_me"><code class="docutils literal notranslate"><span class="pre">Node.dump_me()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.find_successor"><code class="docutils literal notranslate"><span class="pre">Node.find_successor()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.join"><code class="docutils literal notranslate"><span class="pre">Node.join()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.router"><code class="docutils literal notranslate"><span class="pre">Node.router</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.node.Node.stabilize"><code class="docutils literal notranslate"><span class="pre">Node.stabilize()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-chorddht.src.chord.rpc">chorddht.src.chord.rpc module</a><ul>
+<li><a class="reference internal" href="#rpc-module">RPC Module</a><ul>
+<li><a class="reference internal" href="#id1">Key Features</a></li>
+<li><a class="reference internal" href="#id2">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_ask_for_pred_and_succlist"><code class="docutils literal notranslate"><span class="pre">rpc_ask_for_pred_and_succlist()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_ask_for_succ"><code class="docutils literal notranslate"><span class="pre">rpc_ask_for_succ()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_find_job"><code class="docutils literal notranslate"><span class="pre">rpc_find_job()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_get_all_keys"><code class="docutils literal notranslate"><span class="pre">rpc_get_all_keys()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_get_key"><code class="docutils literal notranslate"><span class="pre">rpc_get_key()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_notify"><code class="docutils literal notranslate"><span class="pre">rpc_notify()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_ping"><code class="docutils literal notranslate"><span class="pre">rpc_ping()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_put_key"><code class="docutils literal notranslate"><span class="pre">rpc_put_key()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_save_key"><code class="docutils literal notranslate"><span class="pre">rpc_save_key()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-chorddht.src.chord.storage">chorddht.src.chord.storage module</a><ul>
+<li><a class="reference internal" href="#storage-class">Storage Class</a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage"><code class="docutils literal notranslate"><span class="pre">Storage</span></code></a><ul>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.del_keys"><code class="docutils literal notranslate"><span class="pre">Storage.del_keys()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.get_key"><code class="docutils literal notranslate"><span class="pre">Storage.get_key()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.get_keys"><code class="docutils literal notranslate"><span class="pre">Storage.get_keys()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.get_my_data"><code class="docutils literal notranslate"><span class="pre">Storage.get_my_data()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.iterjobs"><code class="docutils literal notranslate"><span class="pre">Storage.iterjobs()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.make_digest"><code class="docutils literal notranslate"><span class="pre">Storage.make_digest()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.put_key"><code class="docutils literal notranslate"><span class="pre">Storage.put_key()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.put_keys"><code class="docutils literal notranslate"><span class="pre">Storage.put_keys()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-chorddht.src.chord">Module contents</a><ul>
+<li><a class="reference internal" href="#chord-package">Chord Package</a><ul>
+<li><a class="reference internal" href="#key-changes">Key Changes</a></li>
+<li><a class="reference internal" href="#modules">Modules</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="chorddht.src.api.html"
+                          title="previous chapter">chorddht.src.api package</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="weatherlearn.html"
+                          title="next chapter">weatherlearn Package</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/chorddht.src.chord.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="weatherlearn.html" title="weatherlearn Package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="chorddht.src.api.html" title="chorddht.src.api package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="chorddht.html" >chorddht package</a> &#187;</li>
+          <li class="nav-item nav-item-2"><a href="chorddht.src.html" >chorddht.src package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.chord package</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

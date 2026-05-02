@@ -1,0 +1,7 @@
+chorddht.src.api.controller module
+==================================
+
+.. automodule:: chorddht.src.api.controller
+   :members:
+   :undoc-members:
+   :show-inheritance:

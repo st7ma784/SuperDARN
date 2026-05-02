@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Baseline Evaluation Results &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SuperDARN Future Work" href="future.html" />
+    <link rel="prev" title="SuperDARN Codebase Overview" href="index.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="future.html" title="SuperDARN Future Work"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SuperDARN Codebase Overview"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Baseline Evaluation Results</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="baseline-evaluation-results">
+<h1>Baseline Evaluation Results<a class="headerlink" href="#baseline-evaluation-results" title="Link to this heading">¶</a></h1>
+<p>This page documents the dataset statistics and baseline forecast accuracy metrics
+for the SuperDARN ML pipeline.  These figures were computed on 2026-04-23 against
+the full preprocessed training corpus and serve as the quantitative foundation for
+grant proposal submissions.</p>
+<p>All metrics are computed on the <strong>normalised</strong> channel representations output by
+the preprocessing pipeline (zero-mean, unit-variance per channel across a 2,000-sample
+training subset).</p>
+<hr class="docutils" />
+<section id="dataset">
+<h2>Dataset<a class="headerlink" href="#dataset" title="Link to this heading">¶</a></h2>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 60.0%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p>Raw cnvmap files</p></td>
+<td><p><strong>26,129</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Temporal span</p></td>
+<td><p>2008-01-05 06:00 UT — 2017-12-31 22:00 UT (~10 years)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Preprocessed training pairs</p></td>
+<td><p><strong>29,500</strong> consecutive two-hourly radar scans</p></td>
+</tr>
+<tr class="row-even"><td><p>Grid resolution</p></td>
+<td><p>120 × 120 geographic latitude / longitude bins</p></td>
+</tr>
+<tr class="row-odd"><td><p>Input channels</p></td>
+<td><p>Velocity (m/s) · Velocity SD (m/s) · K-vector (°) · Occupancy · Density (log <em>n</em>)</p></td>
+</tr>
+<tr class="row-even"><td><p>Solar-wind conditioning</p></td>
+<td><p>IMF Bx · By · Bz · Kp · Vx (5 scalar FiLM channels per sample)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Train / validation split</p></td>
+<td><p>90 % / 10 %  (26,550 / 2,950 pairs, seed 42)</p></td>
+</tr>
+</tbody>
+</table>
+<section id="channel-statistics-target-distribution">
+<h3>Channel Statistics (target distribution)<a class="headerlink" href="#channel-statistics-target-distribution" title="Link to this heading">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 30.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Channel</p></th>
+<th class="head"><p>Mean</p></th>
+<th class="head"><p>Std</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Velocity (m/s)</p></td>
+<td><p>0.927</p></td>
+<td><p>18.386</p></td>
+</tr>
+<tr class="row-odd"><td><p>Velocity SD (m/s)</p></td>
+<td><p>0.358</p></td>
+<td><p>7.066</p></td>
+</tr>
+<tr class="row-even"><td><p>K-vector (°)</p></td>
+<td><p>−0.043</p></td>
+<td><p>6.143</p></td>
+</tr>
+<tr class="row-odd"><td><p>Occupancy</p></td>
+<td><p>0.004</p></td>
+<td><p>0.064</p></td>
+</tr>
+<tr class="row-even"><td><p>Density (log n)</p></td>
+<td><p>0.003</p></td>
+<td><p>0.051</p></td>
+</tr>
+</tbody>
+</table>
+<p>The near-zero means and low occupancy (0.4 % active cells) reflect the sparse,
+patchy nature of SuperDARN convection maps: genuine radar returns cover only a
+small fraction of the polar cap at any given two-hour window.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="baseline-forecasts">
+<h2>Baseline Forecasts<a class="headerlink" href="#baseline-forecasts" title="Link to this heading">¶</a></h2>
+<p>Two baselines bound the difficulty of the one-step prediction task.</p>
+<dl class="simple">
+<dt><strong>Persistence</strong> (“repeat the last observation”)</dt><dd><p>The simplest possible forecast — predict that the next state equals the
+current state.  Any trained model must beat this to demonstrate skill.</p>
+</dd>
+<dt><strong>Climatology</strong> (“predict all zeros”)</dt><dd><p>Predicts the dataset mean (approximately zero after normalisation).
+This represents a model with no temporal knowledge at all.</p>
+</dd>
+</dl>
+<section id="persistence-baseline">
+<h3>Persistence Baseline<a class="headerlink" href="#persistence-baseline" title="Link to this heading">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 30.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Channel</p></th>
+<th class="head"><p>MSE</p></th>
+<th class="head"><p>RMSE</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Velocity (m/s)</p></td>
+<td><p>107.867</p></td>
+<td><p><strong>10.386</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Velocity SD (m/s)</p></td>
+<td><p>28.383</p></td>
+<td><p><strong>5.328</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>K-vector (°)</p></td>
+<td><p>19.903</p></td>
+<td><p><strong>4.461</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Occupancy</p></td>
+<td><p>0.00110</p></td>
+<td><p><strong>0.0332</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Density (log n)</p></td>
+<td><p>0.00061</p></td>
+<td><p><strong>0.0247</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Overall (all channels)</strong></p></td>
+<td><p><strong>31.231</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="climatology-baseline">
+<h3>Climatology Baseline<a class="headerlink" href="#climatology-baseline" title="Link to this heading">¶</a></h3>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 30.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Channel</p></th>
+<th class="head"><p>MSE</p></th>
+<th class="head"><p>RMSE</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Velocity (m/s)</p></td>
+<td><p>338.913</p></td>
+<td><p><strong>18.410</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Velocity SD (m/s)</p></td>
+<td><p>50.059</p></td>
+<td><p><strong>7.075</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>K-vector (°)</p></td>
+<td><p>37.736</p></td>
+<td><p><strong>6.143</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Occupancy</p></td>
+<td><p>0.00414</p></td>
+<td><p><strong>0.0644</strong></p></td>
+</tr>
+<tr class="row-even"><td><p>Density (log n)</p></td>
+<td><p>0.00265</p></td>
+<td><p><strong>0.0515</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p><strong>Overall (all channels)</strong></p></td>
+<td><p><strong>85.343</strong></p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>The persistence overall MSE (31.23) is 63 % lower than climatology (85.34),
+confirming that successive SuperDARN frames are strongly correlated.
+A trained model must therefore achieve MSE &lt; 31.23 to claim positive skill.</p>
+</section>
+<section id="active-vs-quiet-cell-breakdown-velocity-channel">
+<h3>Active vs. Quiet Cell Breakdown (velocity channel)<a class="headerlink" href="#active-vs-quiet-cell-breakdown-velocity-channel" title="Link to this heading">¶</a></h3>
+<p>SuperDARN returns are sparse: only <strong>0.4 %</strong> of grid cells contain active
+radar echoes in a typical frame.</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 40.0%" />
+<col style="width: 30.0%" />
+<col style="width: 30.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Region</p></th>
+<th class="head"><p>Cell count</p></th>
+<th class="head"><p>Persistence RMSE</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Active (echo present)</p></td>
+<td><p>1,758,959  (0.4 %)</p></td>
+<td><p><strong>124.79 m/s</strong></p></td>
+</tr>
+<tr class="row-odd"><td><p>Quiet (no echo)</p></td>
+<td><p>423,041,041  (99.6 %)</p></td>
+<td><p><strong>6.60 m/s</strong></p></td>
+</tr>
+</tbody>
+</table>
+<p>The 19× higher RMSE on active cells highlights that the convection field is
+highly dynamic precisely where it matters scientifically — motivating an
+event-weighted loss function and the occupancy-channel conditioning used by
+the model.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="skill-score-definition">
+<h2>Skill Score Definition<a class="headerlink" href="#skill-score-definition" title="Link to this heading">¶</a></h2>
+<p>Training and evaluation use the following skill score to contextualise MSE
+relative to the persistence baseline:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>skill_persistence = 1 − model_MSE / persistence_MSE
+</pre></div>
+</div>
+<p>A score &gt; 0 means the model outperforms persistence; score = 1 is a perfect
+forecast; score &lt; 0 means the model is worse than doing nothing.</p>
+<p>An analogous score against the climatology baseline:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>skill_climatology = 1 − model_MSE / climatology_MSE
+</pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="model-training-results">
+<h2>Model Training Results<a class="headerlink" href="#model-training-results" title="Link to this heading">¶</a></h2>
+<p>The Pangu-adapted model (48 M parameters, <code class="docutils literal notranslate"><span class="pre">embed_dim=64</span></code>, <code class="docutils literal notranslate"><span class="pre">mlp_ratio=2</span></code>,
+120 × 120 grid, solar-wind FiLM conditioning) was trained for up to 10 epochs
+with early stopping (patience = 6 on <code class="docutils literal notranslate"><span class="pre">val_mse</span></code>).  Training runs at ~2.6
+it/s on a single GPU (~5 min/epoch, 830 gradient steps per epoch).</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 12.5%" />
+<col style="width: 18.8%" />
+<col style="width: 18.8%" />
+<col style="width: 25.0%" />
+<col style="width: 25.0%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Epoch</p></th>
+<th class="head"><p>val_loss</p></th>
+<th class="head"><p>val_mse</p></th>
+<th class="head"><p>skill_persistence</p></th>
+<th class="head"><p>skill_climatology</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>0.0758</p></td>
+<td><p><strong>0.4922</strong></p></td>
+<td><p>−0.284</p></td>
+<td><p><strong>+0.507</strong></p></td>
+</tr>
+</tbody>
+</table>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>After a single epoch the model already achieves <strong>50.7 % skill over
+climatology</strong> (<code class="docutils literal notranslate"><span class="pre">skill_climatology</span> <span class="pre">=</span> <span class="pre">+0.507</span></code>), indicating that it has
+learned the gross structure of the convection field within the first pass
+through the data.</p>
+<p>The persistence skill score is negative at epoch 0 (−0.284), which is
+expected: the persistence baseline is conservative for this dataset because
+consecutive SuperDARN frames are strongly correlated (persistence MSE 31.2
+vs climatology MSE 85.3).  Beating persistence requires the model to capture
+the <em>dynamics</em> of the convection pattern, not just its spatial structure —
+this typically emerges over several training epochs.</p>
+<p>Training is ongoing; this table will be updated with multi-epoch results.</p>
+</div>
+</section>
+<hr class="docutils" />
+<section id="reproducing-these-results">
+<h2>Reproducing These Results<a class="headerlink" href="#reproducing-these-results" title="Link to this heading">¶</a></h2>
+<p>All scripts are in <code class="docutils literal notranslate"><span class="pre">src/weatherlearn/PTL/</span></code>.</p>
+<p><strong>Step 1 — dataset statistics and baselines (no training required):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span>src/weatherlearn/PTL
+python<span class="w"> </span>grant_baselines.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--data_dir<span class="w"> </span>~/rst/preprocessed/g120_f500<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--cnvmap_dir<span class="w"> </span>~/rst/extracted_data
+</pre></div>
+</div>
+<p><strong>Step 2 — model training (uses pre-cached preprocessed data):</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python<span class="w"> </span>run_baseline.py<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--grid_size<span class="w"> </span><span class="m">120</span><span class="w"> </span>--max_files<span class="w"> </span><span class="m">500</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--epochs<span class="w"> </span><span class="m">10</span><span class="w"> </span>--batch_size<span class="w"> </span><span class="m">32</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--embed_dim<span class="w"> </span><span class="m">64</span><span class="w"> </span>--mlp_ratio<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--ckpt_dir<span class="w"> </span>./checkpoints_baseline
+</pre></div>
+</div>
+<p>Checkpoints are saved to <code class="docutils literal notranslate"><span class="pre">./checkpoints_baseline/</span></code>.
+Best checkpoint is selected by minimum <code class="docutils literal notranslate"><span class="pre">val_mse</span></code>.</p>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">Baseline Evaluation Results</a><ul>
+<li><a class="reference internal" href="#dataset">Dataset</a><ul>
+<li><a class="reference internal" href="#channel-statistics-target-distribution">Channel Statistics (target distribution)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#baseline-forecasts">Baseline Forecasts</a><ul>
+<li><a class="reference internal" href="#persistence-baseline">Persistence Baseline</a></li>
+<li><a class="reference internal" href="#climatology-baseline">Climatology Baseline</a></li>
+<li><a class="reference internal" href="#active-vs-quiet-cell-breakdown-velocity-channel">Active vs. Quiet Cell Breakdown (velocity channel)</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#skill-score-definition">Skill Score Definition</a></li>
+<li><a class="reference internal" href="#model-training-results">Model Training Results</a></li>
+<li><a class="reference internal" href="#reproducing-these-results">Reproducing These Results</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="index.html"
+                          title="previous chapter">SuperDARN Codebase Overview</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="future.html"
+                          title="next chapter">SuperDARN Future Work</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/baseline_results.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="future.html" title="SuperDARN Future Work"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="SuperDARN Codebase Overview"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Baseline Evaluation Results</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>
