@@ -1,0 +1,5 @@
+torch>=2.0
+pytorch_lightning>=2.0
+wandb
+tqdm
+numpy
