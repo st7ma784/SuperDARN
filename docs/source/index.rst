@@ -56,6 +56,7 @@ The SuperDARN codebase provides a robust foundation for processing radar data an
    :caption: Contents:
 
    baseline_results
+   rl_forecast
    future
    chorddht
    weatherlearn

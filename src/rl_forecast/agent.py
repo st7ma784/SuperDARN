@@ -40,6 +40,23 @@ import pytorch_lightning as pl
 from .networks import ConvEncoder, ActionEncoder, LatentActor, GridDecoder, DoubleQCritic
 from .reward import compute_reward, persistence_reward
 
+# Ordered names for the 6-channel state tensor (matches DatasetFromPresaved)
+#   0  obs_vel_north   — SH-fitted northward E×B drift in radar-covered cells (m/s)
+#   1  obs_vel_east    — SH-fitted eastward  E×B drift in radar-covered cells (m/s)
+#   2  model_vel_north — Weimer/TS96 background model northward drift (m/s)
+#   3  model_vel_east  — Weimer/TS96 background model eastward  drift (m/s)
+#   4  soft_occ        — soft radar-coverage fraction [0, 1]
+#   5  boundary_dist   — signed mlat offset from Heppner-Maynard boundary (deg)
+_CHANNEL_NAMES = (
+    'obs_vel_north', 'obs_vel_east',
+    'model_vel_north', 'model_vel_east',
+    'soft_occ', 'boundary_dist',
+)
+# Channels 0-1 are only meaningful inside radar-covered cells; evaluate masked.
+_OBS_CHANNELS = {0, 1}
+# Colormaps per channel: velocity→diverging, occupancy→sequential, boundary→diverging
+_CMAPS = ('RdBu_r', 'RdBu_r', 'RdBu_r', 'RdBu_r', 'Greys_r', 'PuOr')
+
 
 # ── Online Welford reward normaliser ─────────────────────────────────────────
 
@@ -383,9 +400,10 @@ class SACOfflineAgent(pl.LightningModule):
             delta_hat   = self.decoder(feats, a_det, (self.grid_size, self.grid_size))
             y_hat       = s + delta_hat
 
-            # Use s_tn as a proxy for the immediate next state when n_steps=1;
-            # for n>1 we still compute RMSE against s_tn (the trajectory endpoint)
-            # as an approximate measure of multi-step accuracy.
+            # Use s_tn as the forecast target.  For n_steps=1 this is the true
+            # next frame; for n_steps>1 it is the state at t+n (persistence and
+            # policy predictions are both one-step, so the skill comparison is
+            # still well-defined relative to the same reference).
             mse      = F.mse_loss(y_hat, s_tn)
             pers_mse = F.mse_loss(s, s_tn)
             skill    = 1.0 - mse / pers_mse.clamp(min=1e-8)
@@ -393,11 +411,197 @@ class SACOfflineAgent(pl.LightningModule):
             r_policy = compute_reward(s, delta_hat, s_tn).mean()
             r_pers   = persistence_reward(s, s_tn).mean()
 
+            # ── Per-channel breakdown ──────────────────────────────────────
+            # soft_occ (ch 4) tells us which cells are radar-constrained.
+            # Obs-velocity channels are only evaluated inside covered cells.
+            occ_mask = (s_tn[:, 4:5] > 0.05).float()   # (B, 1, H, W)
+
+            # Cache one sample (CPU) for the end-of-epoch spatial figure.
+            # Done here inside no_grad so y_hat is already computed.
+            if batch_idx == 0 and self.trainer.is_global_zero:
+                self._val_vis = (
+                    s[0].detach().cpu(),
+                    y_hat[0].detach().cpu(),
+                    s_tn[0].detach().cpu(),
+                )
+
+            for ch, name in enumerate(_CHANNEL_NAMES):
+                y_ch    = s_tn[:, ch]    # (B, H, W)
+                pred_ch = y_hat[:, ch]
+                pers_ch = s[:, ch]
+
+                if ch in _OBS_CHANNELS:
+                    mask  = occ_mask[:, 0]                       # (B, H, W)
+                    denom = mask.sum().clamp(min=1.0)
+                    se_p  = ((pred_ch - y_ch).pow(2) * mask).sum() / denom
+                    se_b  = ((pers_ch - y_ch).pow(2) * mask).sum() / denom
+                    bias  = ((pred_ch - y_ch) * mask).sum() / denom
+                else:
+                    se_p = (pred_ch - y_ch).pow(2).mean()
+                    se_b = (pers_ch - y_ch).pow(2).mean()
+                    bias = (pred_ch - y_ch).mean()
+
+                skill_ch = 1.0 - se_p / se_b.clamp(min=1e-8)
+
+                self.log(f'val/rmse_{name}',      se_p.sqrt(),  sync_dist=True)
+                self.log(f'val/pers_rmse_{name}', se_b.sqrt(),  sync_dist=True)
+                self.log(f'val/skill_{name}',     skill_ch,     sync_dist=True)
+                self.log(f'val/bias_{name}',      bias,         sync_dist=True)
+
         self.log('val/rmse',         mse.sqrt(),         prog_bar=True, sync_dist=True)
         self.log('val/skill_pers',   skill,              prog_bar=True, sync_dist=True)
         self.log('val/r_policy',     r_policy,           sync_dist=True)
         self.log('val/r_pers',       r_pers,             sync_dist=True)
         self.log('val/r_delta',      r_policy - r_pers,  sync_dist=True)
+
+    def on_validation_epoch_end(self):
+        """Print a human-readable per-channel forecast summary to stdout."""
+        m = self.trainer.callback_metrics
+
+        def _f(key: str) -> str:
+            v = m.get(key)
+            if v is None:
+                return '  n/a  '
+            return f'{float(v):7.4f}'
+
+        header = (
+            f"\n{'─'*72}\n"
+            f"Validation epoch {self.current_epoch:>3d}  "
+            f"(n_steps={self.n_steps}, γ={self.gamma})\n"
+            f"  Overall  RMSE  {_f('val/rmse')}   Skill vs pers {_f('val/skill_pers')}\n"
+            f"  Reward policy  {_f('val/r_policy')}   Reward pers   {_f('val/r_pers')}   "
+            f"Δreward {_f('val/r_delta')}\n"
+        )
+        col = f"  {'Channel':<20} {'Pred RMSE':>9} {'Pers RMSE':>9} {'Skill':>7} {'Bias':>9}"
+        rows = [col, "  " + "-" * 58]
+        for name in _CHANNEL_NAMES:
+            note = " [masked]" if name in ('obs_vel_north', 'obs_vel_east') else ""
+            row = (
+                f"  {name:<20}"
+                f" {_f(f'val/rmse_{name}'):>9}"
+                f" {_f(f'val/pers_rmse_{name}'):>9}"
+                f" {_f(f'val/skill_{name}'):>7}"
+                f" {_f(f'val/bias_{name}'):>9}"
+                f"{note}"
+            )
+            rows.append(row)
+        rows.append("─" * 72)
+        print(header + "\n".join(rows))
+
+        if self.trainer.is_global_zero and hasattr(self, '_val_vis'):
+            self._log_forecast_figure(*self._val_vis)
+
+    # ── Spatial forecast figure ───────────────────────────────────────────────
+
+    def _log_forecast_figure(
+        self,
+        s:     'torch.Tensor',   # (6, H, W) current state
+        y_hat: 'torch.Tensor',   # (6, H, W) predicted next state
+        s_tn:  'torch.Tensor',   # (6, H, W) actual next state
+    ):
+        """
+        Produce a (6 channels × 4 columns) polar-cap forecast figure and
+        send it to W&B or save it to disk under {log_dir}/val_vis/.
+
+        Columns: Current state | Predicted | Actual | Error (pred − actual)
+        Obs channels (0–1) are overlaid with a thin radar-coverage contour.
+        """
+        try:
+            import matplotlib
+            matplotlib.use('Agg')
+            import matplotlib.pyplot as plt
+            import numpy as np
+        except ImportError:
+            print("  [vis] matplotlib not installed — skipping forecast figure")
+            return
+
+        n_ch  = len(_CHANNEL_NAMES)
+        ncols = 4
+        fig, axes = plt.subplots(
+            n_ch, ncols, figsize=(ncols * 3.2, n_ch * 3.0),
+            squeeze=False,
+        )
+        fig.suptitle(
+            f"Forecast vs Actual — Epoch {self.current_epoch}  "
+            f"(n_steps={self.n_steps})",
+            fontsize=12, fontweight='bold', y=1.01,
+        )
+
+        col_labels = ['Current  s_t', 'Predicted  ŷ', 'Actual  s_{t+n}', 'Error  ŷ − actual']
+        for col, label in enumerate(col_labels):
+            axes[0, col].set_title(label, fontsize=9, fontweight='bold')
+
+        # soft_occ for radar-coverage contour overlay on every panel
+        occ_np = s[4].numpy()
+
+        for ch, (name, cmap) in enumerate(zip(_CHANNEL_NAMES, _CMAPS)):
+            s_np   = s[ch].numpy()
+            y_np   = y_hat[ch].numpy()
+            stn_np = s_tn[ch].numpy()
+            err_np = y_np - stn_np
+
+            # Symmetric colour limits at the 98th percentile of the reference span
+            if cmap != 'Greys_r':
+                vmax = float(np.percentile(
+                    np.abs(np.concatenate([s_np.ravel(), y_np.ravel(), stn_np.ravel()])), 98
+                ))
+                vmax = max(vmax, 1e-6)
+                vmin = -vmax
+            else:
+                vmin, vmax = 0.0, 1.0
+
+            err_vmax = float(np.percentile(np.abs(err_np), 98))
+            err_vmax = max(err_vmax, 1e-6)
+
+            panels = [
+                (s_np,   cmap,     vmin,      vmax),
+                (y_np,   cmap,     vmin,      vmax),
+                (stn_np, cmap,     vmin,      vmax),
+                (err_np, 'RdBu_r', -err_vmax, err_vmax),
+            ]
+
+            for col, (data, cm, lo, hi) in enumerate(panels):
+                ax = axes[ch, col]
+                im = ax.imshow(data, cmap=cm, vmin=lo, vmax=hi,
+                               origin='upper', interpolation='nearest')
+                # Radar-coverage boundary as a thin black contour on all panels
+                ax.contour(occ_np, levels=[0.05], colors='k',
+                           linewidths=0.6, alpha=0.5)
+                plt.colorbar(im, ax=ax, fraction=0.046, pad=0.04)
+                ax.set_xticks([])
+                ax.set_yticks([])
+
+            axes[ch, 0].set_ylabel(name, fontsize=8, rotation=0,
+                                   ha='right', va='center', labelpad=60)
+
+        plt.tight_layout()
+
+        # ── Dispatch: W&B → disk fallback ────────────────────────────────
+        logged = False
+        try:
+            import wandb
+            if wandb.run is not None:
+                wandb.log(
+                    {'val/forecast_grid': wandb.Image(fig)},
+                    step=self.global_step,
+                )
+                logged = True
+        except Exception:
+            pass
+
+        if not logged:
+            import os
+            log_root = (
+                getattr(self.trainer, 'log_dir', None)
+                or self.trainer.default_root_dir
+            )
+            save_dir = os.path.join(log_root, 'val_vis')
+            os.makedirs(save_dir, exist_ok=True)
+            path = os.path.join(save_dir, f'epoch_{self.current_epoch:03d}.png')
+            fig.savefig(path, dpi=110, bbox_inches='tight')
+            print(f"  [vis] {path}")
+
+        plt.close(fig)
 
     # ── Inference ─────────────────────────────────────────────────────────────
 
