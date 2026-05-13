@@ -53,7 +53,35 @@ def compute_reward(
     bnd_err = (y_pred[:, 5] - y_true[:, 5]).abs().mean(dim=(-2, -1))
 
     reward = -mse_per_sample - 0.01 * (tv_h + tv_w) - 0.05 * bnd_err
+    # Scale up reward to have meaningful magnitude
+    reward = reward * 100.0
     return reward.detach()
+
+
+def reward_relative_to_persistence(
+    x_last: torch.Tensor,
+    y_true: torch.Tensor,
+    channel_weights: torch.Tensor | None = None,
+) -> torch.Tensor:
+    """
+    Reward = how much better the observed action is vs persistence (predict no change).
+    
+    This gives meaningful signal in offline data where all observed actions were executed.
+    """
+    if channel_weights is None:
+        channel_weights = CHANNEL_WEIGHTS.to(x_last.device)
+    
+    delta_obs = y_true - x_last
+    delta_persist = torch.zeros_like(x_last)
+    
+    # Reward for observed trajectory
+    r_obs = compute_reward(x_last, delta_obs, y_true, channel_weights)
+    
+    # Reward for persistence (no change)
+    r_pers = compute_reward(x_last, delta_persist, y_true, channel_weights)
+    
+    # Return improvement over persistence
+    return (r_obs - r_pers).detach()
 
 
 def persistence_reward(

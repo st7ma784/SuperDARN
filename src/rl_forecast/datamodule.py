@@ -36,7 +36,7 @@ except ImportError as e:
         f"Original error: {e}"
     ) from e
 
-from .reward import compute_reward
+from .reward import compute_reward, reward_relative_to_persistence
 
 
 class NStepRLTransitionDataset(Dataset):
@@ -96,14 +96,13 @@ class NStepRLTransitionDataset(Dataset):
             ys.append(y_k)
 
         # Per-step rewards and n-step discounted return
+        # Use reward relative to persistence to get meaningful signal in offline data
         r_n = torch.zeros(1, dtype=torch.float32)
         for k in range(self.n_steps):
-            a_k = ys[k] - x_lasts[k]
-            r_k = compute_reward(
+            r_k = reward_relative_to_persistence(
                 x_lasts[k].unsqueeze(0),
-                a_k.unsqueeze(0),
                 ys[k].unsqueeze(0),
-            )  # (1,)
+            )  # (1,)  improvement over persistence forecast
             r_n += self._gammas[k] * r_k
 
         s_t   = x_lasts[0]           # (C, H, W)

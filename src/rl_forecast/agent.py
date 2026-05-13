@@ -140,6 +140,7 @@ class SACOfflineAgent(pl.LightningModule):
         self.cql_alpha         = cql_alpha
         self.bc_weight         = bc_weight
         self.actor_update_freq = actor_update_freq
+        self.warmup_steps      = warmup_steps
         self.normalise_rewards = normalise_rewards
 
         # ── Networks ──────────────────────────────────────────────────────
@@ -214,9 +215,24 @@ class SACOfflineAgent(pl.LightningModule):
         s_tn:   torch.Tensor,
         done:   torch.Tensor,
     ):
+        # Log raw rewards before normalization
+        with torch.no_grad():
+            self.log('train/raw_reward_mean', r_n.mean(), on_step=True, on_epoch=False)
+            self.log('train/raw_reward_std',  r_n.std(),  on_step=True, on_epoch=False)
+            self.log('train/raw_reward_min',  r_n.min(),  on_step=True, on_epoch=False)
+            self.log('train/raw_reward_max',  r_n.max(),  on_step=True, on_epoch=False)
+        
         if self.normalise_rewards:
             self._reward_rms.update(r_n)
-            r_n = self._reward_rms.normalise(r_n)
+            r_n_normalized = self._reward_rms.normalise(r_n)
+            with torch.no_grad():
+                self.log('train/norm_reward_mean', r_n_normalized.mean(), on_step=True, on_epoch=False)
+                self.log('train/norm_reward_std',  r_n_normalized.std(),  on_step=True, on_epoch=False)
+            r_n = r_n_normalized
+        else:
+            with torch.no_grad():
+                self.log('train/norm_reward_mean', torch.tensor(0.0), on_step=True, on_epoch=False)
+                self.log('train/norm_reward_std',  torch.tensor(0.0),  on_step=True, on_epoch=False)
 
         # Single encoder pass for s and s_{t+n}
         z_s, feats, z_next = self._encode_pair(s, s_tn)
@@ -233,13 +249,34 @@ class SACOfflineAgent(pl.LightningModule):
             )
 
         q1, q2   = self.critic(z_s, a_data_lat)
-        td_loss  = F.mse_loss(q1, q_target) + F.mse_loss(q2, q_target)
-
-        # CQL: raise data Q, lower policy Q
+        
+        # Use Huber loss instead of MSE to prevent Q-value divergence
+        # Huber is quadratic for small errors (stable) but linear for large errors (robust)
+        td_loss  = F.huber_loss(q1, q_target, delta=1.0) + F.huber_loss(q2, q_target, delta=1.0)
+        
+        # Log Q-value statistics to diagnose if clipping is the issue
         with torch.no_grad():
-            a_pi_cql, _, _ = self.actor.sample(z_s)
-        q1_pi, q2_pi = self.critic(z_s, a_pi_cql)
-        cql_penalty  = ((q1_pi - q1.detach()) + (q2_pi - q2.detach())).mean() * 0.5
+            self.log('train/q1_mean', q1.mean(), on_step=True, on_epoch=False)
+            self.log('train/q1_std',  q1.std(),  on_step=True, on_epoch=False)
+            self.log('train/q2_mean', q2.mean(), on_step=True, on_epoch=False)
+            self.log('train/q2_std',  q2.std(),  on_step=True, on_epoch=False)
+            self.log('train/q_target_mean', q_target.mean(), on_step=True, on_epoch=False)
+            self.log('train/q_target_std',  q_target.std(),  on_step=True, on_epoch=False)
+            # Check if Q-values are at the bounds
+            self.log('train/q1_max', q1.max(), on_step=True, on_epoch=False)
+            self.log('train/q1_min', q1.min(), on_step=True, on_epoch=False)
+
+        # CQL: only apply after some warmup when Q-estimates are more stable
+        # TEMPORARILY DISABLED: CQL is causing loss explosion; focus on TD learning first
+        cql_penalty = torch.tensor(0.0, device=q1.device, dtype=q1.dtype)
+        # step = self.global_step
+        # if step >= self.warmup_steps // 2:
+        #     with torch.no_grad():
+        #         a_pi_cql, _, _ = self.actor.sample(z_s)
+        #     q1_pi, q2_pi = self.critic(z_s, a_pi_cql)
+        #     q1_pi = torch.clamp(q1_pi, min=-100.0, max=10.0)
+        #     q2_pi = torch.clamp(q2_pi, min=-100.0, max=10.0)
+        #     cql_penalty  = ((q1_pi - q1.detach()) + (q2_pi - q2.detach())).mean() * 0.5
 
         loss = td_loss + self.cql_alpha * cql_penalty
         return loss, td_loss.detach(), cql_penalty.detach(), z_s, feats
@@ -255,7 +292,13 @@ class SACOfflineAgent(pl.LightningModule):
     ):
         a_pi, log_pi, _ = self.actor.sample(z_s_detached)
         q_pi   = self.critic.q_min(z_s_detached, a_pi)
-        rl_loss = (self.alpha.detach() * log_pi - q_pi).mean()
+        # TEMPORARILY DISABLED: Clip Q-values to prevent explosion in actor loss
+        # q_pi   = torch.clamp(q_pi, min=-100.0, max=10.0)
+        
+        # Clip alpha to prevent it from growing unbounded
+        alpha_clipped = torch.clamp(self.alpha, min=1e-6, max=1.0)
+        
+        rl_loss = (alpha_clipped.detach() * log_pi - q_pi).mean()
 
         target_size = (self.grid_size, self.grid_size)
         delta_hat   = self.decoder(feats_detached, a_pi, target_size)
@@ -273,7 +316,7 @@ class SACOfflineAgent(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         opt_critic, opt_actor, opt_alpha = self.optimizers()
-        sch_critic, sch_actor            = self.lr_schedulers()
+        sch_critic, sch_actor, sch_alpha = self.lr_schedulers()
         s, a_data, r_n, s_tn, done       = self._unpack(batch)
 
         # 1. Critic update (encoder included)
@@ -294,6 +337,11 @@ class SACOfflineAgent(pl.LightningModule):
         self.log('train/td_loss',     td_loss,  on_step=True)
         self.log('train/cql',         cql_pen,  on_step=True)
         self.log('train/lr_critic',   sch_critic.get_last_lr()[0], on_step=True)
+        
+        # Log diagnostics
+        with torch.no_grad():
+            self.log('train/reward_mean', r_n.mean(), on_step=True)
+            self.log('train/reward_std',  r_n.std(),  on_step=True)
 
         # 2. Actor + alpha update (every actor_update_freq critic steps)
         self._n_critic_steps += 1
@@ -314,6 +362,7 @@ class SACOfflineAgent(pl.LightningModule):
             alph_loss = self._alpha_loss(log_pi)
             self.manual_backward(alph_loss)
             opt_alpha.step()
+            sch_alpha.step()
 
             self.log('train/actor_loss', a_loss,   prog_bar=True, on_step=True)
             self.log('train/rl_loss',    rl_loss,  on_step=True)
@@ -321,6 +370,7 @@ class SACOfflineAgent(pl.LightningModule):
             self.log('train/alpha_loss', alph_loss,on_step=True)
             self.log('train/alpha',      self.alpha, on_step=True)
             self.log('train/lr_actor',   sch_actor.get_last_lr()[0], on_step=True)
+            self.log('train/log_pi_mean', log_pi.mean(), on_step=True)
 
     # ── Validation step ───────────────────────────────────────────────────────
 
@@ -395,8 +445,10 @@ class SACOfflineAgent(pl.LightningModule):
 
         sch_critic = _schedule(opt_critic, self.hparams.critic_lr)
         sch_actor  = _schedule(opt_actor,  self.hparams.actor_lr)
+        # Alpha gets constant LR (no warmup/decay) for stability
+        sch_alpha  = torch.optim.lr_scheduler.ConstantLR(opt_alpha, factor=1.0)
 
         return (
             [opt_critic, opt_actor, opt_alpha],
-            [sch_critic, sch_actor],
+            [sch_critic, sch_actor, sch_alpha],
         )

@@ -3,8 +3,11 @@ Entry point for offline SAC ionospheric RL training.
 
 Usage examples
 ──────────────
+  # Preprocess cnvmap files → numpy arrays (run once)
+  python launch.py --preprocess --cnvmap_dir /data3/rst/extracted_data --data_dir /data2/rl_data --grid_size 120 --max_files 4000
+
   # Basic run from pre-saved data directory
-  python launch.py --data_dir /data/convmap_data/data/abc123 --batch_size 16
+  python launch.py --data_dir /data2/rl_data --batch_size 16
 
   # With W&B logging
   WANDB_API_KEY=xxx python launch.py --data_dir /data/... --wandb
@@ -19,23 +22,93 @@ import argparse
 import datetime
 import os
 import sys
+import time
+import numpy as np
 
 import torch
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import (
     TQDMProgressBar, EarlyStopping, ModelCheckpoint, LearningRateMonitor,
 )
+from tqdm import tqdm
 
-from agent import SACOfflineAgent
-from datamodule import RLDataModule
+# Add parent directory to path so we can import the rl_forecast package
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from rl_forecast.agent import SACOfflineAgent
+from rl_forecast.datamodule import RLDataModule
 
 WANDB_PROJECT = "SuperDARN-RL"
 WANDB_ENTITY  = "st7ma784"
 
 torch.set_float32_matmul_precision('medium')
 
+# Import preprocessing utilities from baseline
+_ptl_path = os.path.join(os.path.dirname(__file__), '..', 'weatherlearn', 'PTL')
+if _ptl_path not in sys.path:
+    sys.path.insert(0, _ptl_path)
+try:
+    from run_baseline import preprocess_to_disk, record_to_grid
+except ImportError:
+    preprocess_to_disk = None
+    record_to_grid = None
+
+
+def preprocess_if_needed(cnvmap_dir, data_dir, grid_size, max_files=None, 
+                         force=False, min_mlat=50.0, max_mlat=90.0):
+    """
+    Preprocess cnvmap files to numpy arrays if needed.
+    
+    Checks if preprocessed data exists; if not or if force=True, runs preprocessing.
+    """
+    os.makedirs(data_dir, exist_ok=True)
+    shape_file = os.path.join(data_dir, "shape.txt")
+    
+    # Check if preprocessing already done
+    if os.path.exists(shape_file) and not force:
+        npy_files = [f for f in os.listdir(data_dir) if f.startswith("dataA_")]
+        print(f"Cache found: {len(npy_files)} chunks in {data_dir}")
+        return data_dir
+    
+    # Run preprocessing
+    if preprocess_to_disk is None:
+        raise RuntimeError(
+            f"Could not import preprocess_to_disk from {_ptl_path}. "
+            "Ensure the weatherlearn submodule is checked out and pydarnio is installed."
+        )
+    
+    print(f"Preprocessing {cnvmap_dir} → {data_dir}")
+    preprocess_to_disk(cnvmap_dir, data_dir, grid_size, max_files=max_files,
+                       min_mlat=min_mlat, max_mlat=max_mlat)
+    return data_dir
+
 
 def train(args):
+    # Set environment variables for multi-GPU training
+    os.environ['NCCL_DEBUG'] = 'INFO'
+    os.environ['NCCL_BLOCKING_WAIT'] = '1'
+    os.environ['NCCL_SOCKET_IFNAME'] = os.environ.get('NCCL_SOCKET_IFNAME', 'lo')  # Try loopback first
+    os.environ['PYTHONUNBUFFERED'] = '1'
+    
+    # Set the backend for DDP
+    if args.backend:
+        os.environ['TORCH_DISTRIBUTED_BACKEND'] = args.backend
+    
+    # Auto-enable find_unused_parameters for DDP strategies if not already specified
+    strategy = args.strategy
+    if strategy == "auto" and args.devices != 1:
+        # Multi-GPU scenario with auto strategy
+        strategy = "ddp_find_unused_parameters_true"
+    elif "ddp" in strategy.lower() and "find_unused" not in strategy.lower():
+        # DDP strategy specified without explicit find_unused setting
+        strategy = "ddp_find_unused_parameters_true"
+    
+    print(f"[DEBUG] CUDA available: {torch.cuda.is_available()}")
+    print(f"[DEBUG] CUDA device count: {torch.cuda.device_count()}")
+    print(f"[DEBUG] Requested devices: {args.devices}")
+    print(f"[DEBUG] Strategy: {strategy} (original: {args.strategy})")
+    print(f"[DEBUG] Backend: {args.backend}")
+    
     pl.seed_everything(args.seed, workers=True)
 
     datamodule = RLDataModule(
@@ -107,6 +180,7 @@ def train(args):
         max_epochs=args.max_epochs,
         accelerator=args.accelerator,
         devices=args.devices,
+        strategy=strategy,
         logger=logtool,
         callbacks=callbacks,
         precision=args.precision,
@@ -130,6 +204,17 @@ def build_parser() -> argparse.ArgumentParser:
         description="Offline SAC for ionospheric forecasting",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
+    # Preprocessing
+    g = p.add_argument_group("Preprocessing")
+    g.add_argument("--preprocess",       action="store_true",
+                   help="Force re-preprocess cnvmap files even if cache exists")
+    g.add_argument("--cnvmap_dir",       type=str, default=None,
+                   help="Raw cnvmap data directory (required if --preprocess is used)")
+    g.add_argument("--min_mlat",         type=float, default=50.0,
+                   help="Minimum magnetic latitude for polar grid (degrees)")
+    g.add_argument("--max_mlat",         type=float, default=90.0,
+                   help="Maximum magnetic latitude for polar grid (degrees)")
+    
     # Data
     g = p.add_argument_group("Data")
     g.add_argument("--data_dir",           type=str,   required=True,
@@ -139,6 +224,9 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--temporal_agg_frames",type=int,   default=1)
     g.add_argument("--val_split",          type=float, default=0.1)
     g.add_argument("--grid_size",          type=int,   default=300)
+    g.add_argument("--max_files",          type=int,   default=None,
+                   help="Max files to preprocess (None = all)")
+
 
     # Model
     g = p.add_argument_group("Model")
@@ -165,14 +253,21 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--warmup_steps",       type=int,   default=1000)
     g.add_argument("--compile",            action="store_true",
                    help="torch.compile the encoder and critic (GPU, PyTorch 2+)")
-    g.add_argument("--normalise_rewards",  action="store_true", default=True)
+    g.add_argument("--normalise_rewards",  action="store_true", default=True,
+                   help="Enable Welford reward normalization (recommended, default=True)")
 
     # Training
     g = p.add_argument_group("Training")
     g.add_argument("--max_epochs",         type=int,   default=200)
     g.add_argument("--patience",           type=int,   default=20)
-    g.add_argument("--accelerator",        type=str,   default="auto")
-    g.add_argument("--devices",            type=str,   default="auto")
+    g.add_argument("--accelerator",        type=str,   default="gpu",
+                   help="'gpu' for GPU, 'cpu' for CPU, 'auto' for auto-detect")
+    g.add_argument("--devices",            type=int,   default=-1,
+                   help="-1 = all GPUs, 1 = single GPU, or comma-separated list of GPU IDs")
+    g.add_argument("--strategy",           type=str,   default="auto",
+                   help="Distributed strategy: 'auto', 'ddp', 'ddp_find_unused_parameters_true'")
+    g.add_argument("--backend",            type=str,   default="nccl",
+                   help="DDP backend: 'nccl' (GPU), 'gloo' (CPU/GPU, more stable), 'mpi'")
     g.add_argument("--precision",          type=str,   default="16-mixed")
     g.add_argument("--seed",               type=int,   default=42)
     g.add_argument("--fast_dev_run",       action="store_true")
@@ -222,6 +317,18 @@ if __name__ == "__main__":
 
     if args.slurm:
         print(_slurm_script(args))
+        sys.exit(0)
+
+    # Preprocess if requested
+    if args.preprocess:
+        if not args.cnvmap_dir:
+            parser.error("--cnvmap_dir is required when using --preprocess")
+        if not os.path.exists(args.cnvmap_dir):
+            parser.error(f"--cnvmap_dir does not exist: {args.cnvmap_dir}")
+        preprocess_if_needed(args.cnvmap_dir, args.data_dir, args.grid_size, 
+                             max_files=args.max_files, force=True,
+                             min_mlat=args.min_mlat, max_mlat=args.max_mlat)
+        print(f"Preprocessing complete. Preprocessed data saved to {args.data_dir}")
         sys.exit(0)
 
     train(args)
