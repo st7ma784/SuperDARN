@@ -30,6 +30,7 @@ import pytorch_lightning as pl
 from pytorch_lightning.callbacks import (
     TQDMProgressBar, EarlyStopping, ModelCheckpoint, LearningRateMonitor,
 )
+from pytorch_lightning.strategies import DDPStrategy
 from tqdm import tqdm
 
 # Add parent directory to path so we can import the rl_forecast package
@@ -84,29 +85,27 @@ def preprocess_if_needed(cnvmap_dir, data_dir, grid_size, max_files=None,
 
 
 def train(args):
-    # Set environment variables for multi-GPU training
-    os.environ['NCCL_DEBUG'] = 'INFO'
-    os.environ['NCCL_BLOCKING_WAIT'] = '1'
-    os.environ['NCCL_SOCKET_IFNAME'] = os.environ.get('NCCL_SOCKET_IFNAME', 'lo')  # Try loopback first
     os.environ['PYTHONUNBUFFERED'] = '1'
-    
-    # Set the backend for DDP
-    if args.backend:
-        os.environ['TORCH_DISTRIBUTED_BACKEND'] = args.backend
-    
-    # Auto-enable find_unused_parameters for DDP strategies if not already specified
-    strategy = args.strategy
-    if strategy == "auto" and args.devices != 1:
-        # Multi-GPU scenario with auto strategy
-        strategy = "ddp_find_unused_parameters_true"
-    elif "ddp" in strategy.lower() and "find_unused" not in strategy.lower():
-        # DDP strategy specified without explicit find_unused setting
-        strategy = "ddp_find_unused_parameters_true"
-    
+
+    # Build the DDP strategy object so PL actually uses the chosen backend.
+    # Passing a string like 'ddp_find_unused_parameters_true' always picks NCCL;
+    # constructing DDPStrategy explicitly is the only reliable way to select gloo.
+    n_devices = torch.cuda.device_count() if args.devices == -1 else args.devices
+    multi_gpu = n_devices > 1
+
+    if multi_gpu:
+        strategy = DDPStrategy(
+            process_group_backend=args.backend,
+            find_unused_parameters=True,
+        )
+        os.environ['NCCL_DEBUG'] = 'WARN'
+    else:
+        strategy = 'auto'
+
     print(f"[DEBUG] CUDA available: {torch.cuda.is_available()}")
     print(f"[DEBUG] CUDA device count: {torch.cuda.device_count()}")
     print(f"[DEBUG] Requested devices: {args.devices}")
-    print(f"[DEBUG] Strategy: {strategy} (original: {args.strategy})")
+    print(f"[DEBUG] Strategy: DDPStrategy(backend={args.backend}, find_unused=True)" if multi_gpu else "[DEBUG] Strategy: auto (single GPU)")
     print(f"[DEBUG] Backend: {args.backend}")
     
     pl.seed_everything(args.seed, workers=True)
@@ -266,8 +265,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="-1 = all GPUs, 1 = single GPU, or comma-separated list of GPU IDs")
     g.add_argument("--strategy",           type=str,   default="auto",
                    help="Distributed strategy: 'auto', 'ddp', 'ddp_find_unused_parameters_true'")
-    g.add_argument("--backend",            type=str,   default="nccl",
-                   help="DDP backend: 'nccl' (GPU), 'gloo' (CPU/GPU, more stable), 'mpi'")
+    g.add_argument("--backend",            type=str,   default="gloo",
+                   help="DDP backend: 'gloo' (stable, works without NVLink), 'nccl' (faster but requires NVML)")
     g.add_argument("--precision",          type=str,   default="16-mixed")
     g.add_argument("--seed",               type=int,   default=42)
     g.add_argument("--fast_dev_run",       action="store_true")

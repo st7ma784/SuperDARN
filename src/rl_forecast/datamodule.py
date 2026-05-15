@@ -185,12 +185,15 @@ class RLDataModule(pl.LightningDataModule):
         )
 
     def val_dataloader(self) -> DataLoader:
-        nw = max(2, self.num_workers // 2)
+        # Use at most 2 workers and never persist them: persistent_workers on the
+        # val loader causes a reset-drain deadlock in DDP at the end of each
+        # validation epoch (workers block on mmap reads while PL waits for them).
+        nw = min(2, self.num_workers)
         return DataLoader(
             self.val_dataset,
             batch_size=self.batch_size,
             shuffle=False,
             num_workers=nw,
             pin_memory=True,
-            persistent_workers=nw > 0,
+            persistent_workers=False,
         )
