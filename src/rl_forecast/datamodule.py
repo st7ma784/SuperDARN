@@ -54,7 +54,7 @@ class NStepRLTransitionDataset(Dataset):
         gamma:    RL discount factor (must match agent)
     """
 
-    def __init__(self, base: DatasetFromPresaved, n_steps: int = 3, gamma: float = 0.99):
+    def __init__(self, base: DatasetFromPresaved, n_steps: int = 6, gamma: float = 0.99):
         self.base    = base
         self.n_steps = n_steps
         self.gamma   = gamma
@@ -132,7 +132,7 @@ class RLDataModule(pl.LightningDataModule):
         self,
         data_dir:             str,
         batch_size:           int   = 16,
-        n_steps:              int   = 3,
+        n_steps:              int   = 6,
         gamma:                float = 0.99,
         num_input_frames:     int   = 1,
         temporal_agg_frames:  int   = 1,
@@ -162,6 +162,33 @@ class RLDataModule(pl.LightningDataModule):
             num_input_frames=self.num_input_frames,
             temporal_agg_frames=self.temporal_agg_frames,
         )
+
+        # Per-channel z-score normalisation fitted on a random sample of the
+        # training portion of the base dataset.  This replaces the per-sample
+        # spatial-L2-norm fallback, which distorts the delta (s_{t+n} - s_t)
+        # because each frame is divided by a different scalar.
+        #
+        # Channel 4 (soft_occ, range [0,1]) is deliberately kept unscaled so
+        # the reward function's occupancy threshold (> 0.05) remains valid.
+        n_base        = len(base)
+        n_train_base  = max(1, int(n_base * (1.0 - self.val_split)))
+        rng           = np.random.default_rng(42)
+        sample_idx    = rng.choice(n_train_base, size=min(2000, n_train_base),
+                                   replace=False).astype(np.int64)
+        stats = base.compute_stats_from_indices(sample_idx)
+
+        # Zero mean / unit std for soft_occ — keep raw [0,1] scale.
+        for key in ('x_mean', 'y_mean'):
+            stats[key][4] = 0.0
+        for key in ('x_std', 'y_std'):
+            stats[key][4] = 1.0
+
+        base.set_normalization_stats(stats)
+        print(f"[datamodule] normalisation (y_std): "
+              f"vN={stats['y_std'][0]:.1f}  vE={stats['y_std'][1]:.1f}  "
+              f"mvN={stats['y_std'][2]:.1f}  mvE={stats['y_std'][3]:.1f}  "
+              f"occ={stats['y_std'][4]:.3f}  bnd={stats['y_std'][5]:.2f}")
+
         full = NStepRLTransitionDataset(base, n_steps=self.n_steps, gamma=self.gamma)
 
         n_val   = max(1, int(len(full) * self.val_split))

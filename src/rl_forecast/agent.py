@@ -416,14 +416,17 @@ class SACOfflineAgent(pl.LightningModule):
             # Obs-velocity channels are only evaluated inside covered cells.
             occ_mask = (s_tn[:, 4:5] > 0.05).float()   # (B, 1, H, W)
 
-            # Cache one sample (CPU) for the end-of-epoch spatial figure.
-            # Done here inside no_grad so y_hat is already computed.
+            # Cache one sample (CPU): autoregressive n-step rollout for vis.
             if batch_idx == 0 and self.trainer.is_global_zero:
-                self._val_vis = (
-                    s[0].detach().cpu(),
-                    y_hat[0].detach().cpu(),
-                    s_tn[0].detach().cpu(),
-                )
+                rollout = [s[0].detach().cpu()]
+                s_roll = s[0:1]
+                for _ in range(self.n_steps):
+                    z_r, feats_r = self.encoder(s_roll)
+                    _, _, a_r    = self.actor.sample(z_r)
+                    d_r          = self.decoder(feats_r, a_r, (self.grid_size, self.grid_size))
+                    s_roll       = (s_roll + d_r)
+                    rollout.append(s_roll[0].detach().cpu())
+                self._val_vis = (rollout, s_tn[0].detach().cpu())
 
             # Skip per-channel metrics during the sanity check — the extra
             # sync_dist all_reduces deadlock against PL's sanity-check metric
@@ -501,7 +504,8 @@ class SACOfflineAgent(pl.LightningModule):
             and hasattr(self, '_val_vis')
             and not self.trainer.sanity_checking
         ):
-            self._log_forecast_figure(*self._val_vis)
+            rollout_vis, s_tn_vis = self._val_vis
+            self._log_forecast_figure(rollout_vis, s_tn_vis)
 
     # ── Spatial forecast figures ──────────────────────────────────────────────
 
@@ -561,34 +565,23 @@ class SACOfflineAgent(pl.LightningModule):
 
     def _log_forecast_figure(
         self,
-        s:     'torch.Tensor',   # (6, H, W) current state
-        y_hat: 'torch.Tensor',   # (6, H, W) predicted next state
-        s_tn:  'torch.Tensor',   # (6, H, W) actual next state
+        rollout:  list,            # [s_t, ŝ_{t+1}, ..., ŝ_{t+n}] each (6, H, W) CPU
+        s_tn:     'torch.Tensor',  # (6, H, W) actual state at t+n
         min_mlat: float = 50.0,
     ):
         """
         Produce two figures and dispatch to W&B or {log_dir}/val_vis/.
 
-        Figure 1 — channel grid (6 rows × 4 cols):
-            Current s_t | Predicted ŷ | Actual s_{t+n} | Error ŷ − actual
-            Each panel is a proper polar-cap view (zenithal equidistant) with
-            a circular boundary, lat rings every 10°, and MLT spokes at
-            00/06/12/18h (midnight at top, SuperDARN convention).
-            Corners outside the polar cap are masked white.
-            A thin contour shows the radar-coverage boundary.
-
-        Figure 2 — E×B drift vectors (obs + model):
-            Row 1: actual observed drift | predicted observed drift | obs error vectors
-            Row 2: actual model drift   | predicted model drift    | model error vectors
-            Drawn as quiver arrows on a subsampled grid so the flow pattern
-            is visible.  Arrow colour encodes speed (normalised units).
+        Figure 1 — channel grid (6 rows × 6 cols):
+            s_t | ŝ_{t+n//3} | ŝ_{t+2*n//3} | ŝ_{t+n}(pred) | s_{t+n}(actual) | Error
+        Figure 2 — E×B drift quiver (obs + model, pred vs actual).
         """
         import threading, os
 
-        # Snapshot tensors to numpy NOW (on the main thread, before DDP moves on)
-        arrays = tuple(t.numpy().copy() for t in (s, y_hat, s_tn))
-        epoch  = self.current_epoch
-        n_steps = self.n_steps
+        rollout_np = [t.numpy().copy() for t in rollout]
+        stn_np     = s_tn.numpy().copy()
+        epoch      = self.current_epoch
+        n_steps    = self.n_steps
 
         log_root = (
             getattr(self.trainer, 'log_dir', None)
@@ -603,9 +596,8 @@ class SACOfflineAgent(pl.LightningModule):
                     matplotlib.use('Agg')
                 import matplotlib.pyplot as plt
                 import numpy as np
-                s_np, y_np, stn_np = arrays
                 self._render_forecast_figures(
-                    s_np, y_np, stn_np, min_mlat,
+                    rollout_np, stn_np, min_mlat,
                     plt, np, os, log_root, epoch, n_steps, global_step,
                 )
             except Exception as exc:
@@ -622,19 +614,40 @@ class SACOfflineAgent(pl.LightningModule):
         t.start()
 
     def _render_forecast_figures(
-        self, s, y_hat, s_tn, min_mlat, plt, np, os,
+        self, rollout, s_tn, min_mlat, plt, np, os,
         log_root, epoch, n_steps, global_step,
     ):
-        """Runs on a daemon thread — all required state passed explicitly."""
-        H, W   = s.shape[-2:]
+        """Runs on a daemon thread — all required state passed explicitly.
+
+        rollout: list of (6, H, W) numpy arrays [s_t, ŝ_{t+1}, ..., ŝ_{t+n}]
+        s_tn:    (6, H, W) actual ground truth at t+n
+        """
+        s    = rollout[0]    # s_t
+        pred = rollout[-1]   # ŝ_{t+n}
+        H, W = s.shape[-2:]
         occ_np = s[4]
 
-        # ── Figure 1: per-channel polar-cap grid ─────────────────────────────
-        ncols = 4
+        # Two intermediate frames spaced across the rollout
+        step1 = max(1, n_steps // 3)
+        step2 = max(step1 + 1, 2 * n_steps // 3)
+        step1 = min(step1, len(rollout) - 1)
+        step2 = min(step2, len(rollout) - 1)
+
+        # ── Figure 1: per-channel polar-cap grid (6 cols) ────────────────────
+        # Col: s_t | ŝ_{step1} | ŝ_{step2} | ŝ_{t+n}(pred) | s_{t+n}(actual) | Error
+        col_labels = [
+            'Current  s_t',
+            f't+{step1}',
+            f't+{step2}',
+            f'Predicted  t+{n_steps}',
+            f'Actual  t+{n_steps}',
+            'Error  pred − actual',
+        ]
+        ncols = 6
         n_ch  = len(_CHANNEL_NAMES)
         fig1, axes1 = plt.subplots(
             n_ch, ncols,
-            figsize=(ncols * 3.4, n_ch * 3.4),
+            figsize=(ncols * 3.0, n_ch * 3.0),
             squeeze=False,
             facecolor='#1a1a2e',
         )
@@ -642,24 +655,24 @@ class SACOfflineAgent(pl.LightningModule):
             f"Polar-cap forecast — Epoch {epoch}  (n_steps={n_steps})",
             fontsize=12, fontweight='bold', color='white', y=1.005,
         )
-        for col, label in enumerate(
-            ['Current  s_t', 'Predicted  ŷ', 'Actual  s_{t+n}', 'Error  ŷ − actual']
-        ):
-            axes1[0, col].set_title(label, fontsize=9, fontweight='bold', color='white')
+        for col, label in enumerate(col_labels):
+            axes1[0, col].set_title(label, fontsize=8, fontweight='bold', color='white')
 
         for ch, (name, cmap) in enumerate(zip(_CHANNEL_NAMES, _CMAPS)):
-            s_np   = s[ch].copy()
-            y_np   = y_hat[ch].copy()
-            stn_np = s_tn[ch].copy()
-            err_np = y_np - stn_np
+            s_np    = s[ch].copy()
+            mid1_np = rollout[step1][ch].copy()
+            mid2_np = rollout[step2][ch].copy()
+            pred_np = pred[ch].copy()
+            stn_np  = s_tn[ch].copy()
+            err_np  = pred_np - stn_np
 
             outside = self._polar_cap_axes_setup(axes1[ch, 0], H, W, min_mlat)
-            for arr in (s_np, y_np, stn_np, err_np):
+            for arr in (s_np, mid1_np, mid2_np, pred_np, stn_np, err_np):
                 arr[outside] = np.nan
 
             if cmap != 'Greys_r':
                 valid = np.concatenate([
-                    s_np[~outside], y_np[~outside], stn_np[~outside]
+                    s_np[~outside], pred_np[~outside], stn_np[~outside]
                 ])
                 vmax = max(float(np.nanpercentile(np.abs(valid), 98)), 1e-6)
                 vmin = -vmax
@@ -669,10 +682,12 @@ class SACOfflineAgent(pl.LightningModule):
             err_vmax = max(float(np.nanpercentile(np.abs(err_np[~outside]), 98)), 1e-6)
 
             panels = [
-                (s_np,   cmap,     vmin,      vmax),
-                (y_np,   cmap,     vmin,      vmax),
-                (stn_np, cmap,     vmin,      vmax),
-                (err_np, 'RdBu_r', -err_vmax, err_vmax),
+                (s_np,    cmap,     vmin,      vmax),
+                (mid1_np, cmap,     vmin,      vmax),
+                (mid2_np, cmap,     vmin,      vmax),
+                (pred_np, cmap,     vmin,      vmax),
+                (stn_np,  cmap,     vmin,      vmax),
+                (err_np,  'RdBu_r', -err_vmax, err_vmax),
             ]
             for col, (data, cm, lo, hi) in enumerate(panels):
                 ax = axes1[ch, col]
@@ -680,7 +695,6 @@ class SACOfflineAgent(pl.LightningModule):
                 im = ax.imshow(data, cmap=cm, vmin=lo, vmax=hi,
                                origin='upper', interpolation='nearest',
                                extent=[0, W, H, 0])
-                # Radar-coverage boundary on every panel
                 ax.contour(occ_np, levels=[0.05], colors='yellow',
                            linewidths=0.7, alpha=0.6, zorder=5)
                 if col > 0:
@@ -697,7 +711,6 @@ class SACOfflineAgent(pl.LightningModule):
         plt.tight_layout()
 
         # ── Figure 2: E×B drift velocity vectors ─────────────────────────────
-        # Quiver subsample: one arrow every `stride` pixels
         stride = max(1, min(H, W) // 25)
         ys_q   = np.arange(stride // 2, H, stride)
         xs_q   = np.arange(stride // 2, W, stride)
@@ -706,7 +719,6 @@ class SACOfflineAgent(pl.LightningModule):
         R      = min(H, W) / 2.0
         in_cap = ((Xq - cx) ** 2 + (Yq - cy) ** 2) <= R ** 2
 
-        # Velocity pairs: (north_ch, east_ch, label)
         vel_pairs = [
             (0, 1, 'Observed  E×B drift'),
             (2, 3, 'Model  E×B drift'),
@@ -718,18 +730,17 @@ class SACOfflineAgent(pl.LightningModule):
             facecolor='#1a1a2e',
         )
         fig2.suptitle(
-            f"E×B drift vectors — Epoch {epoch}",
+            f"E×B drift vectors — Epoch {epoch}  (n_steps={n_steps})",
             fontsize=11, fontweight='bold', color='white',
         )
         for col, lbl in enumerate(['Actual', 'Predicted', 'Error (pred − actual)']):
             axes2[0, col].set_title(lbl, fontsize=9, color='white', fontweight='bold')
 
         for row, (n_ch_idx, e_ch_idx, pair_label) in enumerate(vel_pairs):
-            # Actual, predicted, error velocity grids
             vn_act  = s_tn[n_ch_idx]
             ve_act  = s_tn[e_ch_idx]
-            vn_pred = y_hat[n_ch_idx]
-            ve_pred = y_hat[e_ch_idx]
+            vn_pred = pred[n_ch_idx]
+            ve_pred = pred[e_ch_idx]
             vn_err  = vn_pred - vn_act
             ve_err  = ve_pred - ve_act
 
@@ -737,17 +748,12 @@ class SACOfflineAgent(pl.LightningModule):
             speed_max = float(np.nanpercentile(covered, 98)) if len(covered) > 0 else 1.0
             speed_max = speed_max if np.isfinite(speed_max) and speed_max > 0 else 1.0
 
-            triples = [
-                (vn_act, ve_act),
-                (vn_pred, ve_pred),
-                (vn_err, ve_err),
-            ]
+            triples = [(vn_act, ve_act), (vn_pred, ve_pred), (vn_err, ve_err)]
             for col, (vn, ve) in enumerate(triples):
                 ax = axes2[row, col]
                 ax.set_facecolor('#1a1a2e')
                 outside = self._polar_cap_axes_setup(ax, H, W, min_mlat)
 
-                # Background speed magnitude
                 speed = np.sqrt(vn**2 + ve**2)
                 speed[outside] = np.nan
                 vlim = speed_max if col < 2 else speed_max * 0.5
@@ -755,7 +761,6 @@ class SACOfflineAgent(pl.LightningModule):
                                origin='upper', interpolation='nearest',
                                extent=[0, W, H, 0], alpha=0.6)
 
-                # Quiver: north component → up (−y in image), east → right (+x)
                 U =  ve[ys_q[:, None], xs_q[None, :]]
                 V = -vn[ys_q[:, None], xs_q[None, :]]
                 U[~in_cap] = np.nan

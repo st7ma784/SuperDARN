@@ -235,7 +235,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     # RL hyperparameters
     g = p.add_argument_group("RL")
-    g.add_argument("--n_steps",            type=int,   default=3,
+    g.add_argument("--n_steps",            type=int,   default=6,
                    help="N-step return horizon; must match datamodule")
     g.add_argument("--gamma",              type=float, default=0.99)
     g.add_argument("--tau",                type=float, default=0.005)
