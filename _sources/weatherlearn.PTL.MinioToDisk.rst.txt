@@ -1,0 +1,7 @@
+weatherlearn.PTL.MinioToDisk module
+===================================
+
+.. automodule:: weatherlearn.PTL.MinioToDisk
+   :members:
+   :undoc-members:
+   :show-inheritance:

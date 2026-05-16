@@ -1,0 +1,7 @@
+rl\_forecast.datamodule module
+==============================
+
+.. automodule:: rl_forecast.datamodule
+   :members:
+   :undoc-members:
+   :show-inheritance:

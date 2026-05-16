@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>RL Forecast — Offline SAC for Ionospheric Convection &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SuperDARN Future Work" href="future.html" />
+    <link rel="prev" title="Baseline Evaluation Results" href="baseline_results.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="future.html" title="SuperDARN Future Work"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="baseline_results.html" title="Baseline Evaluation Results"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">RL Forecast — Offline SAC for Ionospheric Convection</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="rl-forecast-offline-sac-for-ionospheric-convection">
+<h1>RL Forecast — Offline SAC for Ionospheric Convection<a class="headerlink" href="#rl-forecast-offline-sac-for-ionospheric-convection" title="Link to this heading">¶</a></h1>
+<p>This document describes the reinforcement-learning forecast module
+(<code class="docutils literal notranslate"><span class="pre">src/rl_forecast/</span></code>).  It trains an offline Soft Actor-Critic (SAC) agent
+to predict the next frame of the polar ionospheric convection field from
+SuperDARN radar data.</p>
+<nav class="contents local" id="contents">
+<p class="topic-title">Contents</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#scientific-data-the-six-channel-state" id="id1">Scientific data: the six-channel state</a></p></li>
+<li><p><a class="reference internal" href="#rl-transition-tuple" id="id2">RL transition tuple</a></p></li>
+<li><p><a class="reference internal" href="#reward-signal" id="id3">Reward signal</a></p></li>
+<li><p><a class="reference internal" href="#soft-actor-critic-sac-synopsis" id="id4">Soft Actor-Critic (SAC) — synopsis</a></p></li>
+<li><p><a class="reference internal" href="#critic-data-seen-and-training" id="id5">Critic: data seen and training</a></p></li>
+<li><p><a class="reference internal" href="#actor-data-seen-and-training" id="id6">Actor: data seen and training</a></p></li>
+<li><p><a class="reference internal" href="#validation-metrics" id="id7">Validation metrics</a></p></li>
+<li><p><a class="reference internal" href="#references" id="id8">References</a></p></li>
+</ul>
+</nav>
+<section id="scientific-data-the-six-channel-state">
+<h2><a class="toc-backref" href="#id1" role="doc-backlink">Scientific data: the six-channel state</a><a class="headerlink" href="#scientific-data-the-six-channel-state" title="Link to this heading">¶</a></h2>
+<p>Every observation fed to the agent is a polar-grid tensor of shape
+<code class="docutils literal notranslate"><span class="pre">(6,</span> <span class="pre">H,</span> <span class="pre">W)</span></code>.  The grid is a zenithal equidistant projection of the northern
+(or southern) polar cap, covering magnetic latitudes from <code class="docutils literal notranslate"><span class="pre">min_mlat</span></code>
+(default 50°) to the pole, at a resolution of <code class="docutils literal notranslate"><span class="pre">grid_size</span> <span class="pre">×</span> <span class="pre">grid_size</span></code> pixels
+(default 300 × 300).</p>
+<table class="docutils align-default">
+<colgroup>
+<col style="width: 6.7%" />
+<col style="width: 26.7%" />
+<col style="width: 66.7%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Index</p></th>
+<th class="head"><p>Name</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">obs_vel_north</span></code></p></td>
+<td><p>Northward component of the SH-fitted E×B convection drift (m/s) in
+radar-covered cells.  Equal to the model northward velocity where
+<code class="docutils literal notranslate"><span class="pre">soft_occ</span> <span class="pre">&gt;</span> <span class="pre">0.05</span></code>; <strong>zero elsewhere</strong>.  Channels 0–1 together give
+the observed 2-D plasma velocity vector only where radar measurements
+constrain the spherical-harmonic (SH) fit.</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">obs_vel_east</span></code></p></td>
+<td><p>Eastward component of the SH-fitted E×B drift (m/s) in radar-covered
+cells.  Zero outside covered regions.</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">model_vel_north</span></code></p></td>
+<td><p>Northward E×B drift from the background statistical convection model
+(Weimer / TS96), available across the <strong>full polar cap</strong> regardless of
+radar coverage.  Provides a physics-based prior in regions where no
+SuperDARN data exist.</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">model_vel_east</span></code></p></td>
+<td><p>Eastward drift from the background model (m/s), full polar cap.</p></td>
+</tr>
+<tr class="row-even"><td><p>4</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">soft_occ</span></code></p></td>
+<td><p>Soft radar-coverage fraction in <code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1]</span></code>.  Values above 0.05
+indicate radar-constrained cells; cells with lower values are
+model-only.  Used as a spatial mask when evaluating the observed
+velocity channels.</p></td>
+</tr>
+<tr class="row-odd"><td><p>5</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">boundary_dist</span></code></p></td>
+<td><p>Signed magnetic-latitude distance from the Heppner-Maynard convection
+boundary (degrees).  Positive values are poleward of (inside) the
+convection zone; negative values are equatorward.  Derived from the
+<code class="docutils literal notranslate"><span class="pre">boundary.mlat</span></code> / <code class="docutils literal notranslate"><span class="pre">boundary.mlon</span></code> arrays in each cnvmap record and
+interpolated onto the grid.</p></td>
+</tr>
+</tbody>
+</table>
+<p>The tensor is <strong>normalised</strong> per-channel using statistics estimated on the
+training split (Welford online mean / variance).  All network inputs and
+outputs therefore live in approximately zero-mean unit-variance space; the
+reward function likewise operates on normalised values.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Obs-velocity channels (0–1) are spatially sparse: only the radar-footprint
+cells are non-zero.  Evaluation metrics for these channels are therefore
+computed <strong>only inside covered cells</strong> (<code class="docutils literal notranslate"><span class="pre">soft_occ</span> <span class="pre">&gt;</span> <span class="pre">0.05</span></code>) to avoid
+diluting the RMSE with trivially-zero regions.</p>
+</div>
+</section>
+<section id="rl-transition-tuple">
+<h2><a class="toc-backref" href="#id2" role="doc-backlink">RL transition tuple</a><a class="headerlink" href="#rl-transition-tuple" title="Link to this heading">¶</a></h2>
+<p>The datamodule (<code class="docutils literal notranslate"><span class="pre">RLDataModule</span></code> / <code class="docutils literal notranslate"><span class="pre">NStepRLTransitionDataset</span></code>) converts
+consecutive frame pairs from the pre-saved dataset into offline RL
+transitions:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="n">s_t</span><span class="p">,</span> <span class="n">a_t</span><span class="p">,</span> <span class="n">R_n</span><span class="p">,</span> <span class="n">s_</span><span class="p">{</span><span class="n">t</span><span class="o">+</span><span class="n">n</span><span class="p">},</span> <span class="n">done</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>where</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">s_t</span></code>   — the normalised 6-channel state at time <em>t</em></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">a_t</span></code>   — the <em>observed</em> delta <code class="docutils literal notranslate"><span class="pre">y_t</span> <span class="pre">−</span> <span class="pre">s_t</span></code> (what the atmosphere
+actually did; used as the data-set action for the critic and as a
+behavioural-cloning target for the actor)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">R_n</span></code>   — n-step discounted return
+<code class="docutils literal notranslate"><span class="pre">Σ_{k=0}^{n-1}</span> <span class="pre">γ^k</span> <span class="pre">·</span> <span class="pre">r(s_{t+k},</span> <span class="pre">a_{t+k})</span></code>,
+where the per-step reward is computed relative to a persistence baseline
+(see <a class="reference internal" href="#reward"><span class="std std-ref">Reward signal</span></a>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">s_{t+n}</span></code> — bootstrap state <em>n</em> steps later, used for the critic target</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">done</span></code>  — always 0 for offline data (no episode boundaries)</p></li>
+</ul>
+<p>Only temporally contiguous indices (within a single mmap’d file chunk) are
+exposed, ensuring that bootstrap states are physically meaningful.</p>
+</section>
+<section id="reward-signal">
+<span id="reward"></span><h2><a class="toc-backref" href="#id3" role="doc-backlink">Reward signal</a><a class="headerlink" href="#reward-signal" title="Link to this heading">¶</a></h2>
+<p>The shaped reward has three components:</p>
+<ol class="arabic simple">
+<li><p><strong>Weighted MSE</strong> — negative channel-weighted squared error between the
+predicted next frame and the ground-truth, with per-channel weights
+<code class="docutils literal notranslate"><span class="pre">[1.5,</span> <span class="pre">1.5,</span> <span class="pre">1.0,</span> <span class="pre">1.0,</span> <span class="pre">0.3,</span> <span class="pre">1.2]</span></code> (obs velocity weighted highest;
+soft-occ lowest).  Obs-channel errors are masked to radar-covered cells.</p></li>
+<li><p><strong>Spatial total-variation penalty</strong> — penalises high-frequency noise in
+the predicted obs-velocity field inside covered cells (weight 0.01).</p></li>
+<li><p><strong>Boundary accuracy penalty</strong> — penalises drift of the predicted
+Heppner-Maynard boundary latitude from the true value (weight 0.05).</p></li>
+</ol>
+<p>During <strong>offline data collection</strong> the reward is computed relative to the
+persistence baseline (predict no change) so that the agent receives a
+meaningful signal even though the data actions were all executed in the real
+atmosphere:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>r_relative = r(obs_action) − r(zero_delta)
+</pre></div>
+</div>
+<p>This avoids the degenerate situation where every observed trajectory gets
+the same absolute reward regardless of how informative it was.</p>
+</section>
+<section id="soft-actor-critic-sac-synopsis">
+<h2><a class="toc-backref" href="#id4" role="doc-backlink">Soft Actor-Critic (SAC) — synopsis</a><a class="headerlink" href="#soft-actor-critic-sac-synopsis" title="Link to this heading">¶</a></h2>
+<p>SAC [Haarnoja et al., 2018] is a maximum-entropy off-policy actor-critic
+algorithm.  It augments the standard RL objective with an entropy bonus,
+encouraging the policy to remain as stochastic as possible while maximising
+cumulative reward:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>J(π) = Σ_t  E[ r(s_t, a_t) + α · H(π(·|s_t)) ]
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">α</span></code> (the <em>temperature</em>) is a Lagrange multiplier that is adapted
+automatically to hit a target entropy <code class="docutils literal notranslate"><span class="pre">H_target</span></code>.  The key properties of
+SAC that make it suitable for this problem are:</p>
+<ul class="simple">
+<li><p><strong>Sample efficiency</strong> — off-policy learning from a replay buffer (here an
+offline dataset) allows full reuse of every transition.</p></li>
+<li><p><strong>Stability</strong> — the twin-critic (double-Q) trick prevents overestimation
+of Q-values; the entropy bonus prevents policy collapse to a deterministic
+mode prematurely.</p></li>
+<li><p><strong>Continuous actions</strong> — the reparameterised Gaussian with tanh squashing
+gives closed-form, low-variance policy gradients over continuous latent
+action spaces.</p></li>
+</ul>
+<p>The three interleaved update rules per step are:</p>
+<p><strong>Critic</strong> — minimise Bellman residual with entropy-regularised targets:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Q_target = r + γ · [min_i Q_tgt_i(s&#39;, a&#39;) − α · log π(a&#39;|s&#39;)]
+L_critic  = Σ_i  Huber(Q_i(s, a),  Q_target)
+</pre></div>
+</div>
+<p><strong>Actor</strong> — maximise soft Q-value while satisfying the entropy constraint:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>L_actor = E_a~π[ α · log π(a|s) − min_i Q_i(s, a) ]
+</pre></div>
+</div>
+<p><strong>Temperature</strong> — dual gradient descent on the entropy constraint:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>L_α = −log_α · (log π(a|s) + H_target)
+</pre></div>
+</div>
+<p>This implementation uses <code class="docutils literal notranslate"><span class="pre">manual_optimization</span></code> (PyTorch Lightning) with
+three separate Adam optimisers, one per component.</p>
+</section>
+<section id="critic-data-seen-and-training">
+<h2><a class="toc-backref" href="#id5" role="doc-backlink">Critic: data seen and training</a><a class="headerlink" href="#critic-data-seen-and-training" title="Link to this heading">¶</a></h2>
+<p>The critic estimates the <em>soft Q-value</em> <code class="docutils literal notranslate"><span class="pre">Q(s,</span> <span class="pre">a)</span></code> — the expected
+discounted return from state <em>s</em> when action <em>a</em> is taken, assuming the
+policy <code class="docutils literal notranslate"><span class="pre">π</span></code> thereafter.</p>
+<p><strong>Input</strong></p>
+<p>The critic sees two encoded vectors concatenated together:</p>
+<ul class="simple">
+<li><p><strong>State latent</strong> <code class="docutils literal notranslate"><span class="pre">z_s</span></code> (dim 256) — produced by the
+<code class="docutils literal notranslate"><span class="pre">ConvEncoder</span></code> (shared with the actor).  This encodes the full 6-channel
+<code class="docutils literal notranslate"><span class="pre">(6,</span> <span class="pre">H,</span> <span class="pre">W)</span></code> polar-grid state.</p></li>
+<li><p><strong>Action latent</strong> (dim 128) — either</p>
+<ul>
+<li><p><em>Data action</em>: the observed delta <code class="docutils literal notranslate"><span class="pre">a_t</span> <span class="pre">=</span> <span class="pre">y_t</span> <span class="pre">−</span> <span class="pre">s_t</span></code> passed through
+<code class="docutils literal notranslate"><span class="pre">ActionEncoder</span></code> (lightweight pool + MLP) to produce a latent vector.
+Used for the TD-error loss.</p></li>
+<li><p><em>Policy action</em>: a latent sample from <code class="docutils literal notranslate"><span class="pre">LatentActor</span></code> (tanh-squashed
+Gaussian), decoded back to grid space by <code class="docutils literal notranslate"><span class="pre">GridDecoder</span></code> for the BC
+anchor; the latent vector itself is used for actor and CQL losses.</p></li>
+</ul>
+</li>
+</ul>
+<p>The concatenated <code class="docutils literal notranslate"><span class="pre">[z_s</span> <span class="pre">‖</span> <span class="pre">a_latent]</span></code> vector (dim 384) is fed to two
+independent MLP heads (<code class="docutils literal notranslate"><span class="pre">DoubleQCritic</span></code>) to give <code class="docutils literal notranslate"><span class="pre">Q1</span></code> and <code class="docutils literal notranslate"><span class="pre">Q2</span></code>.  The
+pessimistic estimate <code class="docutils literal notranslate"><span class="pre">min(Q1,</span> <span class="pre">Q2)</span></code> is used wherever a scalar value
+estimate is needed (actor update, bootstrap target), preventing
+overestimation.</p>
+<p><strong>Training objective</strong></p>
+<p>With n-step returns and the CQL conservative penalty disabled (see
+<code class="docutils literal notranslate"><span class="pre">agent.py</span></code> comments), the critic loss is:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>Q_target = R_n + γ^n · (1 − done) · [min_i Q_tgt_i(s_{t+n}, a&#39;) − α · log π(a&#39;|s_{t+n})]
+L_critic  = Huber(Q1(s_t, a_t), Q_target) + Huber(Q2(s_t, a_t), Q_target)
+</pre></div>
+</div>
+<p>The Huber loss (δ=1.0) replaces MSE to limit the gradient magnitude for
+large TD errors early in training.  Target networks <code class="docutils literal notranslate"><span class="pre">Q_tgt</span></code> are updated by
+Polyak averaging at rate <code class="docutils literal notranslate"><span class="pre">τ</span> <span class="pre">=</span> <span class="pre">0.005</span></code> after every critic step.</p>
+<p>Rewards entering the target are normalised by a Welford running
+mean/variance tracker to prevent Q-value scale drift as the reward
+distribution shifts over training.</p>
+<p>The critic’s optimiser also owns the <code class="docutils literal notranslate"><span class="pre">ConvEncoder</span></code> and <code class="docutils literal notranslate"><span class="pre">ActionEncoder</span></code>
+parameters, because the encoder is the performance bottleneck and it is most
+efficiently trained by the dense per-pixel signal available through the
+critic loss.</p>
+</section>
+<section id="actor-data-seen-and-training">
+<h2><a class="toc-backref" href="#id6" role="doc-backlink">Actor: data seen and training</a><a class="headerlink" href="#actor-data-seen-and-training" title="Link to this heading">¶</a></h2>
+<p>The actor produces the policy <code class="docutils literal notranslate"><span class="pre">π(a</span> <span class="pre">|</span> <span class="pre">s)</span></code> — a distribution over latent
+actions given the current state.</p>
+<p><strong>Input</strong></p>
+<p>The actor sees only the <strong>state latent</strong> <code class="docutils literal notranslate"><span class="pre">z_s</span></code> (dim 256) from the shared
+<code class="docutils literal notranslate"><span class="pre">ConvEncoder</span></code>.  It never sees the raw grid directly; all spatial
+information is compressed into <code class="docutils literal notranslate"><span class="pre">z_s</span></code> by the encoder.</p>
+<p><strong>Architecture</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">LatentActor</span></code> is a two-hidden-layer MLP (512 units, GELU activations) that
+outputs a mean <code class="docutils literal notranslate"><span class="pre">μ</span></code> and log-standard-deviation <code class="docutils literal notranslate"><span class="pre">log</span> <span class="pre">σ</span></code> over a
+128-dimensional latent action space.  Sampling uses the reparameterisation
+trick with tanh squashing:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>ε ~ N(0, I)
+x_t = μ + σ · ε
+a   = tanh(x_t)       ∈ (−1, 1)^128
+</pre></div>
+</div>
+<p>The log-probability includes the tanh Jacobian correction:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>log π(a|s) = Σ_d [ −½(ε_d² + log 2π) − log σ_d − log(1 − a_d² + ε) ]
+</pre></div>
+</div>
+<p>The deterministic action <code class="docutils literal notranslate"><span class="pre">a_det</span> <span class="pre">=</span> <span class="pre">tanh(μ)</span></code> (no noise) is used at inference
+time and during validation.</p>
+<p><strong>Decoding to grid space</strong></p>
+<p>The latent action <code class="docutils literal notranslate"><span class="pre">a</span></code> is decoded back to a <code class="docutils literal notranslate"><span class="pre">(6,</span> <span class="pre">H,</span> <span class="pre">W)</span></code> delta grid by
+<code class="docutils literal notranslate"><span class="pre">GridDecoder</span></code>, which spatially broadcasts the latent vector, concatenates
+it with the encoder’s spatial feature map (<code class="docutils literal notranslate"><span class="pre">feats</span></code>, shape
+<code class="docutils literal notranslate"><span class="pre">(feat_ch,</span> <span class="pre">H/8,</span> <span class="pre">W/8)</span></code>), and upsamples via three transposed-convolution
+stages with residual blocks.  The decoder head is zero-initialised so that
+the agent starts from persistence (delta = 0) at the beginning of training.</p>
+<p><strong>Training objective</strong></p>
+<p>The actor loss has two terms:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>L_actor = L_RL + bc_weight · L_BC
+</pre></div>
+</div>
+<p><em>RL term</em> — standard SAC policy gradient:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>L_RL = E_a~π[ α · log π(a|s) − min_i Q_i(z_s, a) ]
+</pre></div>
+</div>
+<p>The actor gradient is computed with the encoder and critic frozen (their
+gradients are detached).  The SAC temperature <code class="docutils literal notranslate"><span class="pre">α</span></code> is clipped to
+<code class="docutils literal notranslate"><span class="pre">[1e-6,</span> <span class="pre">1.0]</span></code> to prevent it from growing unbounded early in training.</p>
+<p><em>Behavioural cloning anchor</em> — SmoothL1 loss between the decoded policy
+delta and the observed dataset delta:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">L_BC</span> <span class="o">=</span> <span class="n">SmoothL1</span><span class="p">(</span><span class="n">GridDecoder</span><span class="p">(</span><span class="n">feats</span><span class="p">,</span> <span class="n">a_det</span><span class="p">),</span> <span class="n">a_data</span><span class="p">,</span>  <span class="n">β</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>This keeps the decoded prediction close to the distribution of observed
+atmospheric transitions, preventing the actor from drifting into
+physically implausible regions of the grid-space action distribution
+before the Q-function is well-calibrated.</p>
+<p>The actor is updated every <code class="docutils literal notranslate"><span class="pre">actor_update_freq</span> <span class="pre">=</span> <span class="pre">2</span></code> critic steps.</p>
+<p><strong>Temperature adaptation</strong></p>
+<p><code class="docutils literal notranslate"><span class="pre">log</span> <span class="pre">α</span></code> is a scalar <code class="docutils literal notranslate"><span class="pre">nn.Parameter</span></code> updated by gradient descent on:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>L_α = −log_α · (log π + H_target)
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">H_target</span> <span class="pre">=</span> <span class="pre">−0.98</span> <span class="pre">·</span> <span class="pre">action_latent_dim</span></code>.  This automatically adjusts
+the trade-off between exploration (high entropy) and exploitation (low
+entropy) over the course of training.</p>
+</section>
+<section id="validation-metrics">
+<h2><a class="toc-backref" href="#id7" role="doc-backlink">Validation metrics</a><a class="headerlink" href="#validation-metrics" title="Link to this heading">¶</a></h2>
+<p>Each validation epoch reports both aggregate and per-channel metrics, printed
+to stdout as a formatted table and logged to W&amp;B (if enabled).</p>
+<p>Aggregate metrics:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">val/rmse</span></code> — RMS error between <code class="docutils literal notranslate"><span class="pre">y_hat</span> <span class="pre">=</span> <span class="pre">s</span> <span class="pre">+</span> <span class="pre">delta_hat</span></code> and <code class="docutils literal notranslate"><span class="pre">s_tn</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">val/skill_pers</span></code> — skill score vs persistence: <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">−</span> <span class="pre">RMSE_policy</span> <span class="pre">/</span> <span class="pre">RMSE_pers</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">val/r_policy</span></code>, <code class="docutils literal notranslate"><span class="pre">val/r_pers</span></code> — mean shaped rewards for policy and persistence</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">val/r_delta</span></code> — reward improvement of policy over persistence</p></li>
+</ul>
+<p>Per-channel metrics (suffix <code class="docutils literal notranslate"><span class="pre">_{channel_name}</span></code>):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">val/rmse_{ch}</span></code> — RMSE for that channel (obs channels masked to covered cells)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">val/pers_rmse_{ch}</span></code> — persistence RMSE (same mask)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">val/skill_{ch}</span></code> — skill score for that channel</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">val/bias_{ch}</span></code> — mean signed error (positive = overprediction)</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>All values are in <strong>normalised</strong> units.  To convert to physical units,
+multiply by the per-channel standard deviation used during preprocessing
+(stored in <code class="docutils literal notranslate"><span class="pre">shape.txt</span></code> alongside the <code class="docutils literal notranslate"><span class="pre">dataA_*.npy</span></code> / <code class="docutils literal notranslate"><span class="pre">dataB_*.npy</span></code>
+files).  For velocity channels this is typically on the order of 200–600 m/s.</p>
+</div>
+</section>
+<section id="references">
+<h2><a class="toc-backref" href="#id8" role="doc-backlink">References</a><a class="headerlink" href="#references" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p>Haarnoja, T., Zhou, A., Abbeel, P., &amp; Levine, S. (2018).
+<em>Soft Actor-Critic: Off-Policy Maximum Entropy Deep Reinforcement Learning
+with a Stochastic Actor.</em>
+ICML 2018. <a class="reference external" href="https://arxiv.org/abs/1801.01290">https://arxiv.org/abs/1801.01290</a></p></li>
+<li><p>Kumar, A., Zhou, A., Tucker, G., &amp; Levine, S. (2020).
+<em>Conservative Q-Learning for Offline Reinforcement Learning.</em>
+NeurIPS 2020. <a class="reference external" href="https://arxiv.org/abs/2006.04779">https://arxiv.org/abs/2006.04779</a></p></li>
+<li><p>Weimer, D. R. (2005). <em>Improved ionospheric electrodynamic models and
+application to calculating Joule heating rates.</em>
+Journal of Geophysical Research, 110(A5).</p></li>
+<li><p>Heppner, J. P., &amp; Maynard, N. C. (1987). <em>Empirical high-latitude electric
+field models.</em>  Journal of Geophysical Research, 92(A5), 4467–4489.</p></li>
+</ul>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">RL Forecast — Offline SAC for Ionospheric Convection</a><ul>
+<li><a class="reference internal" href="#scientific-data-the-six-channel-state">Scientific data: the six-channel state</a></li>
+<li><a class="reference internal" href="#rl-transition-tuple">RL transition tuple</a></li>
+<li><a class="reference internal" href="#reward-signal">Reward signal</a></li>
+<li><a class="reference internal" href="#soft-actor-critic-sac-synopsis">Soft Actor-Critic (SAC) — synopsis</a></li>
+<li><a class="reference internal" href="#critic-data-seen-and-training">Critic: data seen and training</a></li>
+<li><a class="reference internal" href="#actor-data-seen-and-training">Actor: data seen and training</a></li>
+<li><a class="reference internal" href="#validation-metrics">Validation metrics</a></li>
+<li><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div>
+    <h4>Previous topic</h4>
+    <p class="topless"><a href="baseline_results.html"
+                          title="previous chapter">Baseline Evaluation Results</a></p>
+  </div>
+  <div>
+    <h4>Next topic</h4>
+    <p class="topless"><a href="future.html"
+                          title="next chapter">SuperDARN Future Work</a></p>
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/rl_forecast.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="future.html" title="SuperDARN Future Work"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="baseline_results.html" title="Baseline Evaluation Results"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">RL Forecast — Offline SAC for Ionospheric Convection</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

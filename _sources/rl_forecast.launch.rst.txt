@@ -1,0 +1,7 @@
+rl\_forecast.launch module
+==========================
+
+.. automodule:: rl_forecast.launch
+   :members:
+   :undoc-members:
+   :show-inheritance:

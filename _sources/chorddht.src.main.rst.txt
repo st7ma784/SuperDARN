@@ -1,0 +1,7 @@
+chorddht.src.main module
+========================
+
+.. automodule:: chorddht.src.main
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+rl\_forecast.diagnose\_rewards module
+=====================================
+
+.. automodule:: rl_forecast.diagnose_rewards
+   :members:
+   :undoc-members:
+   :show-inheritance:
