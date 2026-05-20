@@ -42,7 +42,7 @@ class ConvEncoder(nn.Module):
     """
 
     def __init__(self, in_channels: int = 6, latent_dim: int = 256,
-                 base_channels: int = 64):
+                 base_channels: int = 64, time_dim: int = 0):
         super().__init__()
         c = base_channels
         self.stem = nn.Sequential(
@@ -59,8 +59,10 @@ class ConvEncoder(nn.Module):
         self.feat_channels = c * 4
         self.pool = nn.AdaptiveAvgPool2d(4)              # → (B, c*4, 4, 4)
         self.proj = nn.Linear(c * 4 * 16, latent_dim)
+        # Optional time conditioning: [sin_UT, cos_UT, sin_DOY, cos_DOY] → latent
+        self.time_proj = nn.Linear(time_dim, latent_dim) if time_dim > 0 else None
 
-    def forward(self, x: torch.Tensor):
+    def forward(self, x: torch.Tensor, time_vec: 'torch.Tensor | None' = None):
         x = self.stem(x)
         x = self.stage1(x)
         x = self.down1(x)
@@ -68,6 +70,8 @@ class ConvEncoder(nn.Module):
         x = self.down2(x)
         feats = self.stage3(x)                           # (B, feat_ch, H/8, W/8)
         z = self.proj(self.pool(feats).flatten(1))       # (B, latent_dim)
+        if self.time_proj is not None and time_vec is not None:
+            z = z + self.time_proj(time_vec)
         return z, feats
 
 
@@ -205,6 +209,30 @@ class GridDecoder(nn.Module):
         if x.shape[-2:] != torch.Size(target_size):
             x = F.interpolate(x, size=target_size, mode='bilinear', align_corners=False)
         return x
+
+
+# ── Deterministic predictor (supervised multi-step) ─────────────────────────
+
+class DeterministicPredictor(nn.Module):
+    """
+    State-latent → action-latent, deterministic.
+    Replaces LatentActor for supervised rollout training — no sampling, no
+    tanh squashing, no log-probability.  Compatible with GridDecoder unchanged.
+    """
+
+    def __init__(self, state_latent_dim: int = 256, action_latent_dim: int = 128,
+                 hidden_dim: int = 512):
+        super().__init__()
+        self.net = nn.Sequential(
+            nn.Linear(state_latent_dim, hidden_dim),
+            nn.GELU(),
+            nn.Linear(hidden_dim, hidden_dim),
+            nn.GELU(),
+            nn.Linear(hidden_dim, action_latent_dim),
+        )
+
+    def forward(self, z_s: torch.Tensor) -> torch.Tensor:
+        return self.net(z_s)
 
 
 # ── Twin Q-critic ────────────────────────────────────────────────────────────

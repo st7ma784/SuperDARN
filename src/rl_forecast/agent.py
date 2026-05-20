@@ -58,6 +58,23 @@ _OBS_CHANNELS = {0, 1}
 _CMAPS = ('RdBu_r', 'RdBu_r', 'RdBu_r', 'RdBu_r', 'Greys_r', 'PuOr')
 
 
+# ── Time conditioning helper ─────────────────────────────────────────────────
+
+def _advance_time(time_vec: torch.Tensor, dt_hours: float = 2.0 / 60.0) -> torch.Tensor:
+    """
+    Advance a (1, 4) [sin_UT, cos_UT, sin_DOY, cos_DOY] tensor by dt_hours.
+    DOY component is left unchanged (2 min << 1 day).
+    """
+    two_pi = 2.0 * math.pi
+    sin_ut = float(time_vec[0, 0])
+    cos_ut = float(time_vec[0, 1])
+    angle  = math.atan2(sin_ut, cos_ut) + two_pi * dt_hours / 24.0
+    return torch.tensor(
+        [[math.sin(angle), math.cos(angle), float(time_vec[0, 2]), float(time_vec[0, 3])]],
+        dtype=time_vec.dtype, device=time_vec.device,
+    )
+
+
 # ── Online Welford reward normaliser ─────────────────────────────────────────
 
 class RunningMeanStd:
@@ -130,12 +147,12 @@ class SACOfflineAgent(pl.LightningModule):
         latent_dim:           int   = 256,
         action_latent_dim:    int   = 128,
         base_channels:        int   = 64,
-        n_steps:              int   = 3,
+        n_steps:              int   = 12,
         gamma:                float = 0.99,
         tau:                  float = 0.005,
         alpha_init:           float = 0.2,
         target_entropy_scale: float = 0.98,
-        cql_alpha:            float = 1.0,
+        cql_alpha:            float = 0.1,
         bc_weight:            float = 0.5,
         actor_lr:             float = 3e-4,
         critic_lr:            float = 3e-4,
@@ -161,7 +178,7 @@ class SACOfflineAgent(pl.LightningModule):
         self.normalise_rewards = normalise_rewards
 
         # ── Networks ──────────────────────────────────────────────────────
-        self.encoder       = ConvEncoder(in_channels, latent_dim, base_channels)
+        self.encoder       = ConvEncoder(in_channels, latent_dim, base_channels, time_dim=4)
         self.action_enc    = ActionEncoder(in_channels, action_latent_dim)
         self.actor         = LatentActor(latent_dim, action_latent_dim)
         self.decoder       = GridDecoder(
@@ -205,32 +222,38 @@ class SACOfflineAgent(pl.LightningModule):
             p_t.data.mul_(1.0 - tau).add_(p.data, alpha=tau)
 
     def _unpack(self, batch):
-        s, a_data, r_n, s_tn, done = batch
-        return s, a_data, r_n.float(), s_tn, done.float()
+        s, a_data, r_n, s_tn, done, time_t, time_tn = batch
+        return s, a_data, r_n.float(), s_tn, done.float(), time_t.float(), time_tn.float()
 
     # ── Optimised encoder: single forward pass for both s and s_next ──────────
 
-    def _encode_pair(self, s: torch.Tensor, s_next: torch.Tensor):
+    def _encode_pair(self, s: torch.Tensor, s_next: torch.Tensor,
+                     time_s: 'torch.Tensor | None' = None,
+                     time_next: 'torch.Tensor | None' = None):
         """
         Encodes s and s_next in a single conv pass by batching them together.
         Returns (z_s, feats_s, z_next) — feats_next is not needed downstream.
         """
-        both   = torch.cat([s, s_next], dim=0)       # (2B, C, H, W)
-        z_both, feats_both = self.encoder(both)
-        B      = s.shape[0]
-        z_s,    z_next    = z_both[:B],    z_both[B:]
-        feats_s            = feats_both[:B]
+        both      = torch.cat([s, s_next], dim=0)    # (2B, C, H, W)
+        time_both = (torch.cat([time_s, time_next], dim=0)
+                     if (time_s is not None and time_next is not None) else None)
+        z_both, feats_both = self.encoder(both, time_both)
+        B         = s.shape[0]
+        z_s,  z_next = z_both[:B], z_both[B:]
+        feats_s      = feats_both[:B]
         return z_s, feats_s, z_next
 
     # ── Critic step ───────────────────────────────────────────────────────────
 
     def _critic_loss(
         self,
-        s:      torch.Tensor,
-        a_data: torch.Tensor,
-        r_n:    torch.Tensor,
-        s_tn:   torch.Tensor,
-        done:   torch.Tensor,
+        s:       torch.Tensor,
+        a_data:  torch.Tensor,
+        r_n:     torch.Tensor,
+        s_tn:    torch.Tensor,
+        done:    torch.Tensor,
+        time_t:  'torch.Tensor | None' = None,
+        time_tn: 'torch.Tensor | None' = None,
     ):
         # Log raw rewards before normalization
         with torch.no_grad():
@@ -252,7 +275,7 @@ class SACOfflineAgent(pl.LightningModule):
                 self.log('train/norm_reward_std',  torch.tensor(0.0),  on_step=True, on_epoch=False)
 
         # Single encoder pass for s and s_{t+n}
-        z_s, feats, z_next = self._encode_pair(s, s_tn)
+        z_s, feats, z_next = self._encode_pair(s, s_tn, time_t, time_tn)
 
         a_data_lat = self.action_enc(a_data)
 
@@ -283,17 +306,16 @@ class SACOfflineAgent(pl.LightningModule):
             self.log('train/q1_max', q1.max(), on_step=True, on_epoch=False)
             self.log('train/q1_min', q1.min(), on_step=True, on_epoch=False)
 
-        # CQL: only apply after some warmup when Q-estimates are more stable
-        # TEMPORARILY DISABLED: CQL is causing loss explosion; focus on TD learning first
-        cql_penalty = torch.tensor(0.0, device=q1.device, dtype=q1.dtype)
-        # step = self.global_step
-        # if step >= self.warmup_steps // 2:
-        #     with torch.no_grad():
-        #         a_pi_cql, _, _ = self.actor.sample(z_s)
-        #     q1_pi, q2_pi = self.critic(z_s, a_pi_cql)
-        #     q1_pi = torch.clamp(q1_pi, min=-100.0, max=10.0)
-        #     q2_pi = torch.clamp(q2_pi, min=-100.0, max=10.0)
-        #     cql_penalty  = ((q1_pi - q1.detach()) + (q2_pi - q2.detach())).mean() * 0.5
+        # CQL conservative penalty: push Q(s,π) below Q(s,a_data) to prevent
+        # out-of-distribution exploitation. Use small cql_alpha (0.1) for stability.
+        with torch.no_grad():
+            a_pi_cql, _, _ = self.actor.sample(z_s)
+        q1_pi, q2_pi = self.critic(z_s, a_pi_cql)
+        q1_pi = torch.clamp(q1_pi, min=-200.0, max=50.0)
+        q2_pi = torch.clamp(q2_pi, min=-200.0, max=50.0)
+        # One-sided: only penalise when Q(s,π) > Q(s,a_data). Gradient goes to
+        # zero once the conservative constraint is satisfied, preventing overshoot.
+        cql_penalty = F.relu((q1_pi - q1.detach()) + (q2_pi - q2.detach())).mean() * 0.5
 
         loss = td_loss + self.cql_alpha * cql_penalty
         return loss, td_loss.detach(), cql_penalty.detach(), z_s, feats
@@ -317,7 +339,7 @@ class SACOfflineAgent(pl.LightningModule):
         
         rl_loss = (alpha_clipped.detach() * log_pi - q_pi).mean()
 
-        target_size = (self.grid_size, self.grid_size)
+        target_size = a_data.shape[-2:]
         delta_hat   = self.decoder(feats_detached, a_pi, target_size)
         bc_loss     = F.smooth_l1_loss(delta_hat, a_data, beta=0.1)
 
@@ -334,11 +356,13 @@ class SACOfflineAgent(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         opt_critic, opt_actor, opt_alpha = self.optimizers()
         sch_critic, sch_actor, sch_alpha = self.lr_schedulers()
-        s, a_data, r_n, s_tn, done       = self._unpack(batch)
+        s, a_data, r_n, s_tn, done, time_t, time_tn = self._unpack(batch)
 
         # 1. Critic update (encoder included)
         opt_critic.zero_grad(set_to_none=True)
-        c_loss, td_loss, cql_pen, z_s, feats = self._critic_loss(s, a_data, r_n, s_tn, done)
+        c_loss, td_loss, cql_pen, z_s, feats = self._critic_loss(
+            s, a_data, r_n, s_tn, done, time_t, time_tn
+        )
         self.manual_backward(c_loss)
         nn.utils.clip_grad_norm_(
             list(self.encoder.parameters()) +
@@ -392,12 +416,12 @@ class SACOfflineAgent(pl.LightningModule):
     # ── Validation step ───────────────────────────────────────────────────────
 
     def validation_step(self, batch, batch_idx):
-        s, a_data, r_n, s_tn, done = self._unpack(batch)
+        s, a_data, r_n, s_tn, done, time_t, time_tn = self._unpack(batch)
 
         with torch.no_grad():
-            z_s, feats = self.encoder(s)
+            z_s, feats = self.encoder(s, time_t)
             _, _, a_det = self.actor.sample(z_s)
-            delta_hat   = self.decoder(feats, a_det, (self.grid_size, self.grid_size))
+            delta_hat   = self.decoder(feats, a_det, s.shape[-2:])
             y_hat       = s + delta_hat
 
             # Use s_tn as the forecast target.  For n_steps=1 this is the true
@@ -408,6 +432,12 @@ class SACOfflineAgent(pl.LightningModule):
             pers_mse = F.mse_loss(s, s_tn)
             skill    = 1.0 - mse / pers_mse.clamp(min=1e-8)
 
+            # One-step skill: prediction vs actual next frame (s + a_data)
+            y_true_1       = s + a_data
+            mse_1step      = F.mse_loss(y_hat, y_true_1)
+            pers_mse_1step = F.mse_loss(s, y_true_1)
+            skill_1step    = 1.0 - mse_1step / pers_mse_1step.clamp(min=1e-8)
+
             r_policy = compute_reward(s, delta_hat, s_tn).mean()
             r_pers   = persistence_reward(s, s_tn).mean()
 
@@ -416,17 +446,15 @@ class SACOfflineAgent(pl.LightningModule):
             # Obs-velocity channels are only evaluated inside covered cells.
             occ_mask = (s_tn[:, 4:5] > 0.05).float()   # (B, 1, H, W)
 
-            # Cache one sample (CPU): autoregressive n-step rollout for vis.
+            # Cache the first sample so on_validation_epoch_end can do the
+            # n-step rollout AFTER all ranks have synced (avoids DDP barrier
+            # timeout from rank 0 doing n_steps extra forward passes here).
             if batch_idx == 0 and self.trainer.is_global_zero:
-                rollout = [s[0].detach().cpu()]
-                s_roll = s[0:1]
-                for _ in range(self.n_steps):
-                    z_r, feats_r = self.encoder(s_roll)
-                    _, _, a_r    = self.actor.sample(z_r)
-                    d_r          = self.decoder(feats_r, a_r, (self.grid_size, self.grid_size))
-                    s_roll       = (s_roll + d_r)
-                    rollout.append(s_roll[0].detach().cpu())
-                self._val_vis = (rollout, s_tn[0].detach().cpu())
+                self._val_vis_seed = (
+                    s[0:1].detach(),        # (1, 6, H, W) on GPU
+                    time_t[0:1].detach(),   # (1, 4) on GPU
+                    s_tn[0].detach().cpu(), # (6, H, W) ground truth
+                )
 
             # Skip per-channel metrics during the sanity check — the extra
             # sync_dist all_reduces deadlock against PL's sanity-check metric
@@ -457,12 +485,16 @@ class SACOfflineAgent(pl.LightningModule):
 
         self.log('val/rmse',         mse.sqrt(),         prog_bar=True, sync_dist=True)
         self.log('val/skill_pers',   skill,              prog_bar=True, sync_dist=True)
+        self.log('val/skill_1step',  skill_1step,        prog_bar=True, sync_dist=True)
         self.log('val/r_policy',     r_policy,           sync_dist=True)
         self.log('val/r_pers',       r_pers,             sync_dist=True)
         self.log('val/r_delta',      r_policy - r_pers,  sync_dist=True)
 
     def on_validation_epoch_end(self):
         """Print a human-readable per-channel forecast summary to stdout (rank 0 only)."""
+        # trainer.log_dir triggers a DDP broadcast (collective) — call it here so
+        # every rank participates at the same point before the is_global_zero gate.
+        log_root = self.trainer.log_dir
         if not self.trainer.is_global_zero or self.trainer.sanity_checking:
             return
         m = self.trainer.callback_metrics
@@ -477,7 +509,8 @@ class SACOfflineAgent(pl.LightningModule):
             f"\n{'─'*72}\n"
             f"Validation epoch {self.current_epoch:>3d}  "
             f"(n_steps={self.n_steps}, γ={self.gamma})\n"
-            f"  Overall  RMSE  {_f('val/rmse')}   Skill vs pers {_f('val/skill_pers')}\n"
+            f"  Overall  RMSE  {_f('val/rmse')}   Skill vs pers {_f('val/skill_pers')}   "
+            f"Skill 1-step {_f('val/skill_1step')}\n"
             f"  Reward policy  {_f('val/r_policy')}   Reward pers   {_f('val/r_pers')}   "
             f"Δreward {_f('val/r_delta')}\n"
         )
@@ -497,15 +530,26 @@ class SACOfflineAgent(pl.LightningModule):
         rows.append("─" * 72)
         print(header + "\n".join(rows))
 
-        # Skip figure during sanity check — it would block rank-0 while other
-        # DDP ranks move on, causing a deadlock.
+        # All DDP ranks have synced by this point, so rank 0 can safely do
+        # the n-step autoregressive rollout without causing a barrier timeout.
         if (
             self.trainer.is_global_zero
-            and hasattr(self, '_val_vis')
+            and hasattr(self, '_val_vis_seed')
             and not self.trainer.sanity_checking
         ):
-            rollout_vis, s_tn_vis = self._val_vis
-            self._log_forecast_figure(rollout_vis, s_tn_vis)
+            s_seed, time_seed, s_tn_cpu = self._val_vis_seed
+            with torch.no_grad():
+                rollout   = [s_seed[0].cpu()]
+                s_roll    = s_seed
+                time_roll = time_seed
+                for _ in range(self.n_steps):
+                    z_r, feats_r = self.encoder(s_roll, time_roll)
+                    _, _, a_r    = self.actor.sample(z_r)
+                    d_r          = self.decoder(feats_r, a_r, s_roll.shape[-2:])
+                    s_roll       = s_roll + d_r
+                    time_roll    = _advance_time(time_roll, dt_hours=2.0 / 60.0)
+                    rollout.append(s_roll[0].cpu())
+            self._log_forecast_figure(rollout, s_tn_cpu, log_root=log_root)
 
     # ── Spatial forecast figures ──────────────────────────────────────────────
 
@@ -568,6 +612,7 @@ class SACOfflineAgent(pl.LightningModule):
         rollout:  list,            # [s_t, ŝ_{t+1}, ..., ŝ_{t+n}] each (6, H, W) CPU
         s_tn:     'torch.Tensor',  # (6, H, W) actual state at t+n
         min_mlat: float = 50.0,
+        log_root: 'str | None' = None,
     ):
         """
         Produce two figures and dispatch to W&B or {log_dir}/val_vis/.
@@ -583,10 +628,8 @@ class SACOfflineAgent(pl.LightningModule):
         epoch      = self.current_epoch
         n_steps    = self.n_steps
 
-        log_root = (
-            getattr(self.trainer, 'log_dir', None)
-            or self.trainer.default_root_dir
-        )
+        if log_root is None:
+            log_root = self.trainer.default_root_dir
         global_step = self.global_step
 
         def _worker():
@@ -809,13 +852,16 @@ class SACOfflineAgent(pl.LightningModule):
     # ── Inference ─────────────────────────────────────────────────────────────
 
     @torch.no_grad()
-    def predict(self, x_last: torch.Tensor) -> torch.Tensor:
+    def predict(self, x_last: torch.Tensor,
+                time_vec: 'torch.Tensor | None' = None) -> torch.Tensor:
         squeeze = x_last.ndim == 3
         if squeeze:
             x_last = x_last.unsqueeze(0)
-        z_s, feats  = self.encoder(x_last)
+        if time_vec is not None and time_vec.ndim == 1:
+            time_vec = time_vec.unsqueeze(0)
+        z_s, feats  = self.encoder(x_last, time_vec)
         _, _, a_det = self.actor.sample(z_s)
-        delta_hat   = self.decoder(feats, a_det, x_last.shape[-2:])
+        delta_hat   = self.decoder(feats, a_det, x_last.shape[-2:])  # always match input
         y_hat       = x_last + delta_hat
         return y_hat.squeeze(0) if squeeze else y_hat
 

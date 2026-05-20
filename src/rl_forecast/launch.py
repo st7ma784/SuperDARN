@@ -36,8 +36,9 @@ from tqdm import tqdm
 # Add parent directory to path so we can import the rl_forecast package
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
-from rl_forecast.agent import SACOfflineAgent
-from rl_forecast.datamodule import RLDataModule
+from rl_forecast.agent            import SACOfflineAgent
+from rl_forecast.multi_step_agent import MultiStepForecastAgent
+from rl_forecast.datamodule       import RLDataModule, MultiStepDataModule
 
 WANDB_PROJECT = "SuperDARN-RL"
 WANDB_ENTITY  = "st7ma784"
@@ -94,9 +95,11 @@ def train(args):
     multi_gpu = n_devices > 1
 
     if multi_gpu:
+        # SAC has unused params (critic_target not in forward); multi_step does not.
+        find_unused = (args.mode == 'sac')
         strategy = DDPStrategy(
             process_group_backend=args.backend,
-            find_unused_parameters=True,
+            find_unused_parameters=find_unused,
         )
         os.environ['NCCL_DEBUG'] = 'WARN'
     else:
@@ -110,36 +113,62 @@ def train(args):
     
     pl.seed_everything(args.seed, workers=True)
 
-    datamodule = RLDataModule(
-        data_dir=args.data_dir,
-        batch_size=args.batch_size,
-        n_steps=args.n_steps,
-        gamma=args.gamma,
-        num_input_frames=args.num_input_frames,
-        temporal_agg_frames=args.temporal_agg_frames,
-        val_split=args.val_split,
-    )
-
-    model = SACOfflineAgent(
-        grid_size=args.grid_size,
-        in_channels=6,
-        latent_dim=args.latent_dim,
-        action_latent_dim=args.action_latent_dim,
-        base_channels=args.base_channels,
-        n_steps=args.n_steps,
-        gamma=args.gamma,
-        tau=args.tau,
-        alpha_init=args.alpha_init,
-        cql_alpha=args.cql_alpha,
-        bc_weight=args.bc_weight,
-        actor_lr=args.actor_lr,
-        critic_lr=args.critic_lr,
-        alpha_lr=args.alpha_lr,
-        actor_update_freq=args.actor_update_freq,
-        warmup_steps=args.warmup_steps,
-        compile_networks=args.compile,
-        normalise_rewards=args.normalise_rewards,
-    )
+    if args.mode == 'multi_step':
+        datamodule = MultiStepDataModule(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            max_rollout_steps=args.max_rollout_steps,
+            num_input_frames=args.num_input_frames,
+            temporal_agg_frames=args.temporal_agg_frames,
+            val_split=args.val_split,
+        )
+        model = MultiStepForecastAgent(
+            grid_size=args.grid_size,
+            in_channels=6,
+            latent_dim=args.latent_dim,
+            action_latent_dim=args.action_latent_dim,
+            base_channels=args.base_channels,
+            max_rollout_steps=args.max_rollout_steps,
+            init_rollout_steps=args.init_rollout_steps,
+            curriculum_step_epochs=args.curriculum_step_epochs,
+            p_ss_max=args.p_ss_max,
+            p_ss_anneal_epochs=args.p_ss_anneal_epochs,
+            step_weight_scheme=args.step_weight_scheme,
+            gamma=args.gamma,
+            tv_weight=args.tv_weight,
+            lr=args.lr,
+            warmup_steps=args.warmup_steps,
+        )
+    else:
+        datamodule = RLDataModule(
+            data_dir=args.data_dir,
+            batch_size=args.batch_size,
+            n_steps=args.n_steps,
+            gamma=args.gamma,
+            num_input_frames=args.num_input_frames,
+            temporal_agg_frames=args.temporal_agg_frames,
+            val_split=args.val_split,
+        )
+        model = SACOfflineAgent(
+            grid_size=args.grid_size,
+            in_channels=6,
+            latent_dim=args.latent_dim,
+            action_latent_dim=args.action_latent_dim,
+            base_channels=args.base_channels,
+            n_steps=args.n_steps,
+            gamma=args.gamma,
+            tau=args.tau,
+            alpha_init=args.alpha_init,
+            cql_alpha=args.cql_alpha,
+            bc_weight=args.bc_weight,
+            actor_lr=args.actor_lr,
+            critic_lr=args.critic_lr,
+            alpha_lr=args.alpha_lr,
+            actor_update_freq=args.actor_update_freq,
+            warmup_steps=args.warmup_steps,
+            compile_networks=args.compile,
+            normalise_rewards=args.normalise_rewards,
+        )
 
     run_name = "rl-{}".format(datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
     logtool  = None
@@ -188,7 +217,7 @@ def train(args):
         log_every_n_steps=args.log_every_n_steps,
     )
 
-    trainer.fit(model, datamodule)
+    trainer.fit(model, datamodule, ckpt_path=args.resume_from)
 
     if logtool is not None:
         try:
@@ -214,6 +243,12 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--max_mlat",         type=float, default=90.0,
                    help="Maximum magnetic latitude for polar grid (degrees)")
     
+    # Mode
+    p.add_argument("--mode", type=str, default="multi_step",
+                   choices=["sac", "multi_step"],
+                   help="Training mode: 'multi_step' (supervised rollout, recommended) "
+                        "or 'sac' (offline SAC+CQL, legacy).")
+
     # Data
     g = p.add_argument_group("Data")
     g.add_argument("--data_dir",           type=str,   required=True,
@@ -233,14 +268,34 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--action_latent_dim",  type=int,   default=128)
     g.add_argument("--base_channels",      type=int,   default=64)
 
-    # RL hyperparameters
-    g = p.add_argument_group("RL")
+    # Multi-step supervised hyperparameters
+    g = p.add_argument_group("Multi-step supervised (--mode multi_step)")
+    g.add_argument("--max_rollout_steps",      type=int,   default=12,
+                   help="Maximum autoregressive rollout length K.")
+    g.add_argument("--init_rollout_steps",     type=int,   default=1,
+                   help="Starting K for curriculum (1 = one-step supervised).")
+    g.add_argument("--curriculum_step_epochs", type=int,   default=5,
+                   help="Increase K by 1 every N epochs.")
+    g.add_argument("--p_ss_max",               type=float, default=0.5,
+                   help="Maximum scheduled-sampling probability.")
+    g.add_argument("--p_ss_anneal_epochs",     type=int,   default=20,
+                   help="Epochs to linearly anneal scheduled sampling 0 → p_ss_max.")
+    g.add_argument("--step_weight_scheme",     type=str,   default="uniform",
+                   choices=["uniform", "geometric"],
+                   help="How to weight per-step losses: uniform or geometric.")
+    g.add_argument("--tv_weight",              type=float, default=0.01,
+                   help="Total-variation smoothness penalty weight on obs channels.")
+    g.add_argument("--lr",                     type=float, default=3e-4,
+                   help="Learning rate (single optimiser, multi_step mode).")
+
+    # RL hyperparameters (SAC only)
+    g = p.add_argument_group("RL (--mode sac only)")
     g.add_argument("--n_steps",            type=int,   default=6,
                    help="N-step return horizon; must match datamodule")
     g.add_argument("--gamma",              type=float, default=0.99)
     g.add_argument("--tau",                type=float, default=0.005)
     g.add_argument("--alpha_init",         type=float, default=0.2)
-    g.add_argument("--cql_alpha",          type=float, default=1.0)
+    g.add_argument("--cql_alpha",          type=float, default=0.1)
     g.add_argument("--bc_weight",          type=float, default=0.5)
     g.add_argument("--actor_update_freq",  type=int,   default=2)
 
@@ -279,6 +334,8 @@ def build_parser() -> argparse.ArgumentParser:
     g.add_argument("--wandb",              action="store_true")
     g.add_argument("--slurm",              action="store_true",
                    help="Print an sbatch script and exit (does not submit)")
+    g.add_argument("--resume_from",        type=str, default=None,
+                   help="Path to a checkpoint to resume training from (weights + optimiser states)")
 
     return p
 

@@ -17,6 +17,7 @@ Only indices where frames [i … i+n] all lie in the same file chunk (temporally
 contiguous) are exposed; the valid-index mask is computed once at construction.
 """
 
+import math
 import os
 import sys
 import numpy as np
@@ -38,6 +39,18 @@ except ImportError as e:
 
 from .reward import compute_reward, reward_relative_to_persistence
 
+_TWO_PI = 2.0 * math.pi
+
+
+def _time_tensor(ut_hours: float, doy: float) -> torch.Tensor:
+    """4-element time feature: [sin_UT, cos_UT, sin_DOY, cos_DOY]."""
+    return torch.tensor([
+        math.sin(_TWO_PI * ut_hours / 24.0),
+        math.cos(_TWO_PI * ut_hours / 24.0),
+        math.sin(_TWO_PI * doy / 365.25),
+        math.cos(_TWO_PI * doy / 365.25),
+    ], dtype=torch.float32)
+
 
 class NStepRLTransitionDataset(Dataset):
     """
@@ -54,14 +67,16 @@ class NStepRLTransitionDataset(Dataset):
         gamma:    RL discount factor (must match agent)
     """
 
-    def __init__(self, base: DatasetFromPresaved, n_steps: int = 6, gamma: float = 0.99):
-        self.base    = base
-        self.n_steps = n_steps
-        self.gamma   = gamma
-        self._gammas = torch.tensor(
+    def __init__(self, base: DatasetFromPresaved, n_steps: int = 6, gamma: float = 0.99,
+                 timestamps: 'np.ndarray | None' = None):
+        self.base        = base
+        self.n_steps     = n_steps
+        self.gamma       = gamma
+        self._gammas     = torch.tensor(
             [gamma ** k for k in range(n_steps)], dtype=torch.float32
         )
-        self._valid  = self._compute_valid_indices()
+        self._timestamps = timestamps   # (total_frames, 2): [ut_hours, doy] or None
+        self._valid      = self._compute_valid_indices()
 
     def _compute_valid_indices(self) -> np.ndarray:
         cs       = np.asarray(self.base.cumulative_sizes, dtype=np.int64)
@@ -105,12 +120,181 @@ class NStepRLTransitionDataset(Dataset):
             )  # (1,)  improvement over persistence forecast
             r_n += self._gammas[k] * r_k
 
-        s_t   = x_lasts[0]           # (C, H, W)
-        a_t   = ys[0] - x_lasts[0]   # observed delta at t
-        s_tn  = x_lasts[self.n_steps] # (C, H, W)  bootstrap state at t+n
+        s_t   = x_lasts[0]            # (C, H, W)
+        a_t   = ys[0] - x_lasts[0]    # observed delta at t
+        s_tn  = x_lasts[self.n_steps]  # (C, H, W)  bootstrap state at t+n
         done  = torch.zeros(1, dtype=torch.float32)
 
-        return s_t, a_t, r_n.squeeze(0), s_tn, done
+        # Time conditioning: [sin_UT, cos_UT, sin_DOY, cos_DOY] for t and t+n
+        if self._timestamps is not None and base_idx < len(self._timestamps):
+            ut0, doy0 = float(self._timestamps[base_idx, 0]), float(self._timestamps[base_idx, 1])
+            time_t    = _time_tensor(ut0, doy0)
+            # Advance UT by n_steps × 2 min; DOY rolls over midnight if needed
+            ut_n  = ut0 + self.n_steps * 2.0 / 60.0
+            doy_n = doy0 + math.floor(ut_n / 24.0)
+            ut_n  = ut_n % 24.0
+            time_tn = _time_tensor(ut_n, doy_n)
+        else:
+            time_t  = torch.zeros(4, dtype=torch.float32)
+            time_tn = torch.zeros(4, dtype=torch.float32)
+
+        return s_t, a_t, r_n.squeeze(0), s_tn, done, time_t, time_tn
+
+
+class MultiStepDataset(Dataset):
+    """
+    Supervised multi-step dataset.  Each item is a contiguous sequence of
+    ``max_steps + 1`` normalised frames, together with their time vectors::
+
+        states    (max_steps+1, C, H, W)   frames t, t+1, …, t+max_steps
+        time_vecs (max_steps+1, 4)          sinusoidal time features per frame
+
+    Only temporally contiguous indices (within a single mmap'd file chunk)
+    are exposed, matching the validity logic of NStepRLTransitionDataset.
+    """
+
+    def __init__(self, base: DatasetFromPresaved, max_steps: int = 12,
+                 timestamps: 'np.ndarray | None' = None):
+        self.base        = base
+        self.max_steps   = max_steps
+        self._timestamps = timestamps
+        self._valid      = self._compute_valid_indices()
+
+    def _compute_valid_indices(self) -> np.ndarray:
+        cs       = np.asarray(self.base.cumulative_sizes, dtype=np.int64)
+        n        = self.max_steps
+        lookback = self.base.num_input_frames * self.base.temporal_agg_frames - 1
+        total    = max(0, len(self.base) - n)
+        idxs     = np.arange(total, dtype=np.int64)
+        fi_start = np.searchsorted(cs, idxs,     side='right')
+        fi_end   = np.searchsorted(cs, idxs + n, side='right')
+        prev     = np.where(fi_start > 0, cs[np.maximum(fi_start - 1, 0)], 0)
+        valid    = (fi_start == fi_end) & ((idxs - prev) >= lookback)
+        return idxs[valid]
+
+    def __len__(self) -> int:
+        return len(self._valid)
+
+    def __getitem__(self, idx: int):
+        base_idx = int(self._valid[idx])
+        states   = []
+        for k in range(self.max_steps + 1):
+            _, x_last_k, _ = self.base[base_idx + k]
+            states.append(x_last_k)
+
+        time_vecs = []
+        if self._timestamps is not None and base_idx < len(self._timestamps):
+            ut0, doy0 = float(self._timestamps[base_idx, 0]), float(self._timestamps[base_idx, 1])
+            for k in range(self.max_steps + 1):
+                ut_k  = ut0 + k * 2.0 / 60.0
+                doy_k = doy0 + math.floor(ut_k / 24.0)
+                ut_k  = ut_k % 24.0
+                time_vecs.append(_time_tensor(ut_k, doy_k))
+        else:
+            for _ in range(self.max_steps + 1):
+                time_vecs.append(torch.zeros(4, dtype=torch.float32))
+
+        return torch.stack(states), torch.stack(time_vecs)
+
+
+class MultiStepDataModule(pl.LightningDataModule):
+    """
+    DataModule for supervised multi-step rollout training.
+
+    Args:
+        data_dir:        pre-saved dataset directory
+        batch_size:      samples per batch
+        max_rollout_steps: maximum K (defines how many future frames to load)
+        num_input_frames, temporal_agg_frames: passed to DatasetFromPresaved
+        val_split:       fraction held out for validation
+        num_workers:     DataLoader workers (None = auto)
+    """
+
+    def __init__(
+        self,
+        data_dir:             str,
+        batch_size:           int   = 16,
+        max_rollout_steps:    int   = 12,
+        num_input_frames:     int   = 1,
+        temporal_agg_frames:  int   = 1,
+        val_split:            float = 0.1,
+        num_workers:          'int | None' = None,
+        **kwargs,
+    ):
+        super().__init__()
+        self.data_dir           = data_dir
+        self.batch_size         = batch_size
+        self.max_rollout_steps  = max_rollout_steps
+        self.num_input_frames   = num_input_frames
+        self.temporal_agg_frames = temporal_agg_frames
+        self.val_split          = val_split
+        self.num_workers        = (
+            num_workers if num_workers is not None else min(8, os.cpu_count() or 1)
+        )
+        self.train_dataset: Dataset | None = None
+        self.val_dataset:   Dataset | None = None
+
+    def setup(self, stage=None):
+        dataA, dataB, shape = load_dataset_from_disk(self.data_dir)
+        base = DatasetFromPresaved(
+            dataA, dataB, shape,
+            num_input_frames=self.num_input_frames,
+            temporal_agg_frames=self.temporal_agg_frames,
+        )
+
+        n_base       = len(base)
+        n_train_base = max(1, int(n_base * (1.0 - self.val_split)))
+        rng          = np.random.default_rng(42)
+        sample_idx   = rng.choice(n_train_base, size=min(2000, n_train_base),
+                                  replace=False).astype(np.int64)
+        stats = base.compute_stats_from_indices(sample_idx)
+        for key in ('x_mean', 'y_mean'):
+            stats[key][4] = 0.0
+        for key in ('x_std', 'y_std'):
+            stats[key][4] = 1.0
+        base.set_normalization_stats(stats)
+        print(f"[datamodule] normalisation (y_std): "
+              f"vN={stats['y_std'][0]:.1f}  vE={stats['y_std'][1]:.1f}  "
+              f"mvN={stats['y_std'][2]:.1f}  mvE={stats['y_std'][3]:.1f}  "
+              f"occ={stats['y_std'][4]:.3f}  bnd={stats['y_std'][5]:.2f}")
+
+        ts_files = sorted(
+            os.path.join(self.data_dir, f)
+            for f in os.listdir(self.data_dir)
+            if f.startswith("timestamps_") and f.endswith(".npy")
+        )
+        if ts_files:
+            timestamps = np.concatenate([np.load(f) for f in ts_files], axis=0)
+            print(f"[datamodule] Loaded {len(timestamps):,} timestamps ({len(ts_files)} chunks)")
+        else:
+            timestamps = None
+            print("[datamodule] No timestamp files — time conditioning disabled")
+
+        full = MultiStepDataset(base, max_steps=self.max_rollout_steps,
+                                timestamps=timestamps)
+        n_val   = max(1, int(len(full) * self.val_split))
+        n_train = len(full) - n_val
+        self.train_dataset, self.val_dataset = torch.utils.data.random_split(
+            full, [n_train, n_val],
+            generator=torch.Generator().manual_seed(42),
+        )
+
+    def train_dataloader(self) -> DataLoader:
+        nw = self.num_workers
+        return DataLoader(
+            self.train_dataset, batch_size=self.batch_size, shuffle=True,
+            num_workers=nw, pin_memory=True,
+            persistent_workers=nw > 0,
+            prefetch_factor=4 if nw > 0 else None,
+            drop_last=True,
+        )
+
+    def val_dataloader(self) -> DataLoader:
+        nw = min(2, self.num_workers)
+        return DataLoader(
+            self.val_dataset, batch_size=self.batch_size, shuffle=False,
+            num_workers=nw, pin_memory=True, persistent_workers=False,
+        )
 
 
 class RLDataModule(pl.LightningDataModule):
@@ -189,7 +373,21 @@ class RLDataModule(pl.LightningDataModule):
               f"mvN={stats['y_std'][2]:.1f}  mvE={stats['y_std'][3]:.1f}  "
               f"occ={stats['y_std'][4]:.3f}  bnd={stats['y_std'][5]:.2f}")
 
-        full = NStepRLTransitionDataset(base, n_steps=self.n_steps, gamma=self.gamma)
+        # Load timestamp files (chunk-aligned with dataA_*.npy)
+        ts_files = sorted(
+            os.path.join(self.data_dir, f)
+            for f in os.listdir(self.data_dir)
+            if f.startswith("timestamps_") and f.endswith(".npy")
+        )
+        if ts_files:
+            timestamps = np.concatenate([np.load(f) for f in ts_files], axis=0)
+            print(f"[datamodule] Loaded {len(timestamps):,} timestamps ({len(ts_files)} chunks)")
+        else:
+            timestamps = None
+            print("[datamodule] No timestamp files — time conditioning disabled (run extract_timestamps_to_disk)")
+
+        full = NStepRLTransitionDataset(base, n_steps=self.n_steps, gamma=self.gamma,
+                                        timestamps=timestamps)
 
         n_val   = max(1, int(len(full) * self.val_split))
         n_train = len(full) - n_val
