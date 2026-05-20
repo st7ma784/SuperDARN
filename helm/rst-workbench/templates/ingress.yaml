@@ -1,0 +1,85 @@
+{{- if .Values.ingress.enabled }}
+{{- /*
+  Resolve the ingress host:
+    1. Use .Values.ingress.hosts[0].host if explicitly set.
+    2. Otherwise read the "domain" label from the Rancher local cluster CRD
+       (management.cattle.io/v3 Cluster "local") and build:
+           <ingressSubdomain>.<domain>
+       e.g. rst.stevemander.uk
+  This avoids Fleet's ${CLUSTER_LABELS_DOMAIN} string substitution, which is
+  prone to escaping issues.
+*/ -}}
+{{- $host := include "rst-workbench.ingressHost" . -}}
+{{- if $host }}
+{{- $tlsHosts := list $host -}}
+{{- $tls := .Values.ingress.tls -}}
+{{- if not $tls -}}
+{{- $tls = list (dict "hosts" $tlsHosts "secretName" .Values.ingress.tlsSecretName) -}}
+{{- end -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rst-workbench
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "rst-workbench.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ingress
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  tls:
+    {{- range $tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  rules:
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: rst-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: rst-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /docs
+            pathType: Prefix
+            backend:
+              service:
+                name: rst-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /openapi.json
+            pathType: Exact
+            backend:
+              service:
+                name: rst-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          {{- if .Values.frontend.enabled }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rst-frontend
+                port:
+                  number: {{ .Values.frontend.service.port }}
+          {{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,34 @@
+SuperDARN RST Interactive Workbench
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Values.namespace }}
+
+{{- $host := include "rst-workbench.ingressHost" . }}
+{{- if $host }}
+
+  Workbench URL:   https://{{ $host }}
+  API base:        https://{{ $host }}/api
+  WebSocket:       wss://{{ $host }}/ws/progress
+  OpenAPI docs:    https://{{ $host }}/docs
+
+{{- else }}
+
+  No ingress host could be resolved.
+
+  Either set ingress.hosts[0].host explicitly, or stamp a "domain" label onto
+  the Rancher local Cluster CRD so the chart can derive the host as
+  <ingressSubdomain>.<domain> (default "rst.<domain>").
+
+  Inspect with:  kubectl get cluster.management.cattle.io local -o yaml
+{{- end }}
+
+Backends enabled:
+  CPU:  {{ .Values.backend.cpu.enabled }}
+  CUDA: {{ .Values.backend.cuda.enabled }}
+
+Both variants register pods under Service/rst-backend (selector app=rst-backend)
+so traffic is shared automatically when more than one is enabled.
+
+Tail logs:
+  kubectl -n {{ .Values.namespace }} logs -l app=rst-backend --tail=100 -f
+  kubectl -n {{ .Values.namespace }} logs -l app=rst-frontend --tail=100 -f

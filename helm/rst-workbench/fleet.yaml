@@ -1,0 +1,50 @@
+defaultNamespace: rst-workbench
+
+helm:
+  releaseName: rst-workbench
+  # Chart lives in this same directory — fleet.yaml acts as the bundle root,
+  # so Fleet only packages helm/rst-workbench/** (templates + values), not the
+  # rest of the SuperDARN tree. This keeps the bundle well under Rancher's
+  # 3 MB API request limit. Belt-and-braces .fleetignore entries below add a
+  # second layer of exclusion in case the file ever moves up the tree.
+  chart: .
+
+# The ingress host is resolved directly in templates/ingress.yaml via Helm's
+# lookup() against the Rancher cluster CRD (management.cattle.io/v3/Cluster
+# "local"), reading the "domain" label stamped at provision time. No Fleet
+# ${CLUSTER_LABELS_DOMAIN} substitution needed — that approach was prone to
+# escaping issues.
+#
+# Override the subdomain or images per environment with targetCustomizations:
+#
+# targetCustomizations:
+#   - name: production
+#     clusterSelector:
+#       matchLabels:
+#         env: production
+#     helm:
+#       values:
+#         backend:
+#           cuda:
+#             enabled: true
+#
+#   - name: dev
+#     clusterSelector:
+#       matchLabels:
+#         env: dev
+#     helm:
+#       values:
+#         ingressSubdomain: rst-dev
+
+ignore:
+  conditions:
+    - path: ../../external
+    - path: ../../src
+    - path: ../../build
+    - path: ../../images
+    - path: ../../tests
+    - path: ../../val_vis
+    - path: ../../docs
+    - path: ../../.git
+    - path: ../../.github
+    - path: "*.tgz"

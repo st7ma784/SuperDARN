@@ -1,0 +1,12 @@
+# Helm chart ignore — keep the packaged chart small.
+.DS_Store
+.git/
+.gitignore
+.github/
+*.tgz
+*.swp
+*.swo
+*~
+README.md
+fleet.yaml
+.fleetignore

@@ -1,0 +1,11 @@
+# Fleet bundle ignore (chart-scoped).
+# fleet.yaml lives in this directory, so Fleet only walks helm/rst-workbench/**
+# anyway — these patterns just trim build artefacts and dotfiles to be safe.
+*.tgz
+*.swp
+*.swo
+*~
+.DS_Store
+.git/
+.github/
+README.md
