@@ -1,17 +1,25 @@
 # Default values for the rst-workbench Helm chart
 #
-# Ingress — host/TLS are resolved dynamically by ingress.yaml using Helm's
-# lookup() against the Rancher cluster CRD's "domain" label. Do not hardcode
-# the hostname here. The ingress will be exposed at:
-#     rst.<cluster-domain-label>
-# e.g. if the cluster has label domain=stevemander.uk → rst.stevemander.uk.
+# Ingress — host/TLS are resolved dynamically at template time by reading the
+# `clusteros-config` ConfigMap in kube-system (ClusterOS publishes the cluster
+# domain there as the source of truth). Do NOT hardcode the hostname here.
+#
+# Resolution order (see templates/_helpers.tpl :: rst-workbench.ingressHost):
+#   1. ingress.hosts[0].host if set (escape hatch)
+#   2. <ingressSubdomain>.<clusteros-config.domain>   -> domain mode
+#   3. <node-ip-with-dashes>.nip.io                   -> nip mode (LAN only)
+#
+# Per the ClusterOS helm-ingress guide, annotation keys go in YAML (here),
+# never via `helm --set` — Helm parses dots as path separators and the chart
+# extraAnnotations layer drops backslash escapes.
 
 # Global namespace for all resources
 namespace: rst-workbench
 
 # Subdomain prefix used when auto-deriving the host from the cluster's
-# "domain" label (e.g. "rst" → rst.<domain>). Override per-environment in
-# fleet.yaml targetCustomizations if you need a different prefix.
+# domain (e.g. "rst" -> rst.<clusteros-config.domain>). Override per-
+# environment in fleet.yaml targetCustomizations if you need a different
+# prefix.
 ingressSubdomain: rst
 
 # -----------------------------------------------------------------------------
@@ -137,23 +145,33 @@ redis:
       memory: 256Mi
 
 # -----------------------------------------------------------------------------
-# Ingress — annotations only. Host + TLS are filled in by the template using
-# the Rancher cluster CRD's "domain" label (see ingress.yaml). To override
-# the host explicitly, set ingress.hosts directly (skips lookup).
+# Ingress — annotations only. Host + TLS are filled in by the template by
+# reading the clusteros-config ConfigMap (see _helpers.tpl). To override the
+# host explicitly, set ingress.hosts directly (skips ConfigMap + nip.io).
+#
+# Annotation defaults follow the ClusterOS guide: in domain mode Cloudflare
+# terminates TLS upstream, so ssl-redirect is false (otherwise nginx fights
+# Cloudflare's HTTPS termination and produces a redirect loop on empty-host
+# probes). cert-manager is only used when ingress.tls is set explicitly.
 # -----------------------------------------------------------------------------
 ingress:
   enabled: true
   className: nginx
   annotations:
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # Cloudflare terminates TLS; nginx serves HTTP behind the tunnel.
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-body-size: "200m"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
     # WebSocket support for /ws/progress
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
-  # Leave empty to auto-derive from cluster domain label.
+  # Leave empty to auto-derive: <ingressSubdomain>.<clusteros-config.domain>,
+  # falling back to <node-ip>.nip.io when no domain is configured.
   hosts: []
+  # Leave empty to skip TLS (correct for both Cloudflare-terminated domain
+  # mode and nip.io mode). Set explicitly only when you want cert-manager to
+  # issue a cert at the ingress itself.
   tls: []
   tlsSecretName: rst-workbench-tls
 
