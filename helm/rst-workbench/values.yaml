@@ -1,25 +1,45 @@
 # Default values for the rst-workbench Helm chart
 #
-# Ingress — host/TLS are resolved dynamically at template time by reading the
-# `clusteros-config` ConfigMap in kube-system (ClusterOS publishes the cluster
-# domain there as the source of truth). Do NOT hardcode the hostname here.
+# Ingress host/TLS are resolved per the ClusterOS helm-ingress guide. The
+# preferred source of truth is the `clusteros-helm-values` ConfigMap that the
+# node-agent publishes into the fleet-local and fleet-default namespaces; the
+# `global:` block below mirrors that contract and gets overlaid by Fleet's
+# `valuesFrom` at deploy time (see fleet.yaml). For non-Fleet `helm install`,
+# the chart falls back to reading `clusteros-config` from kube-system, and
+# finally to a <node-ip>.nip.io address.
 #
 # Resolution order (see templates/_helpers.tpl :: rst-workbench.ingressHost):
 #   1. ingress.hosts[0].host if set (escape hatch)
-#   2. <ingressSubdomain>.<clusteros-config.domain>   -> domain mode
-#   3. <node-ip-with-dashes>.nip.io                   -> nip mode (LAN only)
+#   2. <ingressSubdomain>.<global.clusterDomain>      -> domain mode (Fleet)
+#   3. <ingressSubdomain>.<clusteros-config.domain>   -> domain mode (helm install)
+#   4. <node-ip-with-dashes>.nip.io                   -> nip mode (LAN only)
 #
-# Per the ClusterOS helm-ingress guide, annotation keys go in YAML (here),
+# Per the guide, annotation keys go in YAML (here or in fleet.yaml helm.values),
 # never via `helm --set` — Helm parses dots as path separators and the chart
 # extraAnnotations layer drops backslash escapes.
+
+# -----------------------------------------------------------------------------
+# Global — mirrors the schema in clusteros-helm-values (fleet-local /
+# fleet-default). Fleet's `valuesFrom` overlays this block at deploy time, so
+# every chart in the cluster picks up the live domain + ssl-redirect settings
+# without each repo embedding them. Defaults here are the safe nip.io-mode
+# values used when no Fleet override is applied.
+# -----------------------------------------------------------------------------
+global:
+  clusterDomain: ""           # Filled by clusteros-helm-values (e.g. "example.com")
+  clusterMode: "nip"          # "domain" when CLOUDFLARE_DOMAIN is set, else "nip"
+  rancherHost: ""             # rancher.<clusterDomain>; informational only here
+  sslRedirect: "true"         # Cluster overrides to "false" when Cloudflare in front
+  # Cluster-wide ingress annotations. Merged before chart-specific
+  # ingress.annotations below; chart annotations win on key conflict.
+  ingressAnnotations: {}
 
 # Global namespace for all resources
 namespace: rst-workbench
 
 # Subdomain prefix used when auto-deriving the host from the cluster's
-# domain (e.g. "rst" -> rst.<clusteros-config.domain>). Override per-
-# environment in fleet.yaml targetCustomizations if you need a different
-# prefix.
+# domain (e.g. "rst" -> rst.<global.clusterDomain>). Override per-environment
+# in fleet.yaml targetCustomizations if you need a different prefix.
 ingressSubdomain: rst
 
 # -----------------------------------------------------------------------------
@@ -145,14 +165,21 @@ redis:
       memory: 256Mi
 
 # -----------------------------------------------------------------------------
-# Ingress — annotations only. Host + TLS are filled in by the template by
-# reading the clusteros-config ConfigMap (see _helpers.tpl). To override the
-# host explicitly, set ingress.hosts directly (skips ConfigMap + nip.io).
+# Ingress — chart-specific annotations only. The host is derived in
+# _helpers.tpl from global.clusterDomain (Fleet path) or, as fallback, the
+# `clusteros-config` ConfigMap (helm-install path). To override the host
+# explicitly, set ingress.hosts directly (skips ConfigMap + nip.io).
 #
-# Annotation defaults follow the ClusterOS guide: in domain mode Cloudflare
-# terminates TLS upstream, so ssl-redirect is false (otherwise nginx fights
-# Cloudflare's HTTPS termination and produces a redirect loop on empty-host
-# probes). cert-manager is only used when ingress.tls is set explicitly.
+# Final annotation map on the rendered Ingress = global.ingressAnnotations
+# merged with this block (chart-specific keys win on conflict). The cluster
+# provides ssl-redirect and force-ssl-redirect via global.ingressAnnotations
+# when Cloudflare is in front; the values here add WebSocket / proxy-body
+# limits the cluster doesn't set.
+#
+# In domain mode Cloudflare terminates TLS upstream, so ssl-redirect is false
+# (otherwise nginx fights Cloudflare's HTTPS termination and produces a
+# redirect loop on empty-host probes). cert-manager is only used when
+# ingress.tls is set explicitly.
 # -----------------------------------------------------------------------------
 ingress:
   enabled: true

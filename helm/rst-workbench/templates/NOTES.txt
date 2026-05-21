@@ -15,11 +15,19 @@ Namespace: {{ .Values.namespace }}
 
   No ingress host could be resolved.
 
-  Either set ingress.hosts[0].host explicitly, or stamp a "domain" label onto
-  the Rancher local Cluster CRD so the chart can derive the host as
-  <ingressSubdomain>.<domain> (default "rst.<domain>").
+  Resolution order (see _helpers.tpl :: rst-workbench.ingressHost):
+    1. .Values.ingress.hosts[0].host (escape hatch)
+    2. .Values.global.clusterDomain      (Fleet valuesFrom path)
+    3. ConfigMap kube-system/clusteros-config key "domain"   (helm install)
+    4. <node-internal-ip>.nip.io                              (LAN fallback)
 
-  Inspect with:  kubectl get cluster.management.cattle.io local -o yaml
+  Either set ingress.hosts[0].host explicitly, or make sure ClusterOS has a
+  CLOUDFLARE_DOMAIN configured in /etc/clusteros/cloudflare.env so the
+  node-agent publishes clusteros-config and clusteros-helm-values.
+
+  Inspect with:
+    kubectl get cm clusteros-config -n kube-system -o yaml
+    kubectl get cm clusteros-helm-values -n fleet-local -o yaml
 {{- end }}
 
 Backends enabled:

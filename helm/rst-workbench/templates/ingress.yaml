@@ -14,9 +14,22 @@ metadata:
   labels:
     {{- include "rst-workbench.labels" . | nindent 4 }}
     app.kubernetes.io/component: ingress
-  {{- with .Values.ingress.annotations }}
+  {{- /*
+    Annotation map. Per the ClusterOS helm-ingress guide we layer
+    global.ingressAnnotations (published by the cluster via
+    clusteros-helm-values, e.g. ssl-redirect / force-ssl-redirect when
+    Cloudflare is in front) first, then chart-specific ingress.annotations
+    on top so chart keys win on conflict. Empty maps render nothing.
+  */ -}}
+  {{- $globalAnn := dict -}}
+  {{- if .Values.global -}}
+    {{- $globalAnn = .Values.global.ingressAnnotations | default dict -}}
+  {{- end -}}
+  {{- $chartAnn := .Values.ingress.annotations | default dict -}}
+  {{- $allAnn := merge (deepCopy $chartAnn) $globalAnn -}}
+  {{- if $allAnn }}
   annotations:
-    {{- toYaml . | nindent 4 }}
+    {{- toYaml $allAnn | nindent 4 }}
   {{- end }}
 spec:
   {{- if .Values.ingress.className }}

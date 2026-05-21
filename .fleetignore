@@ -7,11 +7,17 @@
 # patterns keep the GitRepo well under Rancher's 3 MB API request limit by
 # excluding the large submodules, build outputs, datasets and notebooks.
 
-# Submodules — every byte of RST source, weatherlearn checkpoints, chord-dht,
-# etc. lives here. None of it belongs in a Helm bundle.
+# Submodules — every byte of RST source (57 MB after the SuperDARN merge),
+# weatherlearn checkpoints, chord-dht, etc. lives here. None of it belongs
+# in a Helm bundle, and a recurse-submodule git clone in Fleet can blow
+# straight through the 3 MiB Rancher API request limit if these aren't
+# excluded explicitly.
 external/
+external/rst/
+src/
 src/weatherlearn/
 src/chorddht/
+src/rl_forecast/
 
 # Build artefacts and data
 build/
@@ -19,6 +25,13 @@ val_vis/
 images/
 tests/
 docs/
+
+# Anything outside the helm/ tree is irrelevant to the bundle and just adds
+# bytes Rancher has to base64-encode into the Bundle CR.
+LICENSE
+README.md
+pyproject.toml
+.gitmodules
 
 # Notebooks, models, archives
 *.ipynb

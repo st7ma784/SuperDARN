@@ -10,20 +10,30 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | 
 {{- end -}}
 
 {{/*
-Resolve the cluster domain from the clusteros-config ConfigMap.
+Resolve the cluster domain.
 
-ClusterOS publishes /etc/clusteros/cloudflare.env into the cluster as the
-`clusteros-config` ConfigMap in kube-system (keys: domain, rancher-host, mode).
-That ConfigMap is the source of truth; the previous Rancher cluster-label
-lookup is intentionally not used here.
+Per the ClusterOS helm-ingress guide, the preferred source is Fleet's
+`valuesFrom` ConfigMap (`clusteros-helm-values` in fleet-local / fleet-default),
+which Fleet overlays onto `.Values.global.clusterDomain` at deploy time. For
+non-Fleet installs (plain `helm install`) we fall back to reading
+`clusteros-config` from kube-system directly. The Rancher cluster-label
+lookup used by an earlier version of this chart is intentionally retired.
 
 Returns the bare domain (e.g. "example.com") or "" when the cluster has no
 domain configured (nip.io mode).
 */}}
 {{- define "rst-workbench.clusterDomain" -}}
+{{- $fromValues := "" -}}
+{{- if .Values.global -}}
+  {{- $fromValues = .Values.global.clusterDomain | default "" -}}
+{{- end -}}
+{{- if $fromValues -}}
+{{- $fromValues -}}
+{{- else -}}
 {{- $cm := lookup "v1" "ConfigMap" "kube-system" "clusteros-config" -}}
 {{- if and $cm $cm.data -}}
 {{- index $cm.data "domain" | default "" -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
