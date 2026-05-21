@@ -9,26 +9,30 @@ helm:
   # second layer of exclusion in case the file ever moves up the tree.
   chart: .
 
-  # Per the ClusterOS helm-ingress guide, the cluster domain + ingress
-  # annotations come from the `clusteros-helm-values` ConfigMap that the
-  # node-agent publishes into both fleet-local and fleet-default. This
-  # GitRepo targets the local cluster, so we reference the fleet-local
-  # copy. Fleet overlays this onto the chart's values.yaml before applying
-  # helm.values overrides below.
+  # Ingress host is resolved by the chart's _helpers.tpl, which per the
+  # ClusterOS helm-ingress guide reads kube-system/clusteros-config (the
+  # source of truth that the node-agent always publishes), then falls back
+  # to a <node-ip>.nip.io address.
   #
-  # The chart still falls back to a kube-system/clusteros-config lookup()
-  # for non-Fleet `helm install` testing — see _helpers.tpl.
-  valuesFrom:
-    - configMapKeyRef:
-        name: clusteros-helm-values
-        namespace: fleet-local
-        key: values.yaml
+  # NOTE: Fleet's optional `valuesFrom: clusteros-helm-values` path is NOT
+  # used here. That ConfigMap is published by newer ClusterOS node-agents
+  # in fleet-local / fleet-default, but Fleet's configMapKeyRef has no
+  # `optional:` flag — if the CM is absent the whole bundle fails with
+  # `ErrApplied ... configmaps "clusteros-helm-values" not found`.
+  # If your cluster publishes it and you want cluster-side annotation
+  # overrides flowing in, re-enable by uncommenting:
+  #
+  # valuesFrom:
+  #   - configMapKeyRef:
+  #       name: clusteros-helm-values
+  #       namespace: fleet-local        # or fleet-default for remote targets
+  #       key: values.yaml
 
-# Ingress host is now resolved in three layers:
-#   1. fleet.yaml helm.values.ingress.hosts (explicit override, none by default)
-#   2. .Values.global.clusterDomain   <- clusteros-helm-values via valuesFrom
-#   3. lookup() against kube-system/clusteros-config (helm-install fallback)
-# The earlier Rancher cluster-CRD label approach is intentionally retired.
+# Ingress host resolution order (see _helpers.tpl :: rst-workbench.ingressHost):
+#   1. .Values.ingress.hosts[0].host        (explicit override; none by default)
+#   2. .Values.global.clusterDomain         (set only if valuesFrom is re-enabled)
+#   3. lookup() against kube-system/clusteros-config key "domain"   <- ACTIVE PATH
+#   4. <node-internal-ip>.nip.io            (LAN fallback)
 #
 # Override the subdomain or images per environment with targetCustomizations:
 #

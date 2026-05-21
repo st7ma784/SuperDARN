@@ -12,12 +12,18 @@ helm.sh/chart: {{ printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | 
 {{/*
 Resolve the cluster domain.
 
-Per the ClusterOS helm-ingress guide, the preferred source is Fleet's
-`valuesFrom` ConfigMap (`clusteros-helm-values` in fleet-local / fleet-default),
-which Fleet overlays onto `.Values.global.clusterDomain` at deploy time. For
-non-Fleet installs (plain `helm install`) we fall back to reading
-`clusteros-config` from kube-system directly. The Rancher cluster-label
-lookup used by an earlier version of this chart is intentionally retired.
+Per the ClusterOS helm-ingress guide, the source of truth is the
+`clusteros-config` ConfigMap in kube-system (key `data.domain`), which the
+node-agent always publishes from /etc/clusteros/cloudflare.env. The chart
+reads it via Helm's lookup() — this is the ACTIVE path on every cluster.
+
+`.Values.global.clusterDomain` takes precedence if set, so operators can
+override via `--set global.clusterDomain=...` or re-enable Fleet's optional
+`valuesFrom: clusteros-helm-values` path in fleet.yaml on clusters whose
+node-agent also publishes that second ConfigMap.
+
+The Rancher cluster-label lookup used by an earlier version of this chart
+is intentionally retired.
 
 Returns the bare domain (e.g. "example.com") or "" when the cluster has no
 domain configured (nip.io mode).

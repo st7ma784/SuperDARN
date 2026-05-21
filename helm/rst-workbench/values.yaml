@@ -1,37 +1,39 @@
 # Default values for the rst-workbench Helm chart
 #
-# Ingress host/TLS are resolved per the ClusterOS helm-ingress guide. The
-# preferred source of truth is the `clusteros-helm-values` ConfigMap that the
-# node-agent publishes into the fleet-local and fleet-default namespaces; the
-# `global:` block below mirrors that contract and gets overlaid by Fleet's
-# `valuesFrom` at deploy time (see fleet.yaml). For non-Fleet `helm install`,
-# the chart falls back to reading `clusteros-config` from kube-system, and
-# finally to a <node-ip>.nip.io address.
+# Ingress host/TLS resolution follows the ClusterOS helm-ingress guide:
+# the source of truth is the `clusteros-config` ConfigMap in kube-system,
+# which the node-agent publishes from /etc/clusteros/cloudflare.env. The
+# chart reads it via Helm's `lookup()` (see templates/_helpers.tpl).
 #
 # Resolution order (see templates/_helpers.tpl :: rst-workbench.ingressHost):
-#   1. ingress.hosts[0].host if set (escape hatch)
-#   2. <ingressSubdomain>.<global.clusterDomain>      -> domain mode (Fleet)
-#   3. <ingressSubdomain>.<clusteros-config.domain>   -> domain mode (helm install)
-#   4. <node-ip-with-dashes>.nip.io                   -> nip mode (LAN only)
+#   1. ingress.hosts[0].host                              (explicit escape hatch)
+#   2. <ingressSubdomain>.<global.clusterDomain>          (only if overridden)
+#   3. <ingressSubdomain>.<clusteros-config.domain>       (ACTIVE PATH)
+#   4. <node-ip-with-dashes>.nip.io                       (LAN fallback)
+#
+# Fleet's `valuesFrom: clusteros-helm-values` is documented in the guide as
+# an optional addition on clusters whose node-agent publishes that second
+# ConfigMap. It's intentionally left disabled in fleet.yaml because Fleet
+# hard-fails the bundle when the CM is absent. See fleet.yaml for re-enable.
 #
 # Per the guide, annotation keys go in YAML (here or in fleet.yaml helm.values),
 # never via `helm --set` — Helm parses dots as path separators and the chart
 # extraAnnotations layer drops backslash escapes.
 
 # -----------------------------------------------------------------------------
-# Global — mirrors the schema in clusteros-helm-values (fleet-local /
-# fleet-default). Fleet's `valuesFrom` overlays this block at deploy time, so
-# every chart in the cluster picks up the live domain + ssl-redirect settings
-# without each repo embedding them. Defaults here are the safe nip.io-mode
-# values used when no Fleet override is applied.
+# Global — schema matches clusteros-helm-values (fleet-local / fleet-default)
+# so the block IS ready to accept Fleet's valuesFrom overlay if you re-enable
+# it in fleet.yaml. With valuesFrom disabled (default), these stay at their
+# safe defaults and the chart sources the domain via lookup() instead.
 # -----------------------------------------------------------------------------
 global:
-  clusterDomain: ""           # Filled by clusteros-helm-values (e.g. "example.com")
+  clusterDomain: ""           # If non-empty, takes precedence over lookup()
   clusterMode: "nip"          # "domain" when CLOUDFLARE_DOMAIN is set, else "nip"
   rancherHost: ""             # rancher.<clusterDomain>; informational only here
-  sslRedirect: "true"         # Cluster overrides to "false" when Cloudflare in front
-  # Cluster-wide ingress annotations. Merged before chart-specific
-  # ingress.annotations below; chart annotations win on key conflict.
+  sslRedirect: "true"         # Override to "false" when Cloudflare in front
+  # Optional cluster-wide ingress annotations. When set (via valuesFrom or
+  # --set), they merge with ingress.annotations below; chart annotations
+  # win on key conflict.
   ingressAnnotations: {}
 
 # Global namespace for all resources
