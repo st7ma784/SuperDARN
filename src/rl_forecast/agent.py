@@ -890,7 +890,7 @@ class SACOfflineAgent(pl.LightningModule):
                 optimizer, start_factor=0.05, end_factor=1.0, total_iters=warmup,
             )
             cosine_sched = torch.optim.lr_scheduler.CosineAnnealingLR(
-                optimizer, T_max=max(1, 200_000 - warmup), eta_min=base_lr * 0.01,
+                optimizer, T_max=max(1, 400_000 - warmup), eta_min=base_lr * 0.05,
             )
             return torch.optim.lr_scheduler.SequentialLR(
                 optimizer, [warmup_sched, cosine_sched], milestones=[warmup],

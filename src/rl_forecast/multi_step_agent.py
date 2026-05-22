@@ -618,7 +618,7 @@ class MultiStepForecastAgent(pl.LightningModule):
         warmup_sched = torch.optim.lr_scheduler.LinearLR(
             opt, start_factor=0.05, end_factor=1.0, total_iters=warmup)
         cosine_sched = torch.optim.lr_scheduler.CosineAnnealingLR(
-            opt, T_max=max(1, 200_000 - warmup), eta_min=self.hparams.lr * 0.01)
+            opt, T_max=max(1, 400_000 - warmup), eta_min=self.hparams.lr * 0.05)
         sch = torch.optim.lr_scheduler.SequentialLR(
             opt, [warmup_sched, cosine_sched], milestones=[warmup])
         return [opt], [sch]
