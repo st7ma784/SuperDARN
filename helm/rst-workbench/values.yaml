@@ -64,9 +64,17 @@ backend:
 
   # Shared persistence for uploads + processing results, mounted into every
   # backend pod at /tmp/siw_uploads and /tmp/siw_results.
+  #
+  # storageClass defaults to "longhorn" because the chart relies on
+  # ReadWriteMany so the cpu + cuda Deployments can mount the same PVC
+  # concurrently. The stock RKE2/Rancher default (`local-path`) is RWO-only,
+  # which leaves RWX PVCs Pending forever and trips
+  # MinimumReplicasUnavailable / ProgressDeadlineExceeded on the backend
+  # Deployment. Override to "" to use the cluster default, or to another
+  # RWX-capable class (e.g. nfs-client) per environment.
   persistence:
     enabled: true
-    storageClass: ""        # Empty = cluster default StorageClass
+    storageClass: longhorn
     accessMode: ReadWriteMany   # Multiple backend pods share the volume
     uploadsSize: 5Gi
     resultsSize: 10Gi
