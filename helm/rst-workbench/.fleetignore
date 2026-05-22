@@ -1,0 +1,39 @@
+# Fleet bundle ignore — chart-scoped.
+#
+# fleet.yaml lives in this directory, so Fleet walks helm/rst-workbench/**
+# when computing the Bundle CR. These patterns trim build artefacts, editor
+# noise, and anything large that has no business in a 72 KB helm chart.
+# Belt-and-braces against the 3 MiB Rancher API request limit.
+
+# Packaged helm output
+*.tgz
+*.tar
+*.tar.gz
+*.zip
+
+# Editor / OS
+*.swp
+*.swo
+*~
+.DS_Store
+
+# VCS / CI / docs that don't ship with the chart
+.git/
+.github/
+.gitignore
+README.md
+
+# Binaries that should never be in a values file or template
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.pdf
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.npy
+*.npz

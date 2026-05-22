@@ -1,0 +1,18 @@
+apiVersion: v2
+name: rst-workbench
+description: SuperDARN RST Interactive Workbench — FastAPI + React frontend with selectable CPU / CUDA backends
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - superdarn
+  - rst
+  - radar
+  - cuda
+  - rancher
+  - fleet
+maintainers:
+  - name: Dr S Mander
+sources:
+  - https://github.com/st7ma784/rst
+  - https://github.com/st7ma784/SuperDARN

@@ -1,0 +1,41 @@
+SuperDARN RST Interactive Workbench
+
+Release: {{ .Release.Name }}
+Namespace: {{ .Values.namespace }}
+
+{{- $host := include "rst-workbench.ingressHost" . }}
+{{- if $host }}
+
+  Workbench URL:   https://{{ $host }}
+  API base:        https://{{ $host }}/api
+  WebSocket:       wss://{{ $host }}/ws/progress
+  OpenAPI docs:    https://{{ $host }}/docs
+
+{{- else }}
+
+  No ingress host could be resolved.
+
+  Resolution order (see _helpers.tpl :: rst-workbench.ingressHost):
+    1. .Values.ingress.hosts[0].host                          (escape hatch)
+    2. .Values.global.clusterDomain                           (--set or valuesFrom override)
+    3. ConfigMap kube-system/clusteros-config key "domain"    (ACTIVE PATH)
+    4. <node-internal-ip>.nip.io                              (LAN fallback)
+
+  Either set ingress.hosts[0].host explicitly, or make sure ClusterOS has a
+  CLOUDFLARE_DOMAIN configured in /etc/clusteros/cloudflare.env so the
+  node-agent publishes clusteros-config.
+
+  Inspect with:
+    kubectl get cm clusteros-config -n kube-system -o yaml
+{{- end }}
+
+Backends enabled:
+  CPU:  {{ .Values.backend.cpu.enabled }}
+  CUDA: {{ .Values.backend.cuda.enabled }}
+
+Both variants register pods under Service/rst-backend (selector app=rst-backend)
+so traffic is shared automatically when more than one is enabled.
+
+Tail logs:
+  kubectl -n {{ .Values.namespace }} logs -l app=rst-backend --tail=100 -f
+  kubectl -n {{ .Values.namespace }} logs -l app=rst-frontend --tail=100 -f

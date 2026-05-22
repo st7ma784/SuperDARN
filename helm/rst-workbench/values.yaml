@@ -1,0 +1,207 @@
+# Default values for the rst-workbench Helm chart
+#
+# Ingress host/TLS resolution follows the ClusterOS helm-ingress guide:
+# the source of truth is the `clusteros-config` ConfigMap in kube-system,
+# which the node-agent publishes from /etc/clusteros/cloudflare.env. The
+# chart reads it via Helm's `lookup()` (see templates/_helpers.tpl).
+#
+# Resolution order (see templates/_helpers.tpl :: rst-workbench.ingressHost):
+#   1. ingress.hosts[0].host                              (explicit escape hatch)
+#   2. <ingressSubdomain>.<global.clusterDomain>          (only if overridden)
+#   3. <ingressSubdomain>.<clusteros-config.domain>       (ACTIVE PATH)
+#   4. <node-ip-with-dashes>.nip.io                       (LAN fallback)
+#
+# Fleet's `valuesFrom: clusteros-helm-values` is documented in the guide as
+# an optional addition on clusters whose node-agent publishes that second
+# ConfigMap. It's intentionally left disabled in fleet.yaml because Fleet
+# hard-fails the bundle when the CM is absent. See fleet.yaml for re-enable.
+#
+# Per the guide, annotation keys go in YAML (here or in fleet.yaml helm.values),
+# never via `helm --set` — Helm parses dots as path separators and the chart
+# extraAnnotations layer drops backslash escapes.
+
+# -----------------------------------------------------------------------------
+# Global — schema matches clusteros-helm-values (fleet-local / fleet-default)
+# so the block IS ready to accept Fleet's valuesFrom overlay if you re-enable
+# it in fleet.yaml. With valuesFrom disabled (default), these stay at their
+# safe defaults and the chart sources the domain via lookup() instead.
+# -----------------------------------------------------------------------------
+global:
+  clusterDomain: ""           # If non-empty, takes precedence over lookup()
+  clusterMode: "nip"          # "domain" when CLOUDFLARE_DOMAIN is set, else "nip"
+  rancherHost: ""             # rancher.<clusterDomain>; informational only here
+  sslRedirect: "true"         # Override to "false" when Cloudflare in front
+  # Optional cluster-wide ingress annotations. When set (via valuesFrom or
+  # --set), they merge with ingress.annotations below; chart annotations
+  # win on key conflict.
+  ingressAnnotations: {}
+
+# Global namespace for all resources
+namespace: rst-workbench
+
+# Subdomain prefix used when auto-deriving the host from the cluster's
+# domain (e.g. "rst" -> rst.<global.clusterDomain>). Override per-environment
+# in fleet.yaml targetCustomizations if you need a different prefix.
+ingressSubdomain: rst
+
+# -----------------------------------------------------------------------------
+# Backend — the FastAPI processing service. Two flavours are supported and
+# both can run side-by-side: CPU-only and CUDA-accelerated. They share the
+# `rst-backend` Service (label selector picks pods from either Deployment),
+# so the frontend talks to a single API regardless of which variants are
+# enabled. Disable one to force traffic onto the other.
+# -----------------------------------------------------------------------------
+backend:
+  # Shared FastAPI service port (frontend + ingress target).
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+
+  env:
+    PYTHONUNBUFFERED: "1"
+    LOG_LEVEL: info
+
+  # Shared persistence for uploads + processing results, mounted into every
+  # backend pod at /tmp/siw_uploads and /tmp/siw_results.
+  persistence:
+    enabled: true
+    storageClass: ""        # Empty = cluster default StorageClass
+    accessMode: ReadWriteMany   # Multiple backend pods share the volume
+    uploadsSize: 5Gi
+    resultsSize: 10Gi
+
+  cpu:
+    enabled: true
+    replicaCount: 1
+    image:
+      registry: docker.io
+      repository: st7ma784/rst-webapp-backend
+      tag: latest-cpu
+      pullPolicy: IfNotPresent
+    resources:
+      requests:
+        cpu: 250m
+        memory: 512Mi
+      limits:
+        cpu: "2"
+        memory: 4Gi
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+
+  cuda:
+    enabled: false
+    replicaCount: 1
+    image:
+      registry: docker.io
+      repository: st7ma784/rst-webapp-backend
+      tag: latest-cuda
+      pullPolicy: IfNotPresent
+    # nvidia.com/gpu is appended onto these limits when enabled.
+    gpuCount: 1
+    # Only set this if your cluster has a registered runtime class called
+    # "nvidia" (RKE2 + nvidia-container-runtime). Most Rancher clusters using
+    # the nvidia device plugin do not need it, and setting it would block
+    # admission. Leave empty to skip.
+    runtimeClassName: ""
+    resources:
+      requests:
+        cpu: 500m
+        memory: 2Gi
+      limits:
+        cpu: "4"
+        memory: 8Gi
+    nodeSelector:
+      nvidia.com/gpu.present: "true"
+    tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+    affinity: {}
+
+# -----------------------------------------------------------------------------
+# Frontend — the Vite/React UI. Talks to the backend via path-based ingress
+# routing under the same hostname, so VITE_API_URL is left empty by default
+# and the browser uses relative /api + /ws paths.
+# -----------------------------------------------------------------------------
+frontend:
+  enabled: true
+  replicaCount: 1
+  image:
+    registry: docker.io
+    repository: st7ma784/rst-webapp-frontend
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 3000
+    targetPort: 3000
+  env:
+    # Leave empty → frontend uses same-origin relative URLs through ingress.
+    VITE_API_URL: ""
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+# -----------------------------------------------------------------------------
+# Redis — used by the FastAPI backend for Celery job queues + websocket
+# pub/sub. In-cluster StatefulSet with a small PVC.
+# -----------------------------------------------------------------------------
+redis:
+  enabled: true
+  image: redis:7-alpine
+  port: 6379
+  storage: 2Gi
+  storageClass: ""
+  resources:
+    requests:
+      cpu: 50m
+      memory: 64Mi
+    limits:
+      cpu: 250m
+      memory: 256Mi
+
+# -----------------------------------------------------------------------------
+# Ingress — chart-specific annotations only. The host is derived in
+# _helpers.tpl from global.clusterDomain (Fleet path) or, as fallback, the
+# `clusteros-config` ConfigMap (helm-install path). To override the host
+# explicitly, set ingress.hosts directly (skips ConfigMap + nip.io).
+#
+# Final annotation map on the rendered Ingress = global.ingressAnnotations
+# merged with this block (chart-specific keys win on conflict). The cluster
+# provides ssl-redirect and force-ssl-redirect via global.ingressAnnotations
+# when Cloudflare is in front; the values here add WebSocket / proxy-body
+# limits the cluster doesn't set.
+#
+# In domain mode Cloudflare terminates TLS upstream, so ssl-redirect is false
+# (otherwise nginx fights Cloudflare's HTTPS termination and produces a
+# redirect loop on empty-host probes). cert-manager is only used when
+# ingress.tls is set explicitly.
+# -----------------------------------------------------------------------------
+ingress:
+  enabled: true
+  className: nginx
+  annotations:
+    # Cloudflare terminates TLS; nginx serves HTTP behind the tunnel.
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-body-size: "200m"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
+    # WebSocket support for /ws/progress
+    nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
+  # Leave empty to auto-derive: <ingressSubdomain>.<clusteros-config.domain>,
+  # falling back to <node-ip>.nip.io when no domain is configured.
+  hosts: []
+  # Leave empty to skip TLS (correct for both Cloudflare-terminated domain
+  # mode and nip.io mode). Set explicitly only when you want cert-manager to
+  # issue a cert at the ingress itself.
+  tls: []
+  tlsSecretName: rst-workbench-tls
+
+imagePullSecrets: []

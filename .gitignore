@@ -1,4 +1,63 @@
+# --- Python ---
 venv/
-__pycache__
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/lib/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# --- Notebooks ---
+.ipynb_checkpoints/
+*.ipynb
+
+# --- Docs / Sphinx ---
 _build/
 docs/build/
+docs/_build/
+
+# --- Node ---
+node_modules/
+
+# --- Helm / Fleet packaging artefacts ---
+# Packaged charts and rendered bundles should never be committed: Fleet
+# packages the chart source, not pre-built .tgz, and a stray archive
+# multiplies the bundle size on Rancher's API (3 MiB ingress limit).
+*.tgz
+*.tar
+*.tar.gz
+*.zip
+
+# --- Large binaries / datasets / model checkpoints ---
+# Anything ML-heavy or visual outputs that don't belong in git. Existing
+# tracked PNGs under val_vis/ and images/ are kept (history), but no new
+# binaries should slip in.
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.npy
+*.npz
+*.mat
+*.fits
+*.nc
+*.pdf
+val_vis/*.npy
+val_vis/*.pt
+
+# --- Editor / OS ---
+.DS_Store
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+
+# --- Claude / local session state ---
+.claude/

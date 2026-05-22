@@ -1,0 +1,97 @@
+{{- if .Values.ingress.enabled }}
+{{- /*
+  Resolve the ingress host. Source of truth is the clusteros-config ConfigMap
+  in kube-system (key: data.domain), per the ClusterOS helm-ingress guide.
+  See templates/_helpers.tpl for the full resolution order.
+*/ -}}
+{{- $host := include "rst-workbench.ingressHost" . -}}
+{{- if $host }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rst-workbench
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "rst-workbench.labels" . | nindent 4 }}
+    app.kubernetes.io/component: ingress
+  {{- /*
+    Annotation map. Per the ClusterOS helm-ingress guide we layer
+    global.ingressAnnotations (published by the cluster via
+    clusteros-helm-values, e.g. ssl-redirect / force-ssl-redirect when
+    Cloudflare is in front) first, then chart-specific ingress.annotations
+    on top so chart keys win on conflict. Empty maps render nothing.
+  */ -}}
+  {{- $globalAnn := dict -}}
+  {{- if .Values.global -}}
+    {{- $globalAnn = .Values.global.ingressAnnotations | default dict -}}
+  {{- end -}}
+  {{- $chartAnn := .Values.ingress.annotations | default dict -}}
+  {{- $allAnn := merge (deepCopy $chartAnn) $globalAnn -}}
+  {{- if $allAnn }}
+  annotations:
+    {{- toYaml $allAnn | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- /*
+    TLS:
+      - If ingress.tls is set explicitly, honour it verbatim (cert-manager
+        at the ingress, custom secret, etc).
+      - Otherwise emit no TLS block. In domain mode Cloudflare terminates
+        TLS upstream; in nip mode no cert can be issued for nip.io.
+  */ -}}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    - host: {{ $host | quote }}
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: rst-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /ws
+            pathType: Prefix
+            backend:
+              service:
+                name: rst-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /docs
+            pathType: Prefix
+            backend:
+              service:
+                name: rst-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          - path: /openapi.json
+            pathType: Exact
+            backend:
+              service:
+                name: rst-backend
+                port:
+                  number: {{ .Values.backend.service.port }}
+          {{- if .Values.frontend.enabled }}
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: rst-frontend
+                port:
+                  number: {{ .Values.frontend.service.port }}
+          {{- end }}
+{{- end }}
+{{- end }}

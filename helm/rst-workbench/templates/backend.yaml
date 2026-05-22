@@ -1,0 +1,233 @@
+{{- /*
+Backend Deployments — CPU and CUDA variants share the same Service via label
+selector app=rst-backend. Each enabled variant adds an extra label
+backend-variant=cpu|cuda so you can still scrape / target them individually.
+*/ -}}
+
+{{- if or .Values.backend.cpu.enabled .Values.backend.cuda.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: rst-backend
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "rst-workbench.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+spec:
+  type: {{ .Values.backend.service.type }}
+  selector:
+    app: rst-backend
+  ports:
+    - name: http
+      protocol: TCP
+      port: {{ .Values.backend.service.port }}
+      targetPort: {{ .Values.backend.service.targetPort }}
+{{- end }}
+
+{{- define "rst-workbench.backendEnv" -}}
+- name: REDIS_URL
+  value: "redis://redis.{{ .Values.namespace }}.svc.cluster.local:{{ .Values.redis.port }}"
+- name: UPLOAD_DIR
+  value: /tmp/siw_uploads
+- name: RESULTS_DIR
+  value: /tmp/siw_results
+{{- range $k, $v := .Values.backend.env }}
+- name: {{ $k }}
+  value: {{ $v | quote }}
+{{- end }}
+{{- end -}}
+
+{{- define "rst-workbench.backendVolumeMounts" -}}
+{{- if .Values.backend.persistence.enabled }}
+- name: uploads
+  mountPath: /tmp/siw_uploads
+- name: results
+  mountPath: /tmp/siw_results
+{{- end }}
+{{- end -}}
+
+{{- define "rst-workbench.backendVolumes" -}}
+{{- if .Values.backend.persistence.enabled }}
+- name: uploads
+  persistentVolumeClaim:
+    claimName: rst-uploads
+- name: results
+  persistentVolumeClaim:
+    claimName: rst-results
+{{- end }}
+{{- end -}}
+
+{{- if .Values.backend.cpu.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rst-backend-cpu
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "rst-workbench.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+    backend-variant: cpu
+spec:
+  replicas: {{ .Values.backend.cpu.replicaCount }}
+  selector:
+    matchLabels:
+      app: rst-backend
+      backend-variant: cpu
+  template:
+    metadata:
+      labels:
+        app: rst-backend
+        backend-variant: cpu
+        {{- include "rst-workbench.labels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.cpu.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.cpu.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.cpu.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        {{- if .Values.redis.enabled }}
+        - name: wait-for-redis
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              for i in $(seq 1 60); do
+                nc -z redis.{{ .Values.namespace }}.svc.cluster.local {{ .Values.redis.port }} && exit 0
+                echo "waiting for redis ($i)"; sleep 2
+              done
+              exit 1
+        {{- end }}
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.cpu.image.registry }}/{{ .Values.backend.cpu.image.repository }}:{{ .Values.backend.cpu.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.cpu.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.targetPort }}
+          env:
+            - name: BACKEND_VARIANT
+              value: cpu
+            {{- include "rst-workbench.backendEnv" . | nindent 12 }}
+          resources:
+            {{- toYaml .Values.backend.cpu.resources | nindent 12 }}
+          volumeMounts:
+            {{- include "rst-workbench.backendVolumeMounts" . | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+      volumes:
+        {{- include "rst-workbench.backendVolumes" . | nindent 8 }}
+{{- end }}
+
+{{- if .Values.backend.cuda.enabled }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rst-backend-cuda
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "rst-workbench.labels" . | nindent 4 }}
+    app.kubernetes.io/component: backend
+    backend-variant: cuda
+spec:
+  replicas: {{ .Values.backend.cuda.replicaCount }}
+  selector:
+    matchLabels:
+      app: rst-backend
+      backend-variant: cuda
+  template:
+    metadata:
+      labels:
+        app: rst-backend
+        backend-variant: cuda
+        {{- include "rst-workbench.labels" . | nindent 8 }}
+        app.kubernetes.io/component: backend
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.cuda.nodeSelector }}
+      nodeSelector: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.cuda.tolerations }}
+      tolerations: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.backend.cuda.affinity }}
+      affinity: {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.backend.cuda.runtimeClassName }}
+      runtimeClassName: {{ .Values.backend.cuda.runtimeClassName }}
+      {{- end }}
+      initContainers:
+        {{- if .Values.redis.enabled }}
+        - name: wait-for-redis
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - |
+              for i in $(seq 1 60); do
+                nc -z redis.{{ .Values.namespace }}.svc.cluster.local {{ .Values.redis.port }} && exit 0
+                echo "waiting for redis ($i)"; sleep 2
+              done
+              exit 1
+        {{- end }}
+      containers:
+        - name: backend
+          image: "{{ .Values.backend.cuda.image.registry }}/{{ .Values.backend.cuda.image.repository }}:{{ .Values.backend.cuda.image.tag }}"
+          imagePullPolicy: {{ .Values.backend.cuda.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.backend.service.targetPort }}
+          env:
+            - name: BACKEND_VARIANT
+              value: cuda
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: all
+            - name: NVIDIA_DRIVER_CAPABILITIES
+              value: compute,utility
+            {{- include "rst-workbench.backendEnv" . | nindent 12 }}
+          resources:
+            requests:
+              {{- toYaml .Values.backend.cuda.resources.requests | nindent 14 }}
+            limits:
+              {{- toYaml .Values.backend.cuda.resources.limits | nindent 14 }}
+              nvidia.com/gpu: {{ .Values.backend.cuda.gpuCount | quote }}
+          volumeMounts:
+            {{- include "rst-workbench.backendVolumeMounts" . | nindent 12 }}
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 20
+            periodSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 15
+      volumes:
+        {{- include "rst-workbench.backendVolumes" . | nindent 8 }}
+{{- end }}
