@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>chorddht.src.chord.rpc module &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.chord.rpc module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-chorddht.src.chord.rpc">
+<span id="chorddht-src-chord-rpc-module"></span><h1>chorddht.src.chord.rpc module<a class="headerlink" href="#module-chorddht.src.chord.rpc" title="Link to this heading">¶</a></h1>
+<section id="rpc-module">
+<h2>RPC Module<a class="headerlink" href="#rpc-module" title="Link to this heading">¶</a></h2>
+<p>This module contains the Remote Procedure Call (RPC) functions used for communication between nodes in the
+Chord Distributed Hash Table (DHT) system. These functions enable inter-node communication for tasks such as
+finding successors, retrieving and storing keys, managing node relationships, and handling distributed jobs.</p>
+<section id="key-features">
+<h3>Key Features<a class="headerlink" href="#key-features" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>Successor and Predecessor Management</strong>:
+- <cite>rpc_ask_for_succ</cite>: Finds the successor for a given numeric ID.
+- <cite>rpc_ask_for_pred_and_succlist</cite>: Retrieves the predecessor and successor list of a node.</p></li>
+<li><p><strong>Node Communication</strong>:
+- <cite>rpc_ping</cite>: Pings a node to check its availability.
+- <cite>rpc_notify</cite>: Notifies a node that the calling node is now its predecessor.</p></li>
+<li><p><strong>Key-Value Operations</strong>:
+- <cite>rpc_get_key</cite>: Retrieves a value associated with a key from the DHT.
+- <cite>rpc_save_key</cite>: Stores a key-value pair in the DHT.
+- <cite>rpc_put_key</cite>: Replicates and stores a key-value pair in the DHT.
+- <cite>rpc_get_all_keys</cite>: Retrieves all key-value pairs stored on a specific node.</p></li>
+<li><p><strong>Job Management</strong>:
+- <cite>rpc_find_job</cite>: Finds and retrieves job data from the DHT.</p></li>
+</ul>
+</section>
+<section id="dependencies">
+<h3>Dependencies<a class="headerlink" href="#dependencies" title="Link to this heading">¶</a></h3>
+<ul class="simple">
+<li><p><strong>aiomas</strong>:
+Provides the RPC framework for asynchronous communication between nodes.</p></li>
+<li><p><strong>chord.helpers</strong>:
+Utility functions for generating finger table entries.</p></li>
+<li><p><strong>logging</strong>:
+Used for logging errors and debugging information.</p></li>
+</ul>
+</section>
+</section>
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_ask_for_pred_and_succlist">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_ask_for_pred_and_succlist</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_ask_for_pred_and_succlist" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the predecessor and successor list of the current node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>addr</strong> (<em>str</em>) – Address of the target node.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The predecessor node.
+List: The list of successors.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_ask_for_succ">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_ask_for_succ</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">next_node:</span> <span class="pre">dict,</span> <span class="pre">numeric_id:</span> <span class="pre">int)</span> <span class="pre">-&gt;</span> <span class="pre">(&lt;class</span> <span class="pre">'bool'&gt;,</span> <span class="pre">typing.Optional[dict]</span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_ask_for_succ" title="Link to this definition">¶</a></dt>
+<dd><p>Finds the successor for a given numeric ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>numeric_id</strong> (<em>int</em>) – The numeric ID of the node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Whether or not a successor exists.
+Optional[dict]: The successor node if it exists.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_find_job">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_find_job</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">job_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_find_job" title="Link to this definition">¶</a></dt>
+<dd><p>Checks the current node for the value or delegates to appropriate successors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>job_id</strong> (<em>str</em>) – The job ID to find.</p></li>
+<li><p><strong>ttl</strong> (<em>int</em>) – Time to live for the message.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The job data if found, None otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_get_all_keys">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_get_all_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_id</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_get_all_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Gets all key-value pairs of the node with the given node ID.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>node_id</strong> (<em>int</em>) – The ID of the node.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing the keys and values stored on the node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_get_key">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_get_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_replica</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_get_key" title="Link to this definition">¶</a></dt>
+<dd><p>Checks the current node for the value or delegates to appropriate successors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – The key to find.</p></li>
+<li><p><strong>ttl</strong> (<em>int</em>) – Time to live for the message.</p></li>
+<li><p><strong>is_replica</strong> (<em>bool</em>) – Whether or not the current node is a replica.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value if found, None otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_notify">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_notify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">succ_addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">my_addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ring_sz</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keysize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_notify" title="Link to this definition">¶</a></dt>
+<dd><p>Notifies a node that the calling node is now its predecessor.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>succ_addr</strong> (<em>str</em>) – The address of the successor node.</p></li>
+<li><p><strong>my_addr</strong> (<em>str</em>) – Address of the calling node.</p></li>
+<li><p><strong>ring_sz</strong> (<em>int</em>) – The size of the ring.</p></li>
+<li><p><strong>keysize</strong> (<em>int</em>) – The number of characters to extract from the hash.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_ping">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_ping</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">addr</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_ping" title="Link to this definition">¶</a></dt>
+<dd><p>Pings a node with a given address.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>addr</strong> (<em>str</em>) – The address of the target node to ping.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the node responds with “pong”, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_put_key">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_put_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_put_key" title="Link to this definition">¶</a></dt>
+<dd><p>Generates multiple DHT keys for each value for replication and stores them.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – The key under which the value shall be stored.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value/data being stored.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The response from the node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="chorddht.src.chord.rpc.rpc_save_key">
+<em class="property"><span class="k"><span class="pre">async</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.rpc.</span></span><span class="sig-name descname"><span class="pre">rpc_save_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">next_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></span><a class="headerlink" href="#chorddht.src.chord.rpc.rpc_save_key" title="Link to this definition">¶</a></dt>
+<dd><p>Stores a key-value pair in the actual storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>next_node</strong> (<em>dict</em>) – The next node.</p></li>
+<li><p><strong>key</strong> (<em>str</em>) – The key under which the value shall be stored.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value/data being stored.</p></li>
+<li><p><strong>ttl</strong> (<em>int</em>) – Time to live for the message.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The response from the node.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Optional[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">chorddht.src.chord.rpc module</a><ul>
+<li><a class="reference internal" href="#rpc-module">RPC Module</a><ul>
+<li><a class="reference internal" href="#key-features">Key Features</a></li>
+<li><a class="reference internal" href="#dependencies">Dependencies</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_ask_for_pred_and_succlist"><code class="docutils literal notranslate"><span class="pre">rpc_ask_for_pred_and_succlist()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_ask_for_succ"><code class="docutils literal notranslate"><span class="pre">rpc_ask_for_succ()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_find_job"><code class="docutils literal notranslate"><span class="pre">rpc_find_job()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_get_all_keys"><code class="docutils literal notranslate"><span class="pre">rpc_get_all_keys()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_get_key"><code class="docutils literal notranslate"><span class="pre">rpc_get_key()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_notify"><code class="docutils literal notranslate"><span class="pre">rpc_notify()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_ping"><code class="docutils literal notranslate"><span class="pre">rpc_ping()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_put_key"><code class="docutils literal notranslate"><span class="pre">rpc_put_key()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.rpc.rpc_save_key"><code class="docutils literal notranslate"><span class="pre">rpc_save_key()</span></code></a></li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/chorddht.src.chord.rpc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.chord.rpc module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

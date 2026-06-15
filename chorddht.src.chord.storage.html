@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>chorddht.src.chord.storage module &#8212; SuperDARN  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css?v=2bf1fcf8" />
+    
+    <script src="_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.chord.storage module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="module-chorddht.src.chord.storage">
+<span id="chorddht-src-chord-storage-module"></span><h1>chorddht.src.chord.storage module<a class="headerlink" href="#module-chorddht.src.chord.storage" title="Link to this heading">¶</a></h1>
+<section id="storage-class">
+<h2>Storage Class<a class="headerlink" href="#storage-class" title="Link to this heading">¶</a></h2>
+<p>The <cite>Storage</cite> class provides functionality for securely storing and retrieving key-value pairs in a distributed
+Chord DHT system. It ensures data authenticity and integrity using HMAC-based hashing and supports operations
+such as adding, deleting, and retrieving keys and values.</p>
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**make_digest**:</span></span></dt>
+<dd><p>Generates an HMAC digest for a given message using the node’s secret key.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**get_key**:</span></span></dt>
+<dd><p>Retrieves the value associated with a given key, ensuring its integrity.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**put_key**:</span></span></dt>
+<dd><p>Stores a value under a given key with an optional time-to-live (TTL).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**_del_key**:</span></span></dt>
+<dd><p>Deletes a specific key from storage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**del_keys**:</span></span></dt>
+<dd><p>Deletes multiple keys from storage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**get_my_data**:</span></span></dt>
+<dd><p>Retrieves all keys and values stored in the current storage instance.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**iterjobs**:</span></span></dt>
+<dd><p>Asynchronously iterates over and pops all jobs from storage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**get_keys**:</span></span></dt>
+<dd><p>Retrieves all keys and values within a specified range.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**put_keys**:</span></span></dt>
+<dd><p>Stores multiple key-value pairs in storage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**_store**</span></span></dt>
+<dd><p>A <cite>diskcache.Cache</cite> instance used for local storage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**node**</span></span></dt>
+<dd><p>The node instance associated with this storage.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py">
+<span class="sig-name descname"><span class="pre">-</span> <span class="pre">**node_id**</span></span></dt>
+<dd><p>The unique identifier of the node.</p>
+</dd></dl>
+
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">chorddht.src.chord.storage.</span></span><span class="sig-name descname"><span class="pre">Storage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Provides secure storage functionality for a Chord DHT node.</p>
+<p>This class handles key-value storage with HMAC-based integrity checks, ensuring that data is authentic and
+has not been tampered with. It also supports operations for managing keys and values within the distributed
+system.</p>
+<p>Initializes the Storage instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>node</strong> – The node instance associated with this storage.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.del_keys">
+<span class="sig-name descname"><span class="pre">del_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.del_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Deletes multiple keys from storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>keys</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – A list of keys to delete.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.get_key">
+<span class="sig-name descname"><span class="pre">get_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.get_key" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves the value associated with a given key, ensuring its integrity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – The key to retrieve.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The value stored under the key, or None if the key does not exist or the integrity check fails.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.get_keys">
+<span class="sig-name descname"><span class="pre">get_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">left</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">right</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.get_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves all keys and values within a specified range.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>left</strong> (<em>int</em>) – The start interval (exclusive).</p></li>
+<li><p><strong>right</strong> (<em>int</em>) – The end interval (exclusive).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A tuple containing two lists - keys and their corresponding values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.get_my_data">
+<span class="sig-name descname"><span class="pre">get_my_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.get_my_data" title="Link to this definition">¶</a></dt>
+<dd><p>Retrieves all keys and values stored in the current storage instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing two lists - keys and their corresponding values.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.iterjobs">
+<em class="property"><span class="pre">async</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iterjobs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.iterjobs" title="Link to this definition">¶</a></dt>
+<dd><p>Asynchronously iterates over and pops all jobs from storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Yields<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>tuple</em> – A tuple containing the key and serialized job data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.make_digest">
+<span class="sig-name descname"><span class="pre">make_digest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.make_digest" title="Link to this definition">¶</a></dt>
+<dd><p>Generates an HMAC digest for a given message using the node’s secret key.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>message</strong> (<em>bytes</em>) – The message to hash.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The HMAC digest of the message.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.put_key">
+<span class="sig-name descname"><span class="pre">put_key</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ttl</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">3600</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.put_key" title="Link to this definition">¶</a></dt>
+<dd><p>Stores a value under a given key with an optional time-to-live (TTL).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – The key under which the value will be stored.</p></li>
+<li><p><strong>value</strong> (<em>str</em>) – The value to store.</p></li>
+<li><p><strong>ttl</strong> (<em>int</em>) – The time-to-live for the key-value pair in seconds.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the operation was successful, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="chorddht.src.chord.storage.Storage.put_keys">
+<span class="sig-name descname"><span class="pre">put_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">keys</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#chorddht.src.chord.storage.Storage.put_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Stores multiple key-value pairs in storage.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>keys</strong> (<em>list</em>) – A list of keys.</p></li>
+<li><p><strong>values</strong> (<em>list</em>) – A list of values corresponding to the keys.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+  <div>
+    <h3><a href="index.html">Table of Contents</a></h3>
+    <ul>
+<li><a class="reference internal" href="#">chorddht.src.chord.storage module</a><ul>
+<li><a class="reference internal" href="#storage-class">Storage Class</a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage"><code class="docutils literal notranslate"><span class="pre">Storage</span></code></a><ul>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.del_keys"><code class="docutils literal notranslate"><span class="pre">Storage.del_keys()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.get_key"><code class="docutils literal notranslate"><span class="pre">Storage.get_key()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.get_keys"><code class="docutils literal notranslate"><span class="pre">Storage.get_keys()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.get_my_data"><code class="docutils literal notranslate"><span class="pre">Storage.get_my_data()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.iterjobs"><code class="docutils literal notranslate"><span class="pre">Storage.iterjobs()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.make_digest"><code class="docutils literal notranslate"><span class="pre">Storage.make_digest()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.put_key"><code class="docutils literal notranslate"><span class="pre">Storage.put_key()</span></code></a></li>
+<li><a class="reference internal" href="#chorddht.src.chord.storage.Storage.put_keys"><code class="docutils literal notranslate"><span class="pre">Storage.put_keys()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  </div>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/chorddht.src.chord.storage.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="Related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">SuperDARN  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">chorddht.src.chord.storage module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2025, Stephen Mander, Maria Walach.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    </div>
+  </body>
+</html>

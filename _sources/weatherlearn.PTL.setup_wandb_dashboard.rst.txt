@@ -1,0 +1,7 @@
+weatherlearn.PTL.setup\_wandb\_dashboard module
+===============================================
+
+.. automodule:: weatherlearn.PTL.setup_wandb_dashboard
+   :members:
+   :undoc-members:
+   :show-inheritance:
